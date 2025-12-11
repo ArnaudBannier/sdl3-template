@@ -58,17 +58,15 @@ void Camera_updateViewport(Camera* self, SDL_Renderer* renderer)
         self->m_viewport.y = 0.5f * (outH - self->m_viewport.h);
     }
 
+    self->m_viewport.x = roundf(self->m_viewport.x);
+    self->m_viewport.y = roundf(self->m_viewport.y);
+    self->m_viewport.w = roundf(self->m_viewport.w);
+    self->m_viewport.h = roundf(self->m_viewport.h);
 
-    SDL_Rect viewport = { 0 };
-    viewport.x = (int)roundf(self->m_viewport.x);
-    viewport.y = (int)roundf(self->m_viewport.y);
-    viewport.w = (int)roundf(self->m_viewport.w);
-    viewport.h = (int)roundf(self->m_viewport.h);
-
-    SDL_SetRenderViewport(renderer, &viewport);
+    Camera_setViewport(self, renderer);
 }
 
-float Camera_worldToViewX(Camera* self, float positionX)
+float Camera_worldToViewX(const Camera* self, float positionX)
 {
     assert(self && "self must not be NULL");
     const float w = self->m_worldView.upper.x - self->m_worldView.lower.x;
@@ -76,7 +74,7 @@ float Camera_worldToViewX(Camera* self, float positionX)
     return (positionX - self->m_worldView.lower.x) * scale;
 }
 
-float Camera_worldToViewY(Camera* self, float positionY)
+float Camera_worldToViewY(const Camera* self, float positionY)
 {
     assert(self && "self must not be NULL");
     const float h = self->m_worldView.upper.y - self->m_worldView.lower.y;
@@ -84,7 +82,7 @@ float Camera_worldToViewY(Camera* self, float positionY)
     return (self->m_worldView.upper.y - positionY) * scale;
 }
 
-void Camera_worldToView(Camera* self, Vec2 position, float* x, float* y)
+void Camera_worldToView(const Camera* self, Vec2 position, float* x, float* y)
 {
     assert(self && "self must not be NULL");
     assert(x && y);
@@ -92,7 +90,7 @@ void Camera_worldToView(Camera* self, Vec2 position, float* x, float* y)
     *y = Camera_worldToViewY(self, position.y);
 }
 
-void Camera_viewToWorld(Camera* self, float x, float y, Vec2* position)
+void Camera_viewToWorld(const Camera* self, float x, float y, Vec2* position)
 {
     assert(self && "self must not be NULL");
     const float ratioX = (x - self->m_viewport.x) / self->m_viewport.w;
@@ -103,25 +101,35 @@ void Camera_viewToWorld(Camera* self, float x, float y, Vec2* position)
     position->y = self->m_worldView.lower.y + (1.f - ratioY) * h;
 }
 
+void Camera_setViewport(Camera* self, SDL_Renderer *renderer)
+{
+    SDL_Rect viewport = { 0 };
+    viewport.x = (int)(self->m_viewport.x);
+    viewport.y = (int)(self->m_viewport.y);
+    viewport.w = (int)(self->m_viewport.w);
+    viewport.h = (int)(self->m_viewport.h);
+    SDL_SetRenderViewport(renderer, &viewport);
+}
+
 void Camera_translateWorldView(Camera* self, Vec2 displacement)
 {
     assert(self && "self must not be NULL");
     AABB_translate(&self->m_worldView, displacement);
 }
 
-float Camera_getWidth(Camera* self)
+float Camera_getWidth(const Camera* self)
 {
     assert(self && "self must not be NULL");
     return self->m_viewport.w;
 }
 
-float Camera_getHeight(Camera* self)
+float Camera_getHeight(const Camera* self)
 {
     assert(self && "self must not be NULL");
     return self->m_viewport.h;
 }
 
-float Camera_getWorldToViewScale(Camera* self)
+float Camera_getWorldToViewScale(const Camera* self)
 {
     assert(self && "self must not be NULL");
     const float w = self->m_worldView.upper.x - self->m_worldView.lower.x;

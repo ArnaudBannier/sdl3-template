@@ -21,7 +21,7 @@ GameUIManager* GameUIManager_create(Scene* scene)
 
     UICanvas* canvas = UICanvas_create("canvas");
     self->m_canvas = canvas;
-    self->m_mainPage = GameTitlePage_create(scene, self);
+    self->m_titlePage = GameTitlePage_create(scene, self);
     self->m_settingsPage = NULL;
 
     return self;
@@ -39,10 +39,10 @@ void GameUIManager_destroy(GameUIManager* self)
 
 static void GameUIManager_closePages(GameUIManager* self)
 {
-    GameTitlePage_destroy(self->m_mainPage);
+    GameTitlePage_destroy(self->m_titlePage);
     GameSettingsPage_destroy(self->m_settingsPage);
 
-    self->m_mainPage = NULL;
+    self->m_titlePage = NULL;
     self->m_settingsPage = NULL;
 }
 
@@ -50,9 +50,9 @@ void GameUIManager_update(GameUIManager* self, UIInput* input)
 {
     Scene* scene = self->m_scene;
     UIObject_update(self->m_canvas);
-    if (self->m_mainPage)
+    if (self->m_titlePage)
     {
-        GameTitlePage_update(self->m_mainPage, input);
+        GameTitlePage_update(self->m_titlePage, input);
     }
     if (self->m_settingsPage)
     {
@@ -68,9 +68,9 @@ void GameUIManager_update(GameUIManager* self, UIInput* input)
             self->m_settingsPage = GameSettingsPage_create(scene, self);
             break;
 
-        case GAME_UI_ACTION_OPEN_MAIN:
+        case GAME_UI_ACTION_OPEN_TITLE:
             GameUIManager_closePages(self);
-            self->m_mainPage = GameTitlePage_create(scene, self);
+            self->m_titlePage = GameTitlePage_create(scene, self);
             break;
 
         case GAME_UI_ACTION_START:

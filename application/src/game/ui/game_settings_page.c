@@ -145,7 +145,7 @@ GameSettingsPage* GameSettingsPage_create(Scene* scene, GameUIManager* manager)
     UIButton_setLabelString(backButton, "Back");
     UIButton_setOnClickCallback(backButton, GameSettingsPage_onClick);
     UISelectable_setUserData(backButton, self);
-    UISelectable_setUserId(backButton, GAME_UI_ACTION_OPEN_MAIN);
+    UISelectable_setUserId(backButton, GAME_UI_ACTION_OPEN_TITLE);
     UIStyle_setDefaultButton(backButton);
 
     UIGridLayout_addObject(buttonlayout, backButton, 0, 1, 1, 1);
@@ -172,8 +172,8 @@ void GameSettingsPage_update(GameSettingsPage* self, UIInput* input)
 
     switch (self->m_nextAction)
     {
-    case GAME_UI_ACTION_OPEN_MAIN:
-        self->m_manager->m_nextAction = GAME_UI_ACTION_OPEN_MAIN;
+    case GAME_UI_ACTION_OPEN_TITLE:
+        self->m_manager->m_nextAction = GAME_UI_ACTION_OPEN_TITLE;
         break;
 
     case GAME_UI_ACTION_APPLY_SETTINGS:
@@ -181,7 +181,7 @@ void GameSettingsPage_update(GameSettingsPage* self, UIInput* input)
         int itemIndex = UIList_getSelectedItem(self->m_fullscreenList);
         SDL_SetWindowFullscreen(g_window, itemIndex == 1);
         g_gameConfig.showElapsedTime = (bool)UIList_getSelectedItem(self->m_elapsedList);
-        self->m_manager->m_nextAction = GAME_UI_ACTION_OPEN_MAIN;
+        self->m_manager->m_nextAction = GAME_UI_ACTION_OPEN_TITLE;
         break;
     }
     default:
