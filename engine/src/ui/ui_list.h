@@ -144,6 +144,21 @@ INLINE void UIList_setTextColor(void* self, UIListState state, SDL_Color color)
     assert(UIObject_isOfType(self, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)self;
     selfList->m_itemColors[state] = color;
+    selfList->m_labelColors[state] = color;
+}
+
+INLINE void UIList_setLabelColor(void* self, UIListState state, SDL_Color color)
+{
+    assert(UIObject_isOfType(self, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
+    UIList* selfList = (UIList*)self;
+    selfList->m_labelColors[state] = color;
+}
+
+INLINE void UIList_setItemColor(void* self, UIListState state, SDL_Color color)
+{
+    assert(UIObject_isOfType(self, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
+    UIList* selfList = (UIList*)self;
+    selfList->m_itemColors[state] = color;
 }
 
 INLINE void UIList_setBackgroundColor(void* self, UIListState state, SDL_Color color)
