@@ -4,6 +4,7 @@
 
 A small SDL3-based 2D engine and demo application.  
 This repository provides a reusable game engine (`engine/`) and a sample application (`application/`) demonstrating UI, sprite sheets, input handling, scenes, and resource management.
+See [Space Pixels](https://github.com/ArnaudBannier/space-pixels-sdl3.git) for a more complete example of a game built on top of this engine.
 
 ## Features
 
