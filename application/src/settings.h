@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "game_engine.h"
+#include "engine.h"
 
 #define HD_WIDTH 1280
 #define HD_HEIGHT 720
@@ -23,3 +23,11 @@
 #define PROJECT_ROOT_PATH "..\\..\\.."
 #define ASSETS_PATH "..\\..\\..\\assets"
 #endif
+
+#define MAX_UI_ELEMENT_COUNT 1024
+#define MAX_BODY_COUNT 1 << 15
+#define MAX_OBJECT_COUNT 1 << 15
+#define MAX_SCENE_COUNT 16
+
+#define MAGIC_NUMBER_GAME_OBJECT (uint64_t)0xAABBCCDDEEFF0001
+#define MAGIC_NUMBER_SCENE (uint64_t)0xAABBCCDDEEFF0002

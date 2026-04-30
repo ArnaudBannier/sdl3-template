@@ -8,15 +8,37 @@
 
 #include "settings.h"
 #include "common/common.h"
-#include "game/core/game_core.h"
 
+typedef enum LevelState
+{
+    GAME_STATE_PLAYING,
+    GAME_STATE_PAUSED,
+    GAME_STATE_COMPLETED,
+    GAME_STATE_FAILED
+} LevelState;
+
+typedef struct LevelInfo
+{
+    LevelState state;
+    int levelId;
+    int waveIdx;
+    int enemyCount;
+    int activePlayerCount;
+    bool shouldPause;
+    bool shouldResume;
+} LevelInfo;
 
 typedef struct GameConfig
 {
-    GameScene nextScene;
+    int playerCount;
+    float playerScores[MAX_PLAYER_COUNT];
+    float playerHPs[MAX_PLAYER_COUNT];
 
-    bool showElapsedTime;
-    bool inLevel;
+    float musicGain;
+    float sfxGain;
+    float uiGain;
+
+    LevelInfo level;
 } GameConfig;
 
 void GameConfig_init();

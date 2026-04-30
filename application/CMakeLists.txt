@@ -21,22 +21,33 @@ target_sources(${NAME} PRIVATE
     "src/common/ui_style.c"
     "src/common/assets.c"
     "src/common/assets.h"
-    "src/game/input.c"
-    "src/game/input.h"
-    "src/game/scene.c"
-    "src/game/scene.h"
-    "src/game/ui/game_ui_manager.c"
-    "src/game/ui/game_ui_manager.h"
-    "src/game/ui/game_title_page.c"
-    "src/game/ui/game_title_page.h"
-    "src/game/ui/game_settings_page.c"
-    "src/game/ui/game_settings_page.h"
-    "src/game/game_graphics.h"
-    "src/game/game_graphics.c"
-    "src/game/core/game_core.c"
-    "src/game/core/game_core.h"
+
     "src/game/game_config.c"
     "src/game/game_config.h"
+    "src/game/input.c"
+    "src/game/input.h"
+
+    "src/game/core/game_context.c"
+    "src/game/core/game_context.h"
+    "src/game/core/game_engine.c"
+    "src/game/core/game_engine.h"
+    
+    
+    "src/game/core/scene_manager.c"
+    "src/game/core/scene_manager.h"
+
+    
+    "src/game/scene/title_scene.c"
+    "src/game/scene/title_scene.h"
+    
+    
+    
+    "src/game/ui/title_main_menu.c"
+    "src/game/ui/title_main_menu.h"
+    "src/game/ui/title_settings_page.c"
+    "src/game/ui/title_settings_page.h"
+    "src/game/ui/title_ui_manager.c"
+    "src/game/ui/title_ui_manager.h"
 )
 
 find_library(MATH_LIBRARY m)
@@ -47,10 +58,31 @@ endif()
 #-------------------------------------------------------------------------------
 # Third party libraries
 
+if(MSVC)
+    message(STATUS "MSCV DETECTED")
+    set(THIRD_PARTY_SDL3_DIR       "${CMAKE_SOURCE_DIR}/third_party/SDL3-3.4.4")
+    set(THIRD_PARTY_SDL3_IMAGE_DIR "${CMAKE_SOURCE_DIR}/third_party/SDL3_image-3.4.2")
+    set(THIRD_PARTY_SDL3_TTF_DIR   "${CMAKE_SOURCE_DIR}/third_party/SDL3_ttf-3.2.2")
+    set(THIRD_PARTY_SDL3_MIXER_DIR "${CMAKE_SOURCE_DIR}/third_party/SDL3_mixer-3.2.0")
+
+    list(APPEND CMAKE_PREFIX_PATH
+        "${THIRD_PARTY_SDL3_DIR}/cmake"
+        "${THIRD_PARTY_SDL3_IMAGE_DIR}/cmake"
+        "${THIRD_PARTY_SDL3_TTF_DIR}/cmake"
+        "${THIRD_PARTY_SDL3_MIXER_DIR}/cmake"
+    )
+endif()
+
+find_package(SDL3 REQUIRED)
+find_package(SDL3_image REQUIRED)
+find_package(SDL3_ttf REQUIRED)
+find_package(SDL3_mixer REQUIRED)
+
 target_link_libraries(${NAME} PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
+    SDL3_mixer::SDL3_mixer
     engine
 )
 
@@ -71,5 +103,6 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3::SDL3> $<TARGET_FILE_DIR:${NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_image::SDL3_image> $<TARGET_FILE_DIR:${NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_ttf::SDL3_ttf> $<TARGET_FILE_DIR:${NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:SDL3_mixer::SDL3_mixer> $<TARGET_FILE_DIR:${NAME}>
     )
 endif()

@@ -11,19 +11,35 @@
 typedef enum SpriteID
 {
     SPRITE_UI_BASE,
-    SPRITE_GAME,
     //
     SPRITE_COUNT,
 } SpriteID;
 
-typedef enum FontID
+typedef enum GameFontId
 {
     FONT_NORMAL,
     FONT_BIG,
     FONT_BOLD,
     FONT_BIG_BOLD,
+    FONT_TITLE,
     //
     FONT_COUNT,
-} FontID;
+} GameFontId;
 
-void Game_addAssets(AssetManager* assets);
+typedef enum GameAudioId
+{
+    AUDIO_UI_SELECT,
+    AUDIO_UI_VALIDATE,
+    AUDIO_UI_CANCEL,
+    AUDIO_UI_PAUSE,
+    //
+    AUDIO_COUNT,
+} GameAudioId;
+
+typedef enum GameAnimId
+{
+    //
+    ANIM_COUNT,
+} GameAnimId;
+
+void Game_addAssets(AssetManager* assets, SpriteAnimManager* animManager);

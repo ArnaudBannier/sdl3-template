@@ -11,12 +11,38 @@
 
 typedef struct PlayerInput
 {
+    Vec2 axis;
+
+    float triggerL;
+    float triggerR;
+
+    bool shootDown;
+    bool boostDown;
+    bool shootPressed;
+    bool rocketPressed;
+    bool gunPressed;
+
     bool validatePressed;
+    bool cancelPressed;
+    bool pausePressed;
+
+    bool upPressed;
+    bool downPressed;
+    bool leftPressed;
+    bool rightPressed;
+
+    AxisData axisLeftData;
 } PlayerInput;
+
+void PlayerInput_setTriggerL(PlayerInput* playerInput, Sint16 value);
+void PlayerInput_setTriggerR(PlayerInput* playerInput, Sint16 value);
 
 typedef struct DebugInput
 {
-    bool gizmosPressed;
+    bool uiGizmosPressed;
+    bool objectGizmosPressed;
+    bool makeStepPressed;
+    bool changeModePressed;
 } DebugInput;
 
 typedef struct MouseInput
@@ -28,21 +54,25 @@ typedef struct MouseInput
     Vec2 position;
 } MouseInput;
 
+typedef struct ApplicationInput
+{
+    bool pausePressed;
+    bool quitPressed;
+} ApplicationInput;
+
 /// @brief Structure représentant le gestionnaire des entrées utilisateur.
 typedef struct Input
 {
-    /// @brief Booléen indiquant si le bouton "quitter" vient d'être pressé.
-    bool quitPressed;
-
     DebugInput debug;
     MouseInput mouse;
     PlayerInput players[MAX_PLAYER_COUNT];
+    ApplicationInput app;
     UIInput uiInput;
 } Input;
 
 /// @brief Crée un nouveau gestionnaire des entrées utilisateur.
 /// @return Le gestionnaire créé.
-Input* Input_create();
+Input* Input_create(UISystem* uiSystem);
 
 /// @brief Détruit le gestionnaire des entrées utilisateur.
 /// @param self le gestionnaire.
@@ -52,6 +82,8 @@ void Input_destroy(Input* self);
 /// Cette fonction effectue la boucle des événements SDL.
 /// @param self le gestionnaire.
 void Input_update(Input* self);
+
+void Input_clearUIInput(Input* self);
 
 void Input_beforeEventLoop(Input* self);
 void Input_afterEventLoop(Input* self);

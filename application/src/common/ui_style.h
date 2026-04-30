@@ -8,5 +8,5 @@
 
 #include "settings.h"
 
-void UIStyle_setDefaultButton(UIButton* button);
+void UIStyle_setDefaultButton(UIButton* button, AssetManager* assets);
 void UIStyle_setDefaultList(UIList* list, AssetManager* assets);
