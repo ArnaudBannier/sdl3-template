@@ -5,60 +5,79 @@
 */
 
 #include "ui/ui_label.h"
-#include "game_engine_common.h"
+#include "engine_common.h"
 
-UILabel* UILabel_create(const char* objectName, TTF_Font* font)
+UILabel* UILabel_create(UISystem* uiSystem, const char* objectName, TTF_Font* font)
 {
     UILabel* self = (UILabel*)calloc(1, sizeof(UILabel));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    UILabel_init(self, objectName, font);
+    UILabel_init(self, uiSystem, objectName, font);
 
     return self;
 }
 
-void UILabel_init(void* self, const char* objectName, TTF_Font* font)
+void UILabel_init(void* selfPtr, UISystem* uiSystem, const char* objectName, TTF_Font* font)
 {
-    assert(self && "self must not be NULL");
+    assert(selfPtr && "self must not be NULL");
 
-    UIObject* selfObject = (UIObject*)self;
-    UILabel* selfLabel = (UILabel*)self;
-    UIObject_init(selfObject, objectName);
+    UIObject* selfObject = (UIObject*)selfPtr;
+    UILabel* selfLabel = (UILabel*)selfPtr;
+    UIObject_init(selfObject, uiSystem, objectName);
 
     selfObject->m_type |= UI_TYPE_LABEL;
-    selfLabel->m_text = TTF_CreateText(g_textEngine, font, "Label", 0);
+    selfObject->m_gizmosColor = g_colors.teal5;
+    selfObject->m_gizmosIsFilled = false;
+    selfObject->m_gizmosOpacity = 1.f;
     selfLabel->m_textString = SDL_strdup("Label");
-    selfLabel->m_color = g_colors.gray0;
-    selfLabel->m_anchor = Vec2_anchor_center;
+    ASSERT_NEW(selfLabel->m_textString);
+
+    selfLabel->m_text.ttfText = TTF_CreateText(g_engine.sdl.textEngine, font, "Label", 0);
+    selfLabel->m_text.color = g_colors.gray0;
+    selfLabel->m_text.anchor = Vec2_anchor_center;
+    ASSERT_NEW(selfLabel->m_text.ttfText);
+
+    selfLabel->m_blendMod.alpha = 1.f;
+    selfLabel->m_blendMod.mode = SDL_BLENDMODE_BLEND;
 
     // Virtual methods
     selfObject->m_onRender = UILabelVM_onRender;
     selfObject->m_onUpdate = UILabelVM_onUpdate;
     selfObject->m_onDestroy = UILabelVM_onDestroy;
+    selfObject->m_onDrawGizmos = UIObjectVM_onDrawGizmos;
 }
 
-void UILabelVM_onRender(void* self)
+void UILabelVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
 {
-    UIObject* selfObj = (UIObject*)self;
-    UILabel* selfLabel = (UILabel*)self;
-    TTF_Text* ttfText = selfLabel->m_text;
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UILabel* selfLabel = (UILabel*)selfPtr;
+    TTF_Text* ttfText = selfLabel->m_text.ttfText;
 
     // Update text
-    SDL_Color textColor = selfLabel->m_color;
     bool success = TTF_SetTextString(ttfText, selfLabel->m_textString, strlen(selfLabel->m_textString));
     assert(success);
 
     // Render text
-    SDL_FRect viewportRect = { 0 };
-    UIObject_getViewportRect(selfObj, &viewportRect);
-    UIUtils_renderText(ttfText, &viewportRect, selfLabel->m_anchor, &textColor);
+    Transform transform = { 0 };
+    RenderDim dim = { 0 };
+    RenderAnchor anchor = { 0 };
+
+    UITransform_getComponents(&(selfObj->m_transform), &transform, &dim, &anchor);
+    GraphicsCmd cmd = { 0 };
+    cmd.sortingLayer = &(selfObj->m_layer);
+    cmd.transform = &transform;
+    cmd.dimensions = &dim;
+    cmd.anchor = &anchor;
+    cmd.text = &(selfLabel->m_text);
+    cmd.blendMod = &(selfLabel->m_blendMod);
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
 }
 
-void UILabelVM_onDestroy(void* self)
+void UILabelVM_onDestroy(void* selfPtr)
 {
-    UILabel* selfLabel = (UILabel*)self;
+    UILabel* selfLabel = (UILabel*)selfPtr;
     SDL_free(selfLabel->m_textString);
-    TTF_DestroyText(selfLabel->m_text);
+    TTF_DestroyText(selfLabel->m_text.ttfText);
 
-    UIObjectVM_onDestroy(self);
+    UIObjectVM_onDestroy(selfPtr);
 }

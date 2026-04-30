@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 
 // https://github.com/yeun/open-color
 typedef struct OpenColors OpenColors;

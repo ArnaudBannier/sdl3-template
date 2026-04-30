@@ -5,34 +5,35 @@
 */
 
 #include "ui/ui_button.h"
-#include "game_engine_common.h"
+#include "ui/ui_system.h"
+#include "engine_common.h"
 
-UIButton* UIButton_create(const char* objectName, TTF_Font* font)
+UIButton* UIButton_create(UISystem* uiSystem, const char* objectName, TTF_Font* font)
 {
     UIButton* self = (UIButton*)calloc(1, sizeof(UIButton));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    UIButton_init(self, objectName, font);
+    UIButton_init(self, uiSystem, objectName, font);
 
     return self;
 }
 
-void UIButton_init(void* self, const char* objectName, TTF_Font* font)
+void UIButton_init(void* selfPtr, UISystem* uiSystem, const char* objectName, TTF_Font* font)
 {
-    assert(self && "self must not be NULL");
+    assert(selfPtr && "self must not be NULL");
 
-    UISelectable_init(self, objectName);
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIButton* selfButton = (UIButton*)self;
+    UISelectable_init(selfPtr, uiSystem, objectName);
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIButton* selfButton = (UIButton*)selfPtr;
 
     const char* defaultText = "Text Button";
 
     selfObj->m_type |= UI_TYPE_BUTTON;
     selfButton->m_labelAnchor = Vec2_set(0.5f, 0.5f);
     selfButton->m_useColorMod = false;
-    selfButton->m_labelText = TTF_CreateText(g_textEngine, font, defaultText, strlen(defaultText));
-    AssertNew(selfButton->m_labelText);
+    selfButton->m_labelText = TTF_CreateText(g_engine.sdl.textEngine, font, defaultText, strlen(defaultText));
+    ASSERT_NEW(selfButton->m_labelText);
 
     SDL_Color defaultTextColors[UI_BUTTON_STATE_COUNT] = { 0 };
     SDL_Color defaultBackColors[UI_BUTTON_STATE_COUNT] = { 0 };
@@ -55,7 +56,7 @@ void UIButton_init(void* self, const char* objectName, TTF_Font* font)
 
     // Initialize text contents and colors
     selfButton->m_labelString = SDL_strdup(defaultText);
-    for (int i = 0; i < UI_BUTTON_STATE_COUNT; ++i)
+    for (int i = 0; i < UI_BUTTON_STATE_COUNT; i++)
     {
         selfButton->m_labelColors[i] = defaultTextColors[i];
         selfButton->m_backColors[i] = defaultBackColors[i];
@@ -66,24 +67,25 @@ void UIButton_init(void* self, const char* objectName, TTF_Font* font)
     selfObj->m_onDestroy = UIButtonVM_onDestroy;
     selfObj->m_onRender = UIButtonVM_onRender;
     selfObj->m_onUpdate = UIButtonVM_onUpdate;
-    selfSelectable->m_onFocusChanged = UIButtonVM_onFocusChanged;
+    selfObj->m_onDrawGizmos = UIButtonVM_onDrawGizmos;
     selfSelectable->m_onFocus = UIButtonVM_onFocus;
+    selfSelectable->m_onFocusChanged = UIButtonVM_onFocusChanged;
     selfButton->m_onClick = UIButtonVM_onClick;
 }
 
-void UIButtonVM_onDestroy(void* self)
+void UIButtonVM_onDestroy(void* selfPtr)
 {
-    UIButton* selfButton = (UIButton*)self;
+    UIButton* selfButton = (UIButton*)selfPtr;
     SDL_free(selfButton->m_labelString);
     TTF_DestroyText(selfButton->m_labelText);
 
-    UISelectableVM_onDestroy(self);
+    UISelectableVM_onDestroy(selfPtr);
 }
 
-static void UIButton_updateButtonState(void* self)
+static void UIButton_updateButtonState(void* selfPtr)
 {
-    UIFocusState selectableState = ((UISelectable*)self)->m_focusState;
-    UIButton* selfButton = (UIButton*)self;
+    UIFocusState selectableState = ((UISelectable*)selfPtr)->m_focusState;
+    UIButton* selfButton = (UIButton*)selfPtr;
     if (selectableState == UI_FOCUS_STATE_DISABLED)
     {
         selfButton->m_buttonState = UI_BUTTON_STATE_DISABLED;
@@ -132,85 +134,148 @@ static void UIButton_updateButtonState(void* self)
     }
 }
 
-void UIButtonVM_onUpdate(void* self)
+void UIButtonVM_onUpdate(void* selfPtr)
 {
-    UISelectableVM_onUpdate(self);
-    UIButton_updateButtonState(self);
+    UISelectableVM_onUpdate(selfPtr);
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UIButton* selfButton = (UIButton*)selfPtr;
+    UIButtonState prevState = selfButton->m_buttonState;
+    UIButton_updateButtonState(selfPtr);
+    UIButtonState currState = selfButton->m_buttonState;
 
-    UIObject* selfObj = (UIObject*)self;
-    UIButton* selfButton = (UIButton*)self;
+    if (prevState != currState)
+    {
+        if (currState == UI_BUTTON_STATE_ACTIVE_PRESSED || currState == UI_BUTTON_STATE_PRESSED)
+        {
+            UISystem* uiSystem = UIObject_getUISystem(selfPtr);
+            UISelectable* selfSelectable = (UISelectable*)selfPtr;
+            UISystem_playSFX(uiSystem, selfSelectable->m_audioOnPressed);
+        }
+    }
 
     UITransform_updateAABB(
         &selfButton->m_symbolTransform,
         &selfObj->m_transform
     );
+
+    // Update text
+    TTF_Text* ttfText = selfButton->m_labelText;
+    bool success = TTF_SetTextString(ttfText, selfButton->m_labelString, strlen(selfButton->m_labelString));
+    CHECK_SDL_SUCCESS(success, SDL_LOG_CATEGORY_SYSTEM);
 }
 
-void UIButtonVM_onRender(void* self)
+void UIButtonVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
 {
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIButton* selfButton = (UIButton*)self;
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIButton* selfButton = (UIButton*)selfPtr;
     bool success = true;
 
     UIButtonState state = selfButton->m_buttonState;
-    TTF_Text* ttfText = selfButton->m_labelText;
-
-    // Update text
+    UITransform* uiTransform = &selfObj->m_transform;
     SDL_Color textColor = selfButton->m_labelColors[state];
-    success = TTF_SetTextString(ttfText, selfButton->m_labelString, strlen(selfButton->m_labelString));
-    assert(success);
+    SDL_Color backColor = selfButton->m_backColors[state];
 
-    SDL_FRect viewportRect = { 0 };
-    UIObject_getViewportRect(selfObj, &viewportRect);
+    Transform transform = { 0 };
+    RenderDim dim = { 0 };
+    RenderAnchor anchor = { 0 };
+    RenderTexture texture = { 0 };
+    RenderRect rect = { 0 };
+    RenderColorMod colorMod = { 0 };
+    GraphicsCmd cmd = {
+        .sortingLayer = &(selfObj->m_layer),
+        .transform = &transform,
+        .dimensions = &dim,
+        .anchor = &anchor,
+    };
 
-    UIUtils_renderSprite(
-        selfButton->m_spriteGroup,
-        selfButton->m_spriteIndices[state],
-        selfButton->m_backColors[state],
-        selfButton->m_useColorMod,
-        &viewportRect
-    );
-
-    if (selfButton->m_symbolGroup && selfButton->m_symbolSpriteIndex >= 0)
+    // Background
+    if (selfButton->m_spriteGroup && selfButton->m_spriteIndices[state] >= 0)
     {
-        SDL_FRect symbolRect = { 0 };
-        UITransform_getViewportRect(&selfButton->m_symbolTransform, &symbolRect);
-        UIUtils_renderSprite(
-            selfButton->m_symbolGroup,
-            selfButton->m_symbolSpriteIndex,
-            textColor,
-            selfButton->m_useColorMod,
-            &symbolRect
+        RenderTexture_setFromGroup(
+            &texture,
+            selfButton->m_spriteGroup,
+            selfButton->m_spriteIndices[state]
         );
+        cmd.texture = &texture;
+    }
+    else
+    {
+        rect.color = backColor;
+        rect.filled = true;
+        cmd.rect = &rect;
     }
 
-    UIUtils_renderText(ttfText, &viewportRect, selfButton->m_labelAnchor, &textColor);
+    if (selfButton->m_useColorMod)
+    {
+        colorMod.r = backColor.r / 255.f;
+        colorMod.g = backColor.g / 255.f;
+        colorMod.b = backColor.b / 255.f;
+        cmd.colorMod = &colorMod;
+    }
+    UITransform_getComponents(uiTransform, &transform, &dim, &anchor);
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
+
+
+    // Text
+    RenderText renderText = {
+        .ttfText = selfButton->m_labelText,
+        .color = textColor,
+        .anchor = selfButton->m_labelAnchor
+    };
+    cmd.text = &renderText;
+    cmd.colorMod = NULL;
+    cmd.rect = NULL;
+    cmd.texture = NULL;
+
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
+
+    // Symbol
+    if (selfButton->m_symbolGroup && selfButton->m_symbolSpriteIndex >= 0)
+    {
+        RenderTexture_setFromGroup(
+            &texture,
+            selfButton->m_symbolGroup,
+            selfButton->m_symbolSpriteIndex
+        );
+        cmd.texture = &texture;
+        cmd.rect = NULL;
+        cmd.text = NULL;
+
+        UITransform_getComponents(
+            &(selfButton->m_symbolTransform),
+            &transform, &dim, &anchor
+        );
+
+        GraphicsSystem_addCommand(graphicsSystem, &cmd);
+    }
 }
 
-void UIButton_setLabelString(void* self, const char* text)
+void UIButton_setLabelString(void* selfPtr, const char* text)
 {
-    assert(UIObject_isOfType(self, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
+    assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     assert(text && "text must not be NULL");
-    UIButton* selfButton = (UIButton*)self;
+    UIButton* selfButton = (UIButton*)selfPtr;
 
     assert(selfButton->m_labelString && "Existing text string must not be NULL");
     SDL_free(selfButton->m_labelString);
     selfButton->m_labelString = SDL_strdup(text);
 }
 
-void UIButtonVM_onClick(void* self)
+void UIButtonVM_onClick(void* selfPtr)
 {
-    // Nothing to do
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UISystem* uiSystem = UIObject_getUISystem(selfPtr);
+    UISystem_playSFX(uiSystem, selfSelectable->m_audioOnClick);
 }
 
-void UIButtonVM_onFocus(void* self, UIInput* input)
+void UIButtonVM_onFocus(void* selfPtr, UIInput* input)
 {
-    UISelectableVM_onFocus(self, input);
+    UISelectableVM_onFocus(selfPtr, input);
 
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIButton* selfButton = (UIButton*)self;
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIButton* selfButton = (UIButton*)selfPtr;
 
     bool wasPressed = selfButton->m_isPressed;
 
@@ -263,11 +328,11 @@ void UIButtonVM_onFocus(void* self, UIInput* input)
     }
 }
 
-void UIButtonVM_onFocusChanged(void* self, UIFocusState currState, UIFocusState prevState)
+void UIButtonVM_onFocusChanged(void* selfPtr, UIFocusState currState, UIFocusState prevState)
 {
-    UISelectableVM_onFocusChanged(self, currState, prevState);
+    UISelectableVM_onFocusChanged(selfPtr, currState, prevState);
 
-    UIButton* selfButton = (UIButton*)self;
+    UIButton* selfButton = (UIButton*)selfPtr;
     if (currState == UI_FOCUS_STATE_NORMAL || currState == UI_FOCUS_STATE_DISABLED)
     {
         selfButton->m_isPressed = false;

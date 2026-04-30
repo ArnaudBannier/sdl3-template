@@ -6,9 +6,14 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 #include "utils/utils.h"
 #include "core/sprite_sheet.h"
+#include "core/components.h"
+#include "core/graphics_system.h"
+#include "core/gizmos_system.h"
+
+typedef struct UISystem UISystem;
 
 typedef struct UIRect
 {
@@ -19,7 +24,7 @@ typedef struct UIRect
 } UIRect;
 
 void UIRect_getAABB(const UIRect* rect, const AABB* parentAABB, AABB* outAABB);
-SDL_FRect UIRect_aabbToViewportRect(const AABB* aabb);
+SDL_FRect UIRect_aabbToViewportRect(const AABB* aabb, const UISystem* uiSystem);
 
 typedef struct UITransform
 {
@@ -28,13 +33,9 @@ typedef struct UITransform
 } UITransform;
 
 void UITransform_updateAABB(UITransform* transform, const UITransform* parent);
-void UITransform_getViewportRect(const UITransform* transform, SDL_FRect* outRect);
+void UITransform_getComponents(const UITransform* self, Transform* transform, RenderDim* dim, RenderAnchor* anchor);
+void UITransform_getGizmos(const UITransform* self, Transform* transform, GizmosRect* rect);
+void UITransform_getViewportRect(const UITransform* transform, const UISystem* uiSystem, SDL_FRect* outRect);
 bool UITransform_containsPoint(const UITransform* transform, Vec2 point);
 Vec2 UITransform_getSize(const UITransform* transform);
 void UITransform_setAbsoluteViewAABB(UITransform* transform, const AABB* aabb);
-
-void UIUtils_renderText(TTF_Text* text, const SDL_FRect* destRect, Vec2 anchor, const SDL_Color* color);
-
-void UIUtils_renderSprite(
-    SpriteGroup* spriteGroup, int spriteIndex,
-    SDL_Color color, bool useColorMod, SDL_FRect* dstRect);

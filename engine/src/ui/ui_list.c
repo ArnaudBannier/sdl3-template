@@ -5,7 +5,8 @@
 */
 
 #include "ui/ui_list.h"
-#include "game_engine_common.h"
+#include "ui/ui_system.h"
+#include "engine_common.h"
 
 static void UIList_nextItem(UIList* self)
 {
@@ -75,13 +76,15 @@ static void UIList_updateHandledAction(UIList* self)
 
     if (self->m_configFlags & UI_LIST_CONFIG_AUTO_NAVIGATION)
     {
-        selfSelectable->m_handledActionFlags = UI_ACTION_LEFT | UI_ACTION_RIGHT | UI_ACTION_VALIDATE | UI_ACTION_CLICK;
+        selfSelectable->m_handledActionFlags =
+            UI_ACTION_LEFT | UI_ACTION_RIGHT | UI_ACTION_VALIDATE | UI_ACTION_CLICK;
     }
     else
     {
         if (selfList->m_isActive)
         {
-            selfSelectable->m_handledActionFlags = UI_ACTION_LEFT | UI_ACTION_RIGHT | UI_ACTION_CANCEL | UI_ACTION_VALIDATE | UI_ACTION_CLICK;
+            selfSelectable->m_handledActionFlags =
+                UI_ACTION_LEFT | UI_ACTION_RIGHT | UI_ACTION_CANCEL | UI_ACTION_VALIDATE | UI_ACTION_CLICK;
         }
         else
         {
@@ -90,37 +93,44 @@ static void UIList_updateHandledAction(UIList* self)
     }
 }
 
-UIList* UIList_create(const char* objectName, TTF_Font* font, int itemCount, int configFlags)
+UIList* UIList_create(
+    UISystem* uiSystem, const char* objectName,
+    TTF_Font* font, int itemCount, int configFlags)
 {
     UIList* self = (UIList*)calloc(1, sizeof(UIList));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    UIList_init(self, objectName, font, itemCount, configFlags);
+    UIList_init(self, uiSystem, objectName, font, itemCount, configFlags);
 
     return self;
 }
 
-void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCount, int configFlags)
+void UIList_init(
+    void* selfPtr, UISystem* uiSystem, const char* objectName,
+    TTF_Font* font, int itemCount, int configFlags)
 {
-    assert(self && "self must not be NULL");
+    assert(selfPtr && "self must not be NULL");
 
-    UISelectable_init(self, objectName);
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIList* selfList = (UIList*)self;
+    UISelectable_init(selfPtr, uiSystem, objectName);
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIList* selfList = (UIList*)selfPtr;
 
     selfObj->m_type |= UI_TYPE_LIST;
-    selfList->m_labelAnchor = Vec2_anchor_west;
-    selfList->m_itemAnchor = Vec2_anchor_center;
     selfList->m_itemCount = itemCount;
     selfList->m_itemIdx = 0;
     selfList->m_configFlags = configFlags;
     selfList->m_useColorMod = false;
 
-    selfList->m_itemText = TTF_CreateText(g_textEngine, font, "", 0);
-    selfList->m_labelText = TTF_CreateText(g_textEngine, font, "", 0);
-    AssertNew(selfList->m_itemText);
-    AssertNew(selfList->m_labelText);
+    selfList->m_labelText.ttfText = TTF_CreateText(g_engine.sdl.textEngine, font, "", 0);
+    selfList->m_labelText.color = g_colors.gray0;
+    selfList->m_labelText.anchor = Vec2_anchor_west;
+    ASSERT_NEW(selfList->m_labelText.ttfText);
+
+    selfList->m_itemText.ttfText = TTF_CreateText(g_engine.sdl.textEngine, font, "", 0);
+    selfList->m_itemText.color = g_colors.gray0;
+    selfList->m_itemText.anchor = Vec2_anchor_center;
+    ASSERT_NEW(selfList->m_itemText.ttfText);
 
     SDL_Color defaultTextColors[UI_LIST_STATE_COUNT] = { 0 };
     SDL_Color defaultBackColors[UI_LIST_STATE_COUNT] = { 0 };
@@ -138,13 +148,13 @@ void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCou
     // Initialize text contents and colors
     selfList->m_labelString = SDL_strdup("Label");
     selfList->m_itemStrings = SDL_malloc(itemCount * sizeof(char*));
-    for (int i = 0; i < itemCount; ++i)
+    for (int i = 0; i < itemCount; i++)
     {
         char buffer[32] = { 0 };
         SDL_snprintf(buffer, sizeof(buffer), "Item %d", i);
         selfList->m_itemStrings[i] = SDL_strdup(buffer);
     }
-    for (int i = 0; i < UI_LIST_STATE_COUNT; ++i)
+    for (int i = 0; i < UI_LIST_STATE_COUNT; i++)
     {
         selfList->m_itemColors[i] = defaultTextColors[i];
         selfList->m_labelColors[i] = defaultTextColors[i];
@@ -153,10 +163,10 @@ void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCou
     }
 
     // Buttons
-    selfList->m_prevButton = UIButton_create("UIList_PrevButton", font);
-    selfList->m_nextButton = UIButton_create("UIList_NextButton", font);
-    UIObject_setParent(selfList->m_prevButton, self);
-    UIObject_setParent(selfList->m_nextButton, self);
+    selfList->m_prevButton = UIButton_create(uiSystem, "UIList_PrevButton", font);
+    selfList->m_nextButton = UIButton_create(uiSystem, "UIList_NextButton", font);
+    UIObject_setParent(selfList->m_prevButton, selfList);
+    UIObject_setParent(selfList->m_nextButton, selfList);
     UIButton_setLabelString(selfList->m_prevButton, "<");
     UIButton_setLabelString(selfList->m_nextButton, ">");
     UIButton_setOnClickCallback(selfList->m_prevButton, UIList_prevButtonCB);
@@ -166,7 +176,7 @@ void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCou
         selfList->m_prevButton,
         selfList->m_nextButton
     };
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; i++)
     {
         UIButton_setLabelColor(buttons[i], UI_BUTTON_STATE_NORMAL, defaultTextColors[UI_LIST_STATE_NORMAL]);
         UIButton_setLabelColor(buttons[i], UI_BUTTON_STATE_FOCUSED, defaultTextColors[UI_LIST_STATE_FOCUSED]);
@@ -182,14 +192,14 @@ void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCou
     UIRect rect = { 0 };
     rect.anchorMin = Vec2_set(0.5f, 0.f);
     rect.anchorMax = Vec2_set(0.6f, 1.f);
-    rect.offsetMin = Vec2_set(0.f, 0.f);
-    rect.offsetMax = Vec2_set(0.f, 0.f);
+    rect.offsetMin = Vec2_set(+3.f, +3.f);
+    rect.offsetMax = Vec2_set(-3.f, -3.f);
     UIObject_setRect(selfList->m_prevButton, rect);
 
     rect.anchorMin = Vec2_set(0.9f, 0.f);
     rect.anchorMax = Vec2_set(1.0f, 1.f);
-    rect.offsetMin = Vec2_set(0.f, 0.f);
-    rect.offsetMax = Vec2_set(0.f, 0.f);
+    rect.offsetMin = Vec2_set(+3.f, +3.f);
+    rect.offsetMax = Vec2_set(-3.f, -3.f);
     UIObject_setRect(selfList->m_nextButton, rect);
 
     rect.anchorMin = Vec2_set(0.0f, 0.f);
@@ -210,35 +220,34 @@ void UIList_init(void* self, const char* objectName, TTF_Font* font, int itemCou
     selfObj->m_onDestroy = UIListVM_onDestroy;
     selfObj->m_onRender = UIListVM_onRender;
     selfObj->m_onUpdate = UIListVM_onUpdate;
-
+    selfObj->m_onDrawGizmos = UIListVM_onDrawGizmos;
     selfSelectable->m_onFocusChanged = UIListVM_onFocusChanged;
     selfSelectable->m_onFocus = UIListVM_onFocus;
-
     selfList->m_onItemChanged = UIListVM_onItemChanged;
 }
 
-void UIListVM_onDestroy(void* self)
+void UIListVM_onDestroy(void* selfPtr)
 {
-    UIList* selfList = (UIList*)self;
+    UIList* selfList = (UIList*)selfPtr;
 
     SDL_free(selfList->m_labelString);
-    for (int i = 0; i < selfList->m_itemCount; ++i)
+    for (int i = 0; i < selfList->m_itemCount; i++)
     {
         SDL_free(selfList->m_itemStrings[i]);
     }
     SDL_free(selfList->m_itemStrings);
 
-    TTF_DestroyText(selfList->m_labelText);
-    TTF_DestroyText(selfList->m_itemText);
+    TTF_DestroyText(selfList->m_labelText.ttfText);
+    TTF_DestroyText(selfList->m_itemText.ttfText);
 
-    UISelectableVM_onDestroy(self);
+    UISelectableVM_onDestroy(selfPtr);
 }
 
 
-static void UIList_updateListState(void* self)
+static void UIList_updateListState(void* selfPtr)
 {
-    UIFocusState focusState = ((UISelectable*)self)->m_focusState;
-    UIList* selfList = (UIList*)self;
+    UIFocusState focusState = ((UISelectable*)selfPtr)->m_focusState;
+    UIList* selfList = (UIList*)selfPtr;
     if (focusState == UI_FOCUS_STATE_DISABLED)
     {
         selfList->m_listState = UI_LIST_STATE_DISABLED;
@@ -264,12 +273,12 @@ static void UIList_updateListState(void* self)
     }
 }
 
-void UIListVM_onUpdate(void* self)
+void UIListVM_onUpdate(void* selfPtr)
 {
-    UISelectableVM_onUpdate(self);
-    UIObject* selfObj = (UIObject*)self;
-    UIList* selfList = (UIList*)self;
-    UIFocusState focusState = UISelectable_getFocusState(self);
+    UISelectableVM_onUpdate(selfPtr);
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UIList* selfList = (UIList*)selfPtr;
+    UIFocusState focusState = UISelectable_getFocusState(selfPtr);
 
     selfList->m_hasPrevItem = true;
     selfList->m_hasNextItem = true;
@@ -287,17 +296,32 @@ void UIListVM_onUpdate(void* self)
         UISelectable_setFocusState(selfList->m_nextButton, UI_FOCUS_STATE_DISABLED);
     }
 
-    UIList_updateListState(self);
+    UIList_updateListState(selfPtr);
     UIList_updateHandledAction(selfList);
 
     UITransform_updateAABB(&selfList->m_labelTransform, &selfObj->m_transform);
     UITransform_updateAABB(&selfList->m_itemTransform, &selfObj->m_transform);
+
+    // Update text
+    bool success = TTF_SetTextString(
+        selfList->m_labelText.ttfText,
+        selfList->m_labelString,
+        0
+    );
+    CHECK_SDL_SUCCESS(success, SDL_LOG_CATEGORY_SYSTEM);
+
+    success = TTF_SetTextString(
+        selfList->m_itemText.ttfText,
+        selfList->m_itemStrings[selfList->m_itemIdx],
+        0
+    );
+    CHECK_SDL_SUCCESS(success, SDL_LOG_CATEGORY_SYSTEM);
 }
 
-void UIListVM_onFocusChanged(void* self, UIFocusState currState, UIFocusState prevState)
+void UIListVM_onFocusChanged(void* selfPtr, UIFocusState currState, UIFocusState prevState)
 {
-    UISelectableVM_onFocusChanged(self, currState, prevState);
-    UIList* selfList = (UIList*)self;
+    UISelectableVM_onFocusChanged(selfPtr, currState, prevState);
+    UIList* selfList = (UIList*)selfPtr;
 
     if (currState == UI_FOCUS_STATE_NORMAL)
     {
@@ -313,41 +337,72 @@ void UIListVM_onFocusChanged(void* self, UIFocusState currState, UIFocusState pr
     }
 }
 
-void UIListVM_onRender(void* self)
+void UIListVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
 {
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIList* selfList = (UIList*)self;
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIList* selfList = (UIList*)selfPtr;
     bool success = true;
 
     UIListState state = selfList->m_listState;
-    TTF_Text* labelText = selfList->m_labelText;
-    TTF_Text* ttfText = selfList->m_itemText;
 
-    // Update text
-    success = TTF_SetTextString(labelText, selfList->m_labelString, 0);
-    assert(success);
-    success = TTF_SetTextString(ttfText, selfList->m_itemStrings[selfList->m_itemIdx], 0);
-    assert(success);
+    SDL_Color backColor = selfList->m_backColors[state];
+    selfList->m_labelText.color = selfList->m_labelColors[state];
+    selfList->m_itemText.color = selfList->m_itemColors[state];
 
-    SDL_Color itemColor = selfList->m_itemColors[state];
-    SDL_Color labelColor = selfList->m_labelColors[state];
+    Transform transform = { 0 };
+    RenderDim dim = { 0 };
+    RenderAnchor anchor = { 0 };
+    RenderTexture texture = { 0 };
+    RenderRect rect = { 0 };
+    RenderColorMod colorMod = { 0 };
+    GraphicsCmd cmd = {
+        .sortingLayer = &(selfObj->m_layer),
+        .transform = &transform,
+        .dimensions = &dim,
+        .anchor = &anchor,
+    };
 
-    SDL_FRect viewportRect = { 0 };
-    UIObject_getViewportRect(selfObj, &viewportRect);
-    UIUtils_renderSprite(
-        selfList->m_spriteGroup,
-        selfList->m_spriteIndices[state],
-        selfList->m_backColors[state],
-        selfList->m_useColorMod,
-        &viewportRect
-    );
 
-    UITransform_getViewportRect(&selfList->m_labelTransform, &viewportRect);
-    UIUtils_renderText(labelText, &viewportRect, selfList->m_labelAnchor, &itemColor);
+    // Background
+    if (selfList->m_spriteGroup && selfList->m_spriteIndices[state] >= 0)
+    {
+        RenderTexture_setFromGroup(
+            &texture,
+            selfList->m_spriteGroup,
+            selfList->m_spriteIndices[state]
+        );
+        cmd.texture = &texture;
+    }
+    else
+    {
+        rect.color = backColor;
+        rect.filled = true;
+        cmd.rect = &rect;
+    }
 
-    UITransform_getViewportRect(&selfList->m_itemTransform, &viewportRect);
-    UIUtils_renderText(ttfText, &viewportRect, selfList->m_itemAnchor, &labelColor);
+    if (selfList->m_useColorMod)
+    {
+        colorMod.r = backColor.r / 255.f;
+        colorMod.g = backColor.g / 255.f;
+        colorMod.b = backColor.b / 255.f;
+        cmd.colorMod = &colorMod;
+    }
+    UITransform_getComponents(&(selfObj->m_transform), &transform, &dim, &anchor);
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
+
+    // Label text
+    UITransform_getComponents(&(selfList->m_labelTransform), &transform, &dim, &anchor);
+    cmd.text = &(selfList->m_labelText);
+    cmd.texture = NULL;
+    cmd.rect = NULL;
+    cmd.colorMod = NULL;
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
+
+    // Item text
+    UITransform_getComponents(&(selfList->m_itemTransform), &transform, &dim, &anchor);
+    cmd.text = &(selfList->m_itemText);
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
 }
 
 static void UIListVM_onMouseFocus(UIList* self, UIInput* input)
@@ -362,7 +417,7 @@ static void UIListVM_onMouseFocus(UIList* self, UIInput* input)
         self->m_hasPrevItem,
         self->m_hasNextItem
     };
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 2; i++)
     {
         UIButton* button = buttons[i];
         if (isEnabled[i] == false)
@@ -436,10 +491,10 @@ static void UIListVM_onControllerFocus(UIList* self, UIInput* input)
     }
 }
 
-void UIListVM_onFocus(void* self, UIInput* input)
+void UIListVM_onFocus(void* selfPtr, UIInput* input)
 {
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIList* selfList = (UIList*)self;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIList* selfList = (UIList*)selfPtr;
 
     if (input->lastInputType == UI_INPUT_TYPE_MOUSE)
     {
@@ -450,10 +505,12 @@ void UIListVM_onFocus(void* self, UIInput* input)
         UIListVM_onControllerFocus(selfList, input);
     }
 
-    UIObject_update(self);
+    UIObject_update(selfPtr);
 }
 
-void UIListVM_onItemChanged(void* self, int currItemIdx, int prevItemIdx, bool increase)
+void UIListVM_onItemChanged(void* selfPtr, int currItemIdx, int prevItemIdx, bool increase)
 {
-    // Nothing to do
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UISystem* uiSystem = UIObject_getUISystem(selfPtr);
+    UISystem_playSFX(uiSystem, selfSelectable->m_audioOnClick);
 }

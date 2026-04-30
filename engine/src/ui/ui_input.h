@@ -6,8 +6,10 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 #include "utils/utils.h"
+
+typedef struct UISystem UISystem;
 
 typedef enum UIActionFlags
 {
@@ -83,10 +85,12 @@ typedef struct UIInput
     Vec2 navDirection;
     UIInputType lastInputType;
     UIInputConfig config;
+
     UIInputData m_data;
+    UISystem* m_uiSystem;
 } UIInput;
 
-void UIInput_init(UIInput* self);
+void UIInput_init(UIInput* self, UISystem* uiSystem);
 void UIInput_beforeEventLoop(UIInput* self);
 void UIInput_processEvent(UIInput* self, SDL_Event* event);
 void UIInput_afterEventLoop(UIInput* self);

@@ -83,6 +83,11 @@ Vec2 Vec2_normalize(Vec2 v)
         v.x /= norm;
         v.y /= norm;
     }
+    else
+    {
+        v.x = 1.f;
+        v.y = 0.f;
+    }
 
     return v;
 }
@@ -121,6 +126,29 @@ float Vec2_signedAngleRad(Vec2 from, Vec2 to)
     return Vec2_signedAngleAtan2(from, to);
 }
 
+Vec2 Vec2_rotateDeg(Vec2 v, float angleDeg)
+{
+    float angleRad = angleDeg * DEG_TO_RAD;
+    float cosA = cosf(angleRad);
+    float sinA = sinf(angleRad);
+    Vec2 res = {
+        .x = v.x * cosA - v.y * sinA,
+        .y = v.x * sinA + v.y * cosA
+    };
+    return res;
+}
+
+Vec2 Vec2_rotateRad(Vec2 v, float angleRad)
+{
+    float cosA = cosf(angleRad);
+    float sinA = sinf(angleRad);
+    Vec2 res = {
+        .x = v.x * cosA - v.y * sinA,
+        .y = v.x * sinA + v.y * cosA
+    };
+    return res;
+}
+
 float Vec2_det(Vec2 v1, Vec2 v2)
 {
     return v1.x * v2.y - v1.y * v2.x;
@@ -146,6 +174,14 @@ Vec2 Vec2_smoothDamp(
         smoothTime, maxSpeed, deltaTime);
 
     return res;
+}
+
+Vec2 Vec2_lerp(Vec2 a, Vec2 b, float t)
+{
+    const float u = 1.0f - t;
+    a.x = u * a.x + t * b.x;
+    a.y = u * a.y + t * b.y;
+    return a;
 }
 
 Vec2 AABB_shortestVector(const AABB* a, const AABB* b)
@@ -199,7 +235,6 @@ float Float_smoothDamp(
     return res;
 }
 
-
 void FRect_projectOntoAxis(
     const SDL_FRect* rect, Vec2 axis,
     float* outMin, float* outMax)
@@ -212,10 +247,19 @@ void FRect_projectOntoAxis(
     };
 
     *outMin = *outMax = Vec2_dot(corners[0], axis);
-    for (int i = 1; i < 4; ++i)
+    for (int i = 1; i < 4; i++)
     {
         float projection = Vec2_dot(corners[i], axis);
         *outMin = fminf(*outMin, projection);
         *outMax = fmaxf(*outMax, projection);
     }
+}
+
+uint64_t Uint64_hash(uint64_t value)
+{
+    uint64_t z = value + 0x9e3779b97f4a7c15ULL;
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebULL;
+    z = z ^ (z >> 31);
+    return z;
 }

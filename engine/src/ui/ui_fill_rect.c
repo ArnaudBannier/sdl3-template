@@ -5,59 +5,58 @@
 */
 
 #include "ui/ui_fill_rect.h"
-#include "game_engine_common.h"
+#include "engine_common.h"
 
-UIFillRect* UIFillRect_create(const char* objectName, SDL_Color color)
+UIFillRect* UIFillRect_create(UISystem* uiSystem, const char* objectName, SDL_Color color)
 {
     UIFillRect* self = (UIFillRect*)calloc(1, sizeof(UIFillRect));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    UIFillRect_init(self, objectName, color);
+    UIFillRect_init(self, uiSystem, objectName, color);
 
     return self;
 }
 
-void UIFillRect_init(void* self, const char* objectName, SDL_Color color)
+void UIFillRect_init(void* selfPtr, UISystem* uiSystem, const char* objectName, SDL_Color color)
 {
-    assert(self && "self must not be NULL");
+    assert(selfPtr && "self must not be NULL");
 
-    UIObject* selfObject = (UIObject*)self;
-    UIFillRect* selfFillRect = (UIFillRect*)self;
-    UIObject_init(selfObject, objectName);
+    UIObject* selfObject = (UIObject*)selfPtr;
+    UIFillRect* selfFillRect = (UIFillRect*)selfPtr;
+    UIObject_init(selfObject, uiSystem, objectName);
 
     selfObject->m_type |= UI_TYPE_FILL_RECT;
-    selfFillRect->m_color = color;
-    selfFillRect->m_opacity = 1.f;
+    selfFillRect->m_rect.filled = true;
+    selfFillRect->m_rect.color = color;
+    selfObject->m_gizmosColor = g_colors.gray5;
+    selfObject->m_gizmosIsFilled = false;
+    selfObject->m_gizmosOpacity = 1.f;
+    selfFillRect->m_blendMod.mode = SDL_BLENDMODE_BLEND;
+    selfFillRect->m_blendMod.alpha = 1.f;
 
     // Virtual methods
     selfObject->m_onRender = UIFillRectVM_onRender;
     selfObject->m_onUpdate = UIFillRectVM_onUpdate;
     selfObject->m_onDestroy = UIFillRectVM_onDestroy;
+    selfObject->m_onDrawGizmos = UIFillRectVM_onDrawGizmos;
 }
 
-void UIFillRectVM_onRender(void* self)
+void UIFillRectVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
 {
-    UIFillRect* selfFillRect = (UIFillRect*)self;
+    UIObject* selfObj = (UIObject*)selfPtr;
+    UIFillRect* selfFillRect = (UIFillRect*)selfPtr;
 
-    // Render image
-    SDL_FRect viewportRect = { 0 };
-    UIObject_getViewportRect(self, &viewportRect);
-    SDL_Color color = selfFillRect->m_color;
-    color.a = (Uint8)(color.a * selfFillRect->m_opacity);
+    Transform transform = { 0 };
+    RenderAnchor anchor = { 0 };
+    RenderDim dim = { 0 };
 
-    bool success = SDL_SetRenderDrawColor(g_renderer, color.r, color.g, color.b, color.a);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "UIFillRectVM_onRender");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-
-    success = SDL_RenderFillRect(g_renderer, &viewportRect);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "UIFillRectVM_onRender");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
+    UITransform_getComponents(&(selfObj->m_transform), &transform, &dim, &anchor);
+    GraphicsCmd cmd = { 0 };
+    cmd.sortingLayer = &(selfObj->m_layer);
+    cmd.rect = &(selfFillRect->m_rect);
+    cmd.anchor = &anchor;
+    cmd.transform = &transform;
+    cmd.dimensions = &dim;
+    cmd.blendMod = &(selfFillRect->m_blendMod);
+    GraphicsSystem_addCommand(graphicsSystem, &cmd);
 }

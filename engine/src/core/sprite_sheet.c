@@ -5,9 +5,9 @@
 */
 
 #include "core/sprite_sheet.h"
-#include "core/renderer.h"
-#include "game_engine_settings.h"
-#include "game_engine_common.h"
+#include "core/asset_manager.h"
+#include "engine_settings.h"
+#include "engine_common.h"
 #include "cJSON.h"
 
 static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root);
@@ -19,7 +19,7 @@ static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i);
 SpriteGroup* SpriteGroup_create(SpriteSheet* spriteSheet)
 {
     SpriteGroup* self = (SpriteGroup*)calloc(1, sizeof(SpriteGroup));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
     self->m_spriteSheet = spriteSheet;
 
@@ -36,28 +36,25 @@ void SpriteGroup_destroy(SpriteGroup* self)
     free(self);
 }
 
-SpriteSheet* SpriteSheet_create(SDL_Texture* texture, const char* desc, Uint64 descLength)
+SpriteSheet* SpriteSheet_create(
+    AssetManager* assetManager, int sheetId,
+    const char* descBuffer, Uint64 descLength)
 {
-    assert(texture && "The texture must be valid");
+    assert(assetManager && "assetManager must not be NULL");
 
     SpriteSheet* self = (SpriteSheet*)calloc(1, sizeof(SpriteSheet));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    self->m_texture = texture;
+    self->m_assetManager = assetManager;
+    self->m_sheetId = sheetId;
 
-    cJSON* root = cJSON_ParseWithLength(desc, (size_t)descLength);
-    AssertNew(root);
+    cJSON* root = cJSON_ParseWithLength(descBuffer, (size_t)descLength);
+    ASSERT_NEW(root);
 
     SpriteSheet_parseJSON(self, root);
 
     cJSON_Delete(root);
     root = NULL;
-
-    if (self->m_pixelArt)
-    {
-        bool success = SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
-        assert(success && "Unable to set texture scale mode");
-    }
 
     return self;
 }
@@ -66,13 +63,9 @@ void SpriteSheet_destroy(SpriteSheet* self)
 {
     if (!self) return;
 
-    if (self->m_texture)
-    {
-        SDL_DestroyTexture(self->m_texture);
-    }
     if (self->m_groups)
     {
-        for (int i = 0; i < self->m_groupCount; ++i)
+        for (int i = 0; i < self->m_groupCount; i++)
         {
             SpriteGroup_destroy(self->m_groups[i]);
         }
@@ -83,8 +76,8 @@ void SpriteSheet_destroy(SpriteSheet* self)
 
 SpriteGroup* SpriteSheet_getGroupByName(SpriteSheet* self, const char* name)
 {
-    assert(self && "The SpriteSheet must be valid");
-    for (int i = 0; i < self->m_groupCount; ++i)
+    assert(self && "self must not be NULL");
+    for (int i = 0; i < self->m_groupCount; i++)
     {
         if (SDL_strcmp(name, self->m_groups[i]->m_name) == 0)
         {
@@ -96,9 +89,24 @@ SpriteGroup* SpriteSheet_getGroupByName(SpriteSheet* self, const char* name)
 
 SpriteGroup* SpriteSheet_getGroupByIndex(SpriteSheet* self, int index)
 {
-    assert(self && "The SpriteSheet must be valid");
+    assert(self && "self must not be NULL");
     assert(0 <= index && index < self->m_groupCount);
     return self->m_groups[index];
+}
+
+SDL_Texture* SpriteSheet_getTexture(SpriteSheet* self)
+{
+    assert(self && "self must not be NULL");
+    if (self->m_cachedTexture) return self->m_cachedTexture;
+
+    self->m_cachedTexture = AssetManager_getSpriteSheetTexture(self->m_assetManager, self->m_sheetId);
+    if (!(self->m_cachedTexture))
+    {
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_render");
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to get sprite sheet texture");
+        assert(false);
+    }
+    return self->m_cachedTexture;
 }
 
 static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
@@ -109,8 +117,8 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
     {
         int spriteCount = cJSON_GetArraySize(jRects);
         self->m_spriteCount = spriteCount;
-        self->m_sprites = (Sprite*)calloc(spriteCount, sizeof(Sprite));
-        AssertNew(self->m_sprites);
+        self->m_sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
+        ASSERT_NEW(self->m_sprites);
 
         int i = 0;
         cJSON* jRect = NULL;
@@ -158,7 +166,7 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
         int groupCount = cJSON_GetArraySize(jGroups);
         self->m_groupCount = groupCount;
         self->m_groups = (SpriteGroup**)calloc(groupCount, sizeof(SpriteGroup*));
-        AssertNew(self->m_groups);
+        ASSERT_NEW(self->m_groups);
 
         int i = 0;
         cJSON* jGroup = NULL;
@@ -171,7 +179,7 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
 
 static void SpriteSheet_parseRect(SpriteSheet* self, cJSON* jRect, int i)
 {
-    Sprite* sprite = self->m_sprites + i;
+    TextureRegion* sprite = self->m_sprites + i;
     SDL_FRect* rect = &sprite->srcRect;
     cJSON* jTmp = NULL;
 
@@ -239,14 +247,14 @@ static void SpriteSheet_parseGeometry(SpriteSheet* self, cJSON* jGeo)
         int spriteCount = rowCount * colCount;
 
         self->m_spriteCount = spriteCount;
-        self->m_sprites = (Sprite*)calloc(spriteCount, sizeof(Sprite));
-        AssertNew(self->m_sprites);
+        self->m_sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
+        ASSERT_NEW(self->m_sprites);
 
-        for (int i = 0; i < rowCount; ++i)
+        for (int i = 0; i < rowCount; i++)
         {
             for (int j = 0; j < colCount; ++j)
             {
-                Sprite* sprite = &(self->m_sprites[i * colCount + j]);
+                TextureRegion* sprite = &(self->m_sprites[i * colCount + j]);
                 sprite->srcRect.x = (float)(offsetX + j * (w + borderX));
                 sprite->srcRect.y = (float)(offsetY + i * (h + borderY));
                 sprite->srcRect.w = (float)(w);
@@ -281,7 +289,7 @@ static void SpriteSheet_parseBorder(SpriteSheet* self, cJSON* jBorder)
 
             int spriteIdx = jIdx->valueint;
             assert(0 <= spriteIdx && spriteIdx < self->m_spriteCount);
-            Sprite* sprite = self->m_sprites + spriteIdx;
+            TextureRegion* sprite = self->m_sprites + spriteIdx;
             sprite->hasBorders = true;
             sprite->left = (float)borderL;
             sprite->right = (float)borderR;
@@ -310,7 +318,7 @@ static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i)
         int frameCount = cJSON_GetArraySize(jTmp);
         group->m_spriteCount = frameCount;
         group->m_spriteIndices = (int*)calloc(frameCount, sizeof(int));
-        AssertNew(group->m_spriteIndices);
+        ASSERT_NEW(group->m_spriteIndices);
 
         int i = 0;
         cJSON* jIdx = NULL;
@@ -325,118 +333,34 @@ static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i)
     }
 }
 
-void SpriteGroup_render(SpriteGroup* self, int index, const SDL_FRect* dstRect, Vec2 anchor, float scale)
-{
-    assert(self && self->m_spriteSheet);
-    assert(index >= 0);
-    index = index % self->m_spriteCount;
-    const SpriteSheet* spriteSheet = self->m_spriteSheet;
-    const Sprite* sprite = spriteSheet->m_sprites + self->m_spriteIndices[index];
-    const SDL_FRect* srcRect = &(sprite->srcRect);
-    bool success = true;
-
-    if (sprite->hasBorders)
-    {
-        success = RenderTexture9Grid(
-            g_renderer, spriteSheet->m_texture, srcRect, dstRect, anchor,
-            sprite->left, sprite->right, sprite->top, sprite->bottom, sprite->scale * scale
-        );
-    }
-    else
-    {
-        success = RenderTexture(
-            g_renderer, spriteSheet->m_texture, srcRect, dstRect, anchor
-        );
-    }
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_render");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-}
-
-void SpriteGroup_renderRotated(
-    SpriteGroup* self, int index,
-    const SDL_FRect* dstRect, Vec2 anchor,
-    const double angle, const SDL_FlipMode flip)
-{
-    assert(self && self->m_spriteSheet);
-    assert(index >= 0);
-    index = index % self->m_spriteCount;
-    const SpriteSheet* spriteSheet = self->m_spriteSheet;
-    const Sprite* sprite = spriteSheet->m_sprites + self->m_spriteIndices[index];
-    const SDL_FRect* srcRect = &(sprite->srcRect);
-
-    bool success = RenderTextureRotated(
-        g_renderer, spriteSheet->m_texture, srcRect, dstRect, anchor,
-        angle, flip
-    );
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_renderRotated");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-}
-
-void SpriteGroup_setOpacity(SpriteGroup* self, Uint8 alpha)
-{
-    assert(self && self->m_spriteSheet);
-    SDL_Texture* texture = self->m_spriteSheet->m_texture;
-    bool success = SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_setOpacity");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-    success = SDL_SetTextureAlphaMod(texture, alpha);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_setOpacity");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-}
-
-void SpriteGroup_setOpacityFloat(SpriteGroup* self, float alpha)
-{
-    assert(self && self->m_spriteSheet);
-    SDL_Texture* texture = self->m_spriteSheet->m_texture;
-    bool success = SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_setOpacityFloat");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-    success = SDL_SetTextureAlphaModFloat(texture, alpha);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_setOpacityFloat");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-}
-
-void SpriteGroup_setColorModFloat(SpriteGroup* self, float r, float g, float b)
-{
-    assert(self && self->m_spriteSheet);
-    SDL_Texture* texture = self->m_spriteSheet->m_texture;
-    bool success = SDL_SetTextureColorModFloat(texture, r, g, b);
-    if (!success)
-    {
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_setColorModFloat");
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-        assert(false);
-    }
-}
-
 float SpriteGroup_getAspectRatio(SpriteGroup* self, int index)
 {
-    assert(self && self->m_spriteSheet);
+    assert(self && "self must not be NULL");
+    assert(self->m_spriteSheet);
     assert(index >= 0 && index < self->m_spriteCount);
-    const Sprite* sprite = self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
+    const TextureRegion* sprite = self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
     return sprite->srcRect.w / sprite->srcRect.h;
+}
+
+SDL_Texture* SpriteGroup_getTexture(SpriteGroup* self)
+{
+    assert(self && "self must not be NULL");
+    return SpriteSheet_getTexture(self->m_spriteSheet);
+}
+
+const SDL_FRect* SpriteGroup_getSrcRect(SpriteGroup* self, int index)
+{
+    assert(self && "self must not be NULL");
+    assert(self->m_spriteSheet);
+    assert(index >= 0 && index < self->m_spriteCount);
+    const TextureRegion* sprite = self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
+    return &(sprite->srcRect);
+}
+
+TextureRegion* SpriteGroup_getTextureRegion(SpriteGroup* self, int index)
+{
+    assert(self && "self must not be NULL");
+    assert(self->m_spriteSheet);
+    assert(index >= 0 && index < self->m_spriteCount);
+    return self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
 }

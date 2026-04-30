@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 
 /// @brief Structure représentant un chronomètre.
 typedef struct Timer

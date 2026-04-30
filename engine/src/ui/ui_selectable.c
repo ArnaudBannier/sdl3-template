@@ -5,45 +5,53 @@
 */
 
 #include "ui/ui_selectable.h"
-#include "game_engine_common.h"
+#include "engine_common.h"
 
-UISelectable* UISelectable_create(const char* objectName)
+UISelectable* UISelectable_create(UISystem* uiSystem, const char* objectName)
 {
     UISelectable* self = (UISelectable*)calloc(1, sizeof(UISelectable));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
-    UISelectable_init(self, objectName);
+    UISelectable_init(self, uiSystem, objectName);
 
     return self;
 }
 
-void UISelectable_init(void* self, const char* objectName)
+void UISelectable_init(void* selfPtr, UISystem* uiSystem, const char* objectName)
 {
-    assert(self && "self must not be NULL");
+    assert(selfPtr && "self must not be NULL");
 
-    UIObject* selfObject = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-    UIObject_init(selfObject, objectName);
+    UIObject* selfObject = (UIObject*)selfPtr;
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    UIObject_init(selfObject, uiSystem, objectName);
 
     selfObject->m_type |= UI_TYPE_SELECTABLE;
+    selfObject->m_gizmosColor = g_colors.grape5;
+    selfObject->m_gizmosIsFilled = true;
+    selfObject->m_gizmosOpacity = 0.25f;
 
     selfSelectable->m_handledActionFlags = 0;
     selfSelectable->m_focusState = UI_FOCUS_STATE_NORMAL;
+    selfSelectable->m_audioOnClick = -1;
+    selfSelectable->m_audioOnFocused = -1;
+    selfSelectable->m_audioOnPressed = -1;
 
     // Virtual methods
     selfObject->m_onRender = UISelectableVM_onRender;
     selfObject->m_onUpdate = UISelectableVM_onUpdate;
     selfObject->m_onDestroy = UISelectableVM_onDestroy;
-
+    selfObject->m_onDrawGizmos = UISelectableVM_onDrawGizmos;
+    selfSelectable->m_onFocus = UISelectableVM_onFocus;
     selfSelectable->m_onFocusChanged = UISelectableVM_onFocusChanged;
-    selfSelectable->m_onFocus = NULL;
-    selfSelectable->m_focusState = UI_FOCUS_STATE_NORMAL;
+
+    selfSelectable->m_userOnFocus = NULL;
+    selfSelectable->m_userOnFocusChanged = NULL;
 }
 
-void UISelectable_setFocusState(void* self, UIFocusState state)
+void UISelectable_setFocusState(void* selfPtr, UIFocusState state)
 {
-    UISelectable* selfSelectable = (UISelectable*)self;
-    assert(UIObject_isOfType(self, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
+    UISelectable* selfSelectable = (UISelectable*)selfPtr;
+    assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
 
     if (selfSelectable->m_focusState == state) return;
 
@@ -57,34 +65,12 @@ void UISelectable_setFocusState(void* self, UIFocusState state)
     }
 }
 
-void UISelectableVM_onRender(void* self)
-{
-    UIObject* selfObj = (UIObject*)self;
-    UISelectable* selfSelectable = (UISelectable*)self;
-
-    switch (selfSelectable->m_focusState)
-    {
-    default:
-    case UI_FOCUS_STATE_NORMAL:
-        SDL_SetRenderDrawColor(g_renderer, 0, 255, 255, 255);
-        break;
-
-    case UI_FOCUS_STATE_FOCUSED:
-        SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
-        break;
-    }
-
-    SDL_FRect viewportRect = { 0 };
-    UIObject_getViewportRect(selfObj, &viewportRect);
-    SDL_RenderFillRect(g_renderer, &viewportRect);
-}
-
-void UISelectableVM_onFocusChanged(void* self, UIFocusState currState, UIFocusState prevState)
+void UISelectableVM_onFocusChanged(void* selfPtr, UIFocusState currState, UIFocusState prevState)
 {
     // Nothing to do
 }
 
-void UISelectableVM_onFocus(void* self, UIInput* input)
+void UISelectableVM_onFocus(void* selfPtr, UIInput* input)
 {
     // Nothing to do
 }

@@ -5,7 +5,8 @@
 */
 
 #include "ui/ui_utils.h"
-#include "game_engine_common.h"
+#include "ui/ui_system.h"
+#include "engine_common.h"
 
 void UIRect_getAABB(const UIRect* rect, const AABB* parentAABB, AABB* outAABB)
 {
@@ -24,15 +25,14 @@ void UIRect_getAABB(const UIRect* rect, const AABB* parentAABB, AABB* outAABB)
     }
 }
 
-SDL_FRect UIRect_aabbToViewportRect(const AABB* aabb)
+SDL_FRect UIRect_aabbToViewportRect(const AABB* aabb, const UISystem* uiSystem)
 {
-    Vec2 pixelsPerUnit = g_sizes.uiPixelsPerUnit;
     Vec2 size = AABB_getSize(aabb);
     SDL_FRect rect = { 0 };
-    rect.x = aabb->lower.x * pixelsPerUnit.x;
-    rect.y = (g_sizes.uiSize.y - aabb->upper.y) * pixelsPerUnit.y;
-    rect.w = size.x * pixelsPerUnit.x;
-    rect.h = size.y * pixelsPerUnit.y;
+    rect.x = UISystem_uiToViewX(uiSystem, aabb->lower.x);
+    rect.y = UISystem_uiToViewY(uiSystem, aabb->upper.y);
+    rect.w = UISystem_uiToViewLength(uiSystem, size.x);
+    rect.h = UISystem_uiToViewLength(uiSystem, size.y);
     return rect;
 }
 
@@ -58,19 +58,52 @@ void UITransform_updateAABB(UITransform* transform, const UITransform* parent)
     }
 }
 
-void UITransform_getViewportRect(const UITransform* transform, SDL_FRect* outRect)
+void UITransform_getComponents(
+    const UITransform* self,
+    Transform* transform, RenderDim* dim, RenderAnchor* anchor)
+{
+    assert(self && "self must not be NULL");
+    assert(transform && "transform must not be NULL");
+    assert(dim && "dim must not be NULL");
+    assert(anchor && "anchor must not be NULL");
+    Vec2 size = AABB_getSize(&self->aabb);
+
+    transform->space = TRANSFORM_SPACE_UI;
+    transform->position = self->aabb.lower;
+
+    dim->space = RENDER_DIM_SPACE_UI;
+    dim->width = size.x;
+    dim->height = size.y;
+
+    anchor->value = Vec2_anchor_south_west;
+}
+
+void UITransform_getGizmos(const UITransform* self, Transform* transform, GizmosRect* rect)
+{
+    assert(self && "self must not be NULL");
+    assert(transform && "transform must not be NULL");
+    assert(rect && "rect must not be NULL");
+    Vec2 size = AABB_getSize(&self->aabb);
+    transform->space = TRANSFORM_SPACE_UI;
+    transform->position = self->aabb.lower;
+    rect->anchor = Vec2_anchor_south_west;
+    rect->width = size.x;
+    rect->height = size.y;
+    rect->filled = false;
+}
+
+void UITransform_getViewportRect(const UITransform* transform, const UISystem* uiSystem, SDL_FRect* outRect)
 {
     assert(transform && "transform must not be NULL");
+    assert(uiSystem && "uiSystem must not be NULL");
     assert(outRect && "outRect must not be NULL");
-
-    Vec2 pixelsPerUnit = g_sizes.uiPixelsPerUnit;
     const AABB* aabb = &transform->aabb;
     Vec2 size = AABB_getSize(aabb);
     SDL_FRect rect = { 0 };
-    rect.x = aabb->lower.x * pixelsPerUnit.x;
-    rect.y = (g_sizes.uiSize.y - aabb->upper.y) * pixelsPerUnit.y;
-    rect.w = size.x * pixelsPerUnit.x;
-    rect.h = size.y * pixelsPerUnit.y;
+    rect.x = UISystem_uiToViewX(uiSystem, aabb->lower.x);
+    rect.y = UISystem_uiToViewY(uiSystem, aabb->upper.y);
+    rect.w = UISystem_uiToViewLength(uiSystem, size.x);
+    rect.h = UISystem_uiToViewLength(uiSystem, size.y);
     *outRect = rect;
 }
 
@@ -86,73 +119,7 @@ Vec2 UITransform_getSize(const UITransform* transform)
 
 void UITransform_setAbsoluteViewAABB(UITransform* transform, const AABB* aabb)
 {
-    Vec2 pixelsPerUnit = g_sizes.uiPixelsPerUnit;
+    Vec2 pixelsPerUnit = g_engine.sizes.uiPixelsPerUnit;
     transform->localRect.offsetMin = Vec2_div(aabb->lower, pixelsPerUnit);
     transform->localRect.offsetMax = Vec2_div(aabb->upper, pixelsPerUnit);
-}
-
-void UIUtils_renderText(TTF_Text* text, const SDL_FRect* destRect, Vec2 anchor, const SDL_Color* color)
-{
-    bool success = true;
-    success = TTF_SetTextColor(text, color->r, color->g, color->b, color->a);
-    assert(success);
-
-    int textW = 0;
-    int textH = 0;
-    success = TTF_GetTextSize(text, &textW, &textH);
-    assert(success);
-
-    SDL_FRect textRect = *destRect;
-    textRect.x += anchor.x * (textRect.w - textW);
-    textRect.y += (1.f - anchor.y) * (textRect.h - textH);
-    textRect.x = roundf(textRect.x);
-    textRect.y = roundf(textRect.y);
-
-    success = TTF_DrawRendererText(text, textRect.x, textRect.y);
-    assert(success);
-}
-
-void UIUtils_renderSprite(
-    SpriteGroup* spriteGroup, int spriteIndex,
-    SDL_Color color, bool useColorMod, SDL_FRect* dstRect)
-{
-    assert(dstRect && "dstRect must not be NULL");
-    bool success = true;
-
-    if (spriteGroup && spriteIndex >= 0)
-    {
-        if (useColorMod)
-        {
-            float a = color.a / 255.f;
-            float r = color.r / 255.f * a;
-            float g = color.g / 255.f * a;
-            float b = color.b / 255.f * a;
-
-            SpriteGroup_setColorModFloat(spriteGroup, r, g, b);
-        }
-        else
-        {
-            SpriteGroup_setColorModFloat(spriteGroup, 1.f, 1.f, 1.f);
-        }
-
-        SpriteGroup_render(spriteGroup, spriteIndex, dstRect, Vec2_anchor_north_west, g_sizes.mainRenderScale);
-    }
-    else
-    {
-        success = SDL_SetRenderDrawColor(g_renderer, color.r, color.g, color.b, color.a);
-        if (!success)
-        {
-            SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "UIUtils_renderSprite");
-            SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-            assert(false);
-        }
-
-        success = SDL_RenderFillRect(g_renderer, dstRect);
-        if (!success)
-        {
-            SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "UIUtils_renderSprite");
-            SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "%s", SDL_GetError());
-            assert(false);
-        }
-    }
 }

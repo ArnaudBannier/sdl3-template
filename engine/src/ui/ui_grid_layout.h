@@ -6,16 +6,17 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 #include "ui/ui_input.h"
 #include "ui/ui_utils.h"
 #include "ui/ui_object.h"
 #include "utils/utils.h"
 #include "core/sprite_sheet.h"
 
-void UIGridLayoutVM_onRender(void* self);
-void UIGridLayoutVM_onUpdate(void* self);
-void UIGridLayoutVM_onDestroy(void* self);
+void UIGridLayoutVM_onUpdate(void* selfPtr);
+void UIGridLayoutVM_onDestroy(void* selfPtr);
+void UIGridLayoutVM_onDrawGizmos(void* selfPtr, GizmosSystem* gizmosSystem);
+#define UIGridLayoutVM_onRender UIObjectVM_onRender
 
 typedef struct UIGridCell
 {
@@ -46,25 +47,25 @@ typedef struct UIGridLayout
     UIGridCell m_cells[UI_GRID_MAX_ELEMENTS];
 } UIGridLayout;
 
-UIGridLayout* UIGridLayout_create(const char* objectName, int rowCount, int columnCount);
-void UIGridLayout_init(void* self, const char* objectName, int rowCount, int columnCount);
-INLINE void UIGridLayout_destroy(void* self)
+UIGridLayout* UIGridLayout_create(UISystem* uiSystem, const char* objectName, int rowCount, int columnCount);
+void UIGridLayout_init(void* selfPtr, UISystem* uiSystem, const char* objectName, int rowCount, int columnCount);
+INLINE void UIGridLayout_destroy(void* selfPtr)
 {
-    UIObject_destroy(self);
+    UIObject_destroy(selfPtr);
 }
 
-void UIGridLayout_addObject(void* self, void* object, int rowIdx, int columnIdx, int rowSpan, int columnSpan);
+void UIGridLayout_addObject(void* selfPtr, void* object, int rowIdx, int columnIdx, int rowSpan, int columnSpan);
 
-void UIGridLayout_setRowSize(void* self, int index, float size);
-void UIGridLayout_setColumnSize(void* self, int index, float size);
-void UIGridLayout_setRowSizes(void* self, float size);
-void UIGridLayout_setColumnSizes(void* self, float size);
+void UIGridLayout_setRowSize(void* selfPtr, int index, float size);
+void UIGridLayout_setColumnSize(void* selfPtr, int index, float size);
+void UIGridLayout_setRowSizes(void* selfPtr, float size);
+void UIGridLayout_setColumnSizes(void* selfPtr, float size);
 
-void UIGridLayout_setRowSpacing(void* self, int index, float spacing);
-void UIGridLayout_setColumnSpacing(void* self, int index, float spacing);
-void UIGridLayout_setRowSpacings(void* self, float spacing);
-void UIGridLayout_setColumnSpacings(void* self, float spacing);
+void UIGridLayout_setRowSpacing(void* selfPtr, int index, float spacing);
+void UIGridLayout_setColumnSpacing(void* selfPtr, int index, float spacing);
+void UIGridLayout_setRowSpacings(void* selfPtr, float spacing);
+void UIGridLayout_setColumnSpacings(void* selfPtr, float spacing);
 
-void UIGridLayout_setPadding(void* self, Vec2 padding);
-void UIGridLayout_setAnchor(void* self, Vec2 anchor);
-Vec2 UIGridLayout_getMinimumSize(void* self);
+void UIGridLayout_setPadding(void* selfPtr, Vec2 padding);
+void UIGridLayout_setAnchor(void* selfPtr, Vec2 anchor);
+Vec2 UIGridLayout_getMinimumSize(void* selfPtr);

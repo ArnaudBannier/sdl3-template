@@ -5,9 +5,10 @@
 */
 
 #include "ui/ui_input.h"
-#include "game_engine_common.h"
+#include "ui/ui_system.h"
+#include "engine_common.h"
 
-void UIInput_init(UIInput* self)
+void UIInput_init(UIInput* self, UISystem* uiSystem)
 {
     assert(self && "self must not be NULL");
     self->upPressed = false;
@@ -23,9 +24,10 @@ void UIInput_init(UIInput* self)
     self->cancelPressed = false;
     self->mouseMoved = false;
 
-    self->mousePxPos = Vec2_zero;
-    self->mouseUIPos = Vec2_set(0, g_sizes.uiSize.y);
     self->navDirection = Vec2_zero;
+    self->mousePxPos = Vec2_zero;
+    self->mouseUIPos.x = UISystem_viewToUIX(uiSystem, 0.f);
+    self->mouseUIPos.y = UISystem_viewToUIX(uiSystem, 0.f);
 
     // Default keyboard config A
     self->config.keyboardA.upKey = SDL_SCANCODE_W;
@@ -52,6 +54,7 @@ void UIInput_init(UIInput* self)
     self->config.controller.axisY = SDL_GAMEPAD_AXIS_LEFTY;
 
     // Internal data
+    self->m_uiSystem = uiSystem;
     self->m_data.m_activeZone = 1 << 14;
     self->m_data.m_axisX = 0;
     self->m_data.m_axisY = 0;
@@ -265,7 +268,7 @@ void UIInput_afterEventLoop(UIInput* self)
     float mouseX = 0;
     float mouseY = 0;
     (void)SDL_GetMouseState(&windowX, &windowY);
-    bool success = SDL_RenderCoordinatesFromWindow(g_renderer, windowX, windowY, &mouseX, &mouseY);
+    bool success = SDL_RenderCoordinatesFromWindow(g_engine.sdl.renderer, windowX, windowY, &mouseX, &mouseY);
     if (!success)
     {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to compute coordinates");
@@ -284,6 +287,8 @@ void UIInput_afterEventLoop(UIInput* self)
 
     self->mousePxPos.x = mouseX;
     self->mousePxPos.y = mouseY;
-    self->mouseUIPos.x = mouseX / g_sizes.uiPixelsPerUnit.x;
-    self->mouseUIPos.y = (g_sizes.viewportSize.y - mouseY) / g_sizes.uiPixelsPerUnit.y;
+
+    const UISystem* uiSystem = self->m_uiSystem;
+    self->mouseUIPos.x = UISystem_viewToUIX(uiSystem, mouseX);
+    self->mouseUIPos.y = UISystem_viewToUIY(uiSystem, mouseY);
 }

@@ -6,13 +6,15 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288f
 #endif
 #define RAD_TO_DEG 57.295779513082320876798154814105f
 #define DEG_TO_RAD 0.01745329251994329576923690768489f
+
+uint64_t Uint64_hash(uint64_t value);
 
 /// @brief Structure représentant un vecteur de R^2.
 typedef struct Vec2
@@ -43,6 +45,20 @@ extern const Vec2 Vec2_anchor_south_east;
 /// @param y la composante y.
 /// @return Le vecteur ayant les composantes données.
 Vec2 Vec2_set(float x, float y);
+
+INLINE Vec2 Vec2_unitRad(float angleRad)
+{
+    Vec2 res = {
+        .x = cosf(angleRad),
+        .y = sinf(angleRad),
+    };
+    return res;
+}
+
+INLINE Vec2 Vec2_unitDeg(float angleDeg)
+{
+    return Vec2_unitRad(angleDeg * DEG_TO_RAD);
+}
 
 /// @brief Additionne deux vecteurs.
 /// @param v1 le premier vecteur.
@@ -124,6 +140,9 @@ float Vec2_signedAngleDeg(Vec2 from, Vec2 to);
 /// @return L'angle orienté du vecteur from vers le vecteur to.
 float Vec2_signedAngleRad(Vec2 from, Vec2 to);
 
+Vec2 Vec2_rotateDeg(Vec2 v, float angleDeg);
+Vec2 Vec2_rotateRad(Vec2 v, float angleRad);
+
 /// @brief Modifie progressivement un vecteur vers un objectif souhaité au fil du temps.
 /// @param current la position courante.
 /// @param target la position souahitée.
@@ -138,6 +157,8 @@ Vec2 Vec2_smoothDamp(
     Vec2 current, Vec2 target, Vec2* currentVelocity,
     float smoothTime, float maxSpeed, float deltaTime
 );
+
+Vec2 Vec2_lerp(Vec2 a, Vec2 b, float t);
 
 /// @brief Structure représentant une boîte en deux dimensions alignées sur les axes x et y.
 /// AABB signifie "Axis-Aligned Bounding Box".

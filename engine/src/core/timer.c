@@ -9,7 +9,7 @@
 Timer* Timer_create()
 {
     Timer* self = (Timer*)calloc(1, sizeof(Timer));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
     self->m_currentTime = 0;
     self->m_previousTime = 0;
@@ -33,7 +33,7 @@ void Timer_destroy(Timer* self)
 
 void Timer_start(Timer* self)
 {
-    assert(self && "The Timer must be created");
+    assert(self && "self must not be NULL");
     self->m_currentTime = SDL_GetTicks();
     self->m_previousTime = SDL_GetTicks();
     self->m_delta = 0;
@@ -41,7 +41,7 @@ void Timer_start(Timer* self)
 
 void Timer_update(Timer* self)
 {
-    assert(self && "The Timer must be created");
+    assert(self && "self must not be NULL");
     self->m_previousTime = self->m_currentTime;
     self->m_currentTime = SDL_GetTicks();
 

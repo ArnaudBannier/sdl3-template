@@ -6,22 +6,22 @@
 
 #pragma once
 
-#include "game_engine_settings.h"
+#include "engine_settings.h"
 #include "ui/ui_input.h"
 #include "ui/ui_selectable.h"
-#include "ui/ui_canvas.h"
+#include "ui/ui_system.h"
 
 #define MAX_UI_SELECTABLES_IN_GROUP 256
 
 typedef struct UIFocusManagerElement
 {
     UISelectable* m_selectable;
-    int m_id;
+    UIObjectId m_id;
 } UIFocusManagerElement;
 
 typedef struct UIFocusManager
 {
-    UICanvas* m_canvas;
+    UISystem* m_uiSystem;
 
     UIFocusManagerElement m_elements[MAX_UI_SELECTABLES_IN_GROUP];
     int m_elementCount;
@@ -30,11 +30,10 @@ typedef struct UIFocusManager
     bool m_enabled;
 } UIFocusManager;
 
-UIFocusManager* UIFocusManager_create();
+UIFocusManager* UIFocusManager_create(UISystem* uiSystem);
 void UIFocusManager_destroy(UIFocusManager* self);
 void UIFocusManager_update(UIFocusManager* self, UIInput* input);
 
-void UIFocusManager_setCanvas(UIFocusManager* self, void* canvas);
 void UIFocusManager_addSelectable(UIFocusManager* self, void* selectable);
 void UIFocusManager_removeSelectable(UIFocusManager* self, void* selectable);
 void UIFocusManager_clear(UIFocusManager* self);

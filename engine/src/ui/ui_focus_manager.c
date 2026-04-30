@@ -6,11 +6,12 @@
 
 #include "ui/ui_focus_manager.h"
 
-UIFocusManager* UIFocusManager_create()
+UIFocusManager* UIFocusManager_create(UISystem* uiSystem)
 {
     UIFocusManager* self = (UIFocusManager*)calloc(1, sizeof(UIFocusManager));
-    AssertNew(self);
+    ASSERT_NEW(self);
 
+    self->m_uiSystem = uiSystem;
     self->m_enabled = true;
     self->m_elementCount = 0;
     self->m_focused = NULL;
@@ -24,16 +25,6 @@ void UIFocusManager_destroy(UIFocusManager* self)
     free(self);
 }
 
-void UIFocusManager_setCanvas(UIFocusManager* self, void* canvas)
-{
-    assert(self && "self must not be NULL");
-    if (canvas)
-    {
-        assert(UIObject_isOfType(canvas, UI_TYPE_CANVAS) && "canvas must be of type UI_TYPE_CANVAS");
-    }
-    self->m_canvas = (UICanvas*)canvas;
-}
-
 void UIFocusManager_addSelectable(UIFocusManager* self, void* selectable)
 {
     assert(self && "self must not be NULL");
@@ -45,12 +36,12 @@ void UIFocusManager_addSelectable(UIFocusManager* self, void* selectable)
         return;
     }
 
-    const int id = UIObject_getObjectId(selectable);
+    const UIObjectId id = UIObject_getObjectId(selectable);
 
     for (int i = 0; i < self->m_elementCount; i++)
     {
         UIFocusManagerElement* element = &self->m_elements[i];
-        if (element->m_id == id)
+        if (UIObjectId_equal(element->m_id, id))
         {
             printf("Selectable is already in the focus manager\n");
             return;
@@ -71,12 +62,12 @@ void UIFocusManager_removeSelectable(UIFocusManager* self, void* selectable)
         self->m_focused = NULL;
     }
 
-    const int id = UIObject_getObjectId(selectable);
+    const UIObjectId id = UIObject_getObjectId(selectable);
 
     for (int i = 0; i < self->m_elementCount; i++)
     {
         UIFocusManagerElement* element = &self->m_elements[i];
-        if (element->m_id == id)
+        if (UIObjectId_equal(element->m_id, id))
         {
             self->m_elements[i] = self->m_elements[self->m_elementCount - 1];
             self->m_elementCount--;
@@ -98,6 +89,12 @@ static void UIFocusManager_setFocusOn(UIFocusManager* self, UISelectable* select
     if (self->m_focused)
     {
         UISelectable_setFocusState(self->m_focused, UI_FOCUS_STATE_NORMAL);
+
+        if (selectable)
+        {
+            int audioId = UISelectable_getAudioOnFocused(selectable);
+            UISystem_playSFX(self->m_uiSystem, audioId);
+        }
     }
     self->m_focused = selectable;
     UISelectable_setFocusState(self->m_focused, UI_FOCUS_STATE_FOCUSED);
@@ -109,12 +106,11 @@ void UIFocusManager_setFocused(UIFocusManager* self, void* selectable)
 
     if (self->m_focused && self->m_focused == selectable) return;
 
-    const int id = UIObject_getObjectId(selectable);
+    const UIObjectId id = UIObject_getObjectId(selectable);
     for (int i = 0; i < self->m_elementCount; i++)
     {
         UIFocusManagerElement* element = &self->m_elements[i];
-        if (element->m_id != id) continue;
-
+        if (!UIObjectId_equal(element->m_id, id)) continue;
         UIFocusManager_setFocusOn(self, element->m_selectable);
         return;
     }
@@ -174,7 +170,7 @@ static void UIFocusManager_searchNext(UIFocusManager* self, UIInput* input)
 
 static void UIFocusManager_updateMouse(UIFocusManager* self, UIInput* input)
 {
-    SDL_FPoint mousePoint = { input->mousePxPos.x, input->mousePxPos.y };
+    UISystem* uiSystem = self->m_uiSystem;
     Vec2 mouseUIPos = input->mouseUIPos;
     AABB aabb = { 0 };
 
@@ -223,24 +219,21 @@ static void UIFocusManager_updateGamepad(UIFocusManager* self, UIInput* input)
 
 static void UIFocusManager_validate(UIFocusManager* self)
 {
-    if (self->m_canvas)
+    UISystem* uiSystem = self->m_uiSystem;
+    for (int i = 0; i < self->m_elementCount;)
     {
-        for (int i = 0; i < self->m_elementCount;)
+        UIFocusManagerElement* element = &self->m_elements[i];
+        if (UISystem_hasObjectId(uiSystem, element->m_id) == false)
         {
-            UIFocusManagerElement* element = &self->m_elements[i];
-            if (UICanvas_hasObject(self->m_canvas, element->m_id) == false)
-            {
-                SDL_LogWarn(
-                    SDL_LOG_CATEGORY_SYSTEM,
-                    "Selectable with id %d not found in canvas, removing from focus manager\n",
-                    element->m_id
-                );
-                self->m_elements[i] = self->m_elements[self->m_elementCount - 1];
-                self->m_elementCount--;
-                continue;
-            }
-            i++;
+            SDL_LogWarn(
+                SDL_LOG_CATEGORY_SYSTEM,
+                "Selectable not found in canvas, removing from focus manager\n"
+            );
+            self->m_elements[i] = self->m_elements[self->m_elementCount - 1];
+            self->m_elementCount--;
+            continue;
         }
+        i++;
     }
 
     bool focusedIsValid = false;
