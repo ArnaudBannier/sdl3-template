@@ -31,7 +31,6 @@ typedef struct GameContext
 GameContext* GameContext_create();
 void GameContext_destroy(GameContext* self);
 
-void GameContext_addGameObject(GameContext* self, void* gameObjectPtr);
 void GameContext_playSFX(GameContext* self, int audioId);
 void GameContext_playSpatialSFX(GameContext* self, int audioId, Transform* transform);
 
