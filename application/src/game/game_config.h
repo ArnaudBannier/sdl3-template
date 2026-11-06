@@ -9,36 +9,26 @@
 #include "settings.h"
 #include "common/common.h"
 
-typedef enum LevelState
+typedef enum PuzzleState
 {
-    GAME_STATE_PLAYING,
-    GAME_STATE_PAUSED,
-    GAME_STATE_COMPLETED,
-    GAME_STATE_FAILED
-} LevelState;
+    PUZZLE_STATE_PLAYING,
+    PUZZLE_STATE_COMPLETED,
+    PUZZLE_STATE_FAILED
+} PuzzleState;
 
-typedef struct LevelInfo
+typedef struct PuzzleInfo
 {
-    LevelState state;
-    int levelId;
-    int waveIdx;
-    int enemyCount;
-    int activePlayerCount;
-    bool shouldPause;
-    bool shouldResume;
-} LevelInfo;
+    PuzzleState state;
+    bool enabled;
+} PuzzleInfo;
 
 typedef struct GameConfig
 {
-    int playerCount;
-    float playerScores[MAX_PLAYER_COUNT];
-    float playerHPs[MAX_PLAYER_COUNT];
-
     float musicGain;
     float sfxGain;
     float uiGain;
 
-    LevelInfo level;
+    PuzzleInfo puzzle;
 } GameConfig;
 
 void GameConfig_init();

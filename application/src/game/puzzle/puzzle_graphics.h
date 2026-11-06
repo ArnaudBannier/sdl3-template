@@ -15,12 +15,11 @@
 typedef struct PuzzleGraphics
 {
     GameContext* context;
+
     AABB puzzleAABB;
+    AABB cells[PUZZLE_ROW_COUNT][PUZZLE_COL_COUNT];
     float spacing;
 
-    AABB cells[PUZZLE_ROW_COUNT][PUZZLE_COL_COUNT];
-
-    bool enabled;
     int selectedRow;
     int selectedCol;
 } PuzzleGraphics;
@@ -29,9 +28,3 @@ PuzzleGraphics* PuzzleGraphics_create(GameContext* context);
 void PuzzleGraphics_destroy(PuzzleGraphics* self);
 void PuzzleGraphics_update(PuzzleGraphics* self);
 void PuzzleGraphics_render(PuzzleGraphics* self);
-
-INLINE void PuzzleGraphics_setEnabled(PuzzleGraphics* self, bool enabled)
-{
-    assert(self && "self must not be NULL");
-    self->enabled = enabled;
-}

@@ -13,7 +13,6 @@ PuzzleGraphics* PuzzleGraphics_create(GameContext* context)
     ASSERT_NEW(self);
 
     self->context = context;
-    self->enabled = true;
     self->selectedRow = -1;
     self->selectedCol = -1;
     self->spacing = 10.f;
@@ -61,7 +60,7 @@ void PuzzleGraphics_update(PuzzleGraphics* self)
 
     PuzzleGraphics_updateCells(self);
 
-    if (self->enabled == false)
+    if (g_gameConfig.puzzle.enabled == false)
     {
         return;
     }
@@ -86,14 +85,13 @@ void PuzzleGraphics_update(PuzzleGraphics* self)
             }
         }
     }
-
 }
 
 void PuzzleGraphics_render(PuzzleGraphics* self)
 {
     assert(self && "self must not be NULL");
 
-    if (self->enabled == false)
+    if (g_gameConfig.puzzle.enabled == false)
     {
         return;
     }
@@ -107,14 +105,9 @@ void PuzzleGraphics_render(PuzzleGraphics* self)
     RenderDim dimensions = { 0 };
 
     transform.space = TRANSFORM_SPACE_UI;
-    transform.position = Vec2_set(2.f, 2.f);
     dimensions.space = RENDER_DIM_SPACE_UI;
-    dimensions.width = 1.0f;
-    dimensions.height = 1.0f;
-    sortingLayer.layer = DEFAULT_UI_LAYER + 5;
 
     RenderRect rect = { 0 };
-    rect.color = g_colors.blue5;
     rect.filled = true;
 
     for (int i = 0; i < PUZZLE_ROW_COUNT; i++)

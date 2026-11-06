@@ -19,7 +19,8 @@ static void MainMenu_onClick(void* selectable)
     const char* objectName = UIObject_getObjectName(selectable);
     if (strcmp(objectName, "start-button") == 0)
     {
-        printf("Start button clicked\n");
+        UIManager_closePages(self->uiManager);
+        g_gameConfig.puzzle.enabled = true;
     }
     else if (strcmp(objectName, "settings-button") == 0)
     {
