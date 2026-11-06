@@ -18,18 +18,18 @@ SpriteAnim* SpriteAnim_create(AnimId id, SpriteGroup* spriteGroup)
 {
     SpriteAnim* self = (SpriteAnim*)calloc(1, sizeof(SpriteAnim));
     ASSERT_NEW(self);
-    self->m_id = id;
-    self->m_spriteGroup = spriteGroup;
-    self->m_cycleTime = 1.f;
-    self->m_cycleCount = -1;
+    self->id = id;
+    self->spriteGroup = spriteGroup;
+    self->cycleTime = 1.f;
+    self->cycleCount = -1;
 
     const int frameCount = SpriteGroup_getSpriteCount(spriteGroup);
-    self->m_frameCount = frameCount;
-    self->m_keyFrames = (float*)calloc(frameCount, sizeof(float));
-    ASSERT_NEW(self->m_keyFrames);
+    self->frameCount = frameCount;
+    self->keyFrames = (float*)calloc(frameCount, sizeof(float));
+    ASSERT_NEW(self->keyFrames);
     for (int i = 0; i < frameCount; i++)
     {
-        self->m_keyFrames[i] = (float)i / (float)frameCount;
+        self->keyFrames[i] = (float)i / (float)frameCount;
     }
 
     return self;
@@ -38,7 +38,7 @@ SpriteAnim* SpriteAnim_create(AnimId id, SpriteGroup* spriteGroup)
 void SpriteAnim_destroy(SpriteAnim* self)
 {
     if (!self) return;
-    free(self->m_keyFrames);
+    free(self->keyFrames);
     free(self);
 }
 
@@ -50,11 +50,11 @@ void SpriteAnim_updateState(const SpriteAnim* self, SpriteAnimState* state, floa
     if (SpriteAnimState_isPlaying(state) == false) return;
     if (dt <= 0.f) return;
 
-    const AnimId m_id = self->m_id;
-    const float cycleTime = self->m_cycleTime;
-    const int cycleCount = self->m_cycleCount;
-    const float* keyFrames = self->m_keyFrames;
-    const int frameCount = self->m_frameCount;
+    const AnimId id = self->id;
+    const float cycleTime = self->cycleTime;
+    const int cycleCount = self->cycleCount;
+    const float* keyFrames = self->keyFrames;
+    const int frameCount = self->frameCount;
     const float epsilon = 0.001f;
     const float prevAccu = state->accu;
     float prevProgression = SpriteAnim_getStateProgress(self, state);
@@ -63,7 +63,7 @@ void SpriteAnim_updateState(const SpriteAnim* self, SpriteAnimState* state, floa
 
     if (prevAccu <= 0.f && state->cycleIdx == 0)
     {
-        SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_ANIMATION_START, 0, m_id);
+        SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_ANIMATION_START, 0, id);
     }
 
     while (state->accu >= cycleTime - epsilon)
@@ -72,12 +72,12 @@ void SpriteAnim_updateState(const SpriteAnim* self, SpriteAnimState* state, floa
         {
             if (keyFrames[i] > prevProgression - epsilon)
             {
-                SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_FRAME_CHANGED, i, m_id);
+                SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_FRAME_CHANGED, i, id);
             }
         }
         prevProgression = 0.f;
 
-        SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_CYCLE_END, state->cycleIdx, m_id);
+        SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_CYCLE_END, state->cycleIdx, id);
 
         state->accu -= cycleTime;
         state->cycleIdx++;
@@ -85,7 +85,7 @@ void SpriteAnim_updateState(const SpriteAnim* self, SpriteAnimState* state, floa
         if ((cycleCount > 0) && (state->cycleIdx >= cycleCount))
         {
             // Fin de l'animation
-            SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_ANIMATION_END, 0, m_id);
+            SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_ANIMATION_END, 0, id);
 
             state->accu = cycleTime;
             state->frameIdx = frameCount - 1;
@@ -105,7 +105,7 @@ void SpriteAnim_updateState(const SpriteAnim* self, SpriteAnimState* state, floa
         if (keyFrames[i] > prevProgression - epsilon &&
             keyFrames[i] <= currProgression - epsilon)
         {
-            SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_FRAME_CHANGED, i, m_id);
+            SpriteAnimState_emplaceBackEvent(state, ANIM_EVENT_FRAME_CHANGED, i, id);
             state->frameIdx = i;
         }
     }

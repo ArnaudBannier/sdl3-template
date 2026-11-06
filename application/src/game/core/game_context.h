@@ -14,18 +14,18 @@
 
 typedef struct GameContext
 {
-    AssetManager* m_assets;
-    SpriteAnimManager* m_animManager;
-    AudioSystem* m_audioSystem;
-    Viewport* m_viewport;
-    Camera* m_camera;
-    Input* m_input;
-    UISystem* m_uiSystem;
-    ParticleSystem* m_particleSystem;
-    GraphicsSystem* m_graphicsSystem;
-    GizmosSystem* m_gizmosSystem;
+    AssetManager* assets;
+    SpriteAnimManager* animManager;
+    AudioSystem* audioSystem;
+    Viewport* viewport;
+    Camera* camera;
+    Input* input;
+    UISystem* uiSystem;
+    ParticleSystem* particleSystem;
+    GraphicsSystem* graphicsSystem;
+    GizmosSystem* gizmosSystem;
 
-    float m_stepAlpha;
+    float stepAlpha;
 } GameContext;
 
 GameContext* GameContext_create();
@@ -37,65 +37,65 @@ void GameContext_playSpatialSFX(GameContext* self, int audioId, Transform* trans
 INLINE AssetManager* GameContext_getAssetManager(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_assets;
+    return self->assets;
 }
 
 INLINE Input* GameContext_getInput(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_input;
+    return self->input;
 }
 
 INLINE AudioSystem* GameContext_getAudioSystem(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_audioSystem;
+    return self->audioSystem;
 }
 
 INLINE Viewport* GameContext_getViewport(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_viewport;
+    return self->viewport;
 }
 
 INLINE Camera* GameContext_getCamera(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_camera;
+    return self->camera;
 }
 
 INLINE SpriteAnimManager* GameContext_getAnimManager(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_animManager;
+    return self->animManager;
 }
 
 INLINE GraphicsSystem* GameContext_getGraphicsSystem(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_graphicsSystem;
+    return self->graphicsSystem;
 }
 
 INLINE GizmosSystem* GameContext_getGizmosSystem(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_gizmosSystem;
+    return self->gizmosSystem;
 }
 
 INLINE ParticleSystem* GameContext_getParticleSystem(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_particleSystem;
+    return self->particleSystem;
 }
 
 INLINE UISystem* GameContext_getUISystem(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_uiSystem;
+    return self->uiSystem;
 }
 
 INLINE float GameContext_getStepAlpha(GameContext* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_stepAlpha;
+    return self->stepAlpha;
 }

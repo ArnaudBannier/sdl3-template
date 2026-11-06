@@ -29,15 +29,15 @@ typedef struct GizmosCoreCmd
 
 static void GizmosSystem_increaseCapacity(GizmosSystem* self)
 {
-    size_t newCapacity = self->m_capacity * 2;
+    size_t newCapacity = self->capacity * 2;
     GizmosCoreCmd* mewCommands = (GizmosCoreCmd*)realloc(
-        self->m_commands,
+        self->commands,
         newCapacity * sizeof(GizmosCoreCmd)
     );
     ASSERT_NEW(mewCommands);
 
-    self->m_commands = mewCommands;
-    self->m_capacity = newCapacity;
+    self->commands = mewCommands;
+    self->capacity = newCapacity;
 }
 
 GizmosSystem* GizmosSystem_create()
@@ -45,9 +45,9 @@ GizmosSystem* GizmosSystem_create()
     GizmosSystem* self = (GizmosSystem*)calloc(1, sizeof(GizmosSystem));
     ASSERT_NEW(self);
 
-    self->m_capacity = 16;
-    self->m_commands = (GizmosCoreCmd*)calloc(self->m_capacity, sizeof(GizmosCoreCmd));
-    ASSERT_NEW(self->m_commands);
+    self->capacity = 16;
+    self->commands = (GizmosCoreCmd*)calloc(self->capacity, sizeof(GizmosCoreCmd));
+    ASSERT_NEW(self->commands);
 
     return self;
 }
@@ -55,7 +55,7 @@ GizmosSystem* GizmosSystem_create()
 void GizmosSystem_destroy(GizmosSystem* self)
 {
     if (!self) return;
-    free(self->m_commands);
+    free(self->commands);
     free(self);
 }
 
@@ -64,15 +64,15 @@ void GizmosSystem_addCommand(GizmosSystem* self, const GizmosCmd* cmd)
     assert(self && "self must not be NULL");
     assert(cmd && "cmd must not be NULL");
 
-    if (self->m_count >= self->m_capacity)
+    if (self->count >= self->capacity)
     {
         GizmosSystem_increaseCapacity(self);
     }
-    assert(self->m_count < self->m_capacity && "m_count must be less than m_capacity");
+    assert(self->count < self->capacity && "m_count must be less than capacity");
 
-    GizmosCoreCmd* coreCmd = &self->m_commands[self->m_count];
+    GizmosCoreCmd* coreCmd = &self->commands[self->count];
     memset(coreCmd, 0, sizeof(GizmosCoreCmd));
-    self->m_count++;
+    self->count++;
 
     if (cmd->transform)
     {
@@ -104,7 +104,7 @@ void GizmosSystem_addCommand(GizmosSystem* self, const GizmosCmd* cmd)
 void GizmosSystem_clear(GizmosSystem* self)
 {
     assert(self && "self must not be NULL");
-    self->m_count = 0;
+    self->count = 0;
 }
 
 static void GizmosSystem_renderCircle(
@@ -244,9 +244,9 @@ void GizmosSystem_render(
     const Camera* camera,
     const UISystem* uiSystem)
 {
-    for (size_t i = 0; i < self->m_count; i++)
+    for (size_t i = 0; i < self->count; i++)
     {
-        GizmosCoreCmd* coreCmd = &self->m_commands[i];
+        GizmosCoreCmd* coreCmd = &self->commands[i];
         if (coreCmd->flags & GIZMOS_CMD_CIRCLE)
         {
             GizmosSystem_renderCircle(self, renderer, camera, uiSystem, coreCmd);

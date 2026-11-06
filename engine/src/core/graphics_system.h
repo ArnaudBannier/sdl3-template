@@ -19,10 +19,10 @@ typedef struct GraphicsCoreCmd GraphicsCoreCmd;
 
 typedef struct GraphicsSystem
 {
-    GraphicsCoreCmd* m_commands;
-    size_t m_count;
-    size_t m_capacity;
-    float m_renderScale;
+    GraphicsCoreCmd* commands;
+    size_t count;
+    size_t capacity;
+    float renderScale;
 } GraphicsSystem;
 
 GraphicsSystem* GraphicsSystem_create();
@@ -53,7 +53,7 @@ void GraphicsSystem_addCommand(
 INLINE void GraphicsSystem_setRenderScale(GraphicsSystem* self, float renderScale)
 {
     assert(self && "self must not be NULL");
-    self->m_renderScale = renderScale;
+    self->renderScale = renderScale;
 }
 
 void GraphicsSystem_clear(GraphicsSystem* self);

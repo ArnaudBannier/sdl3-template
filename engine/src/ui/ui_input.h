@@ -61,9 +61,9 @@ typedef struct UIInputConfig
 
 typedef struct UIInputData
 {
-    Sint16 m_activeZone;
-    Sint16 m_axisX;
-    Sint16 m_axisY;
+    Sint16 activeZone;
+    Sint16 axisX;
+    Sint16 axisY;
 } UIInputData;
 
 typedef struct UIInput
@@ -86,8 +86,8 @@ typedef struct UIInput
     UIInputType lastInputType;
     UIInputConfig config;
 
-    UIInputData m_data;
-    UISystem* m_uiSystem;
+    UIInputData data;
+    UISystem* uiSystem;
 } UIInput;
 
 void UIInput_init(UIInput* self, UISystem* uiSystem);

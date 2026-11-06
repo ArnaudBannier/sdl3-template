@@ -23,8 +23,8 @@ static void MainMenu_onClick(void* selectable)
     }
     else if (strcmp(objectName, "settings-button") == 0)
     {
-        UIManager_closePages(self->m_uiManager);
-        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_SETTINGS);
+        UIManager_closePages(self->uiManager);
+        UIManager_openPage(self->uiManager, TITLE_UI_PAGE_SETTINGS);
     }
     else if (strcmp(objectName, "quit-button") == 0)
     {
@@ -45,15 +45,15 @@ MainMenu* MainMenu_create(GameContext* context, UIManager* manager)
     MainMenu* self = (MainMenu*)calloc(1, sizeof(MainMenu));
     ASSERT_NEW(self);
 
-    self->m_uiManager = manager;
-    self->m_context = context;
-    self->m_mainPanel = UIObject_create(uiSystem, "main-panel");
-    self->m_focusManager = UIFocusManager_create(uiSystem);
+    self->uiManager = manager;
+    self->context = context;
+    self->mainPanel = UIObject_create(uiSystem, "main-panel");
+    self->focusManager = UIFocusManager_create(uiSystem);
 
-    UIObject_setParent(self->m_mainPanel, canvas);
+    UIObject_setParent(self->mainPanel, canvas);
 
     UIGridLayout* layout = UIGridLayout_create(uiSystem, "main-layout", 4, 1);
-    UIObject_setParent(layout, self->m_mainPanel);
+    UIObject_setParent(layout, self->mainPanel);
     UIGridLayout_setRowSizes(layout, 25.0f);
     UIGridLayout_setRowSpacings(layout, 5.f);
     UIGridLayout_setRowSpacing(layout, 0, 20.f);
@@ -78,10 +78,10 @@ MainMenu* MainMenu_create(GameContext* context, UIManager* manager)
         UISelectable_setUserData(button, self);
         UIStyle_setDefaultButton(button, assets);
         UIGridLayout_addObject(layout, button, i + 1, 0, 1, 1);
-        UIFocusManager_addSelectable(self->m_focusManager, button);
+        UIFocusManager_addSelectable(self->focusManager, button);
         if (i == 0)
         {
-            UIFocusManager_setFocused(self->m_focusManager, button);
+            UIFocusManager_setFocused(self->focusManager, button);
         }
     }
 
@@ -92,14 +92,14 @@ void MainMenu_destroy(MainMenu* self)
 {
     if (!self) return;
 
-    UIObject_destroy(self->m_mainPanel);
-    UIFocusManager_destroy(self->m_focusManager);
+    UIObject_destroy(self->mainPanel);
+    UIFocusManager_destroy(self->focusManager);
 
     free(self);
 }
 
 void MainMenu_update(MainMenu* self)
 {
-    Input* input = GameContext_getInput(self->m_context);
-    UIFocusManager_update(self->m_focusManager, &input->uiInput);
+    Input* input = GameContext_getInput(self->context);
+    UIFocusManager_update(self->focusManager, &input->uiInput);
 }

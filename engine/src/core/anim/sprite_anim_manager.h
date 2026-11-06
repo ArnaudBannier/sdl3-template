@@ -21,9 +21,9 @@ struct SpriteAnimEntry
 typedef struct SpriteAnimManager
 {
     int tmp;
-    SpriteAnimEntry** m_entries;
-    int m_entryCount;
-    int m_entrySize;
+    SpriteAnimEntry** entries;
+    int entryCount;
+    int entrySize;
 } SpriteAnimManager;
 
 SpriteAnimManager* SpriteAnimManager_create();

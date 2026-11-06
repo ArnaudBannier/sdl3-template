@@ -34,29 +34,29 @@ typedef enum UIButtonState
 
 typedef struct UIButton
 {
-    UISelectable m_baseSelectable;
-    TTF_Text* m_labelText;
+    UISelectable baseSelectable;
+    TTF_Text* labelText;
 
-    char* m_labelString;
-    SDL_Color m_labelColors[UI_BUTTON_STATE_COUNT];
-    SDL_Color m_backColors[UI_BUTTON_STATE_COUNT];
+    char* labelString;
+    SDL_Color labelColors[UI_BUTTON_STATE_COUNT];
+    SDL_Color backColors[UI_BUTTON_STATE_COUNT];
 
-    SpriteGroup* m_spriteGroup;
-    int m_spriteIndices[UI_BUTTON_STATE_COUNT];
+    SpriteGroup* spriteGroup;
+    int spriteIndices[UI_BUTTON_STATE_COUNT];
 
-    SpriteGroup* m_symbolGroup;
-    int m_symbolSpriteIndex;
-    UITransform m_symbolTransform;
-    UITransform m_labelTransform;
+    SpriteGroup* symbolGroup;
+    int symbolSpriteIndex;
+    UITransform symbolTransform;
+    UITransform labelTransform;
 
-    Vec2 m_labelAnchor;
-    bool m_isActive;
-    bool m_isPressed;
-    bool m_useColorMod;
-    UIButtonState m_buttonState;
+    Vec2 labelAnchor;
+    bool isActive;
+    bool isPressed;
+    bool useColorMod;
+    UIButtonState buttonState;
 
-    void (*m_onClick)(void* selfPtr);
-    void (*m_userOnClick)(void* selfPtr);
+    void (*onClick)(void* selfPtr);
+    void (*userOnClick)(void* selfPtr);
 } UIButton;
 
 UIButton* UIButton_create(UISystem* uiSystem, const char* objectName, TTF_Font* font);
@@ -70,56 +70,56 @@ INLINE void UIButton_setLabelColor(void* selfPtr, UIButtonState state, SDL_Color
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_labelColors[state] = color;
+    selfButton->labelColors[state] = color;
 }
 
 INLINE void UIButton_setBackgroundColor(void* selfPtr, UIButtonState state, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_backColors[state] = color;
+    selfButton->backColors[state] = color;
 }
 
 INLINE void UIButton_setLabelAnchor(void* selfPtr, Vec2 anchor)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_labelAnchor = anchor;
+    selfButton->labelAnchor = anchor;
 }
 
 INLINE void UIButton_setSpriteGroup(void* selfPtr, SpriteGroup* spriteGroup)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_spriteGroup = spriteGroup;
+    selfButton->spriteGroup = spriteGroup;
 }
 
 INLINE void UIButton_setSpriteIndex(void* selfPtr, UIButtonState state, int spriteIndex)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_spriteIndices[state] = spriteIndex;
+    selfButton->spriteIndices[state] = spriteIndex;
 }
 
 INLINE void UIButton_setUseColorMod(void* selfPtr, bool useColorMod)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_useColorMod = useColorMod;
+    selfButton->useColorMod = useColorMod;
 }
 
 INLINE void UIButton_setActiveState(void* selfPtr, bool isActive)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_isActive = isActive;
+    selfButton->isActive = isActive;
 }
 
 INLINE bool UIButton_isActive(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    return selfButton->m_isActive;
+    return selfButton->isActive;
 }
 
 INLINE void UIButton_setSymbolSprite(
@@ -130,9 +130,9 @@ INLINE void UIButton_setSymbolSprite(
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_symbolGroup = symbolGroup;
-    selfButton->m_symbolSpriteIndex = spriteIndex;
-    selfButton->m_symbolTransform.localRect = rect;
+    selfButton->symbolGroup = symbolGroup;
+    selfButton->symbolSpriteIndex = spriteIndex;
+    selfButton->symbolTransform.localRect = rect;
 }
 
 void UIButton_setLabelString(void* selfPtr, const char* text);
@@ -141,16 +141,16 @@ INLINE void UIButton_setLabelRect(void* selfPtr, UIRect rect)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_labelTransform.localRect = rect;
+    selfButton->labelTransform.localRect = rect;
 }
 
 INLINE void UIButton_setFont(void* selfPtr, TTF_Font* font)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    if (selfButton->m_labelText)
+    if (selfButton->labelText)
     {
-        TTF_SetTextFont(selfButton->m_labelText, font);
+        TTF_SetTextFont(selfButton->labelText, font);
     }
 }
 
@@ -160,5 +160,5 @@ INLINE void UIButton_setOnClickCallback(
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_BUTTON) && "self must be of type UI_TYPE_BUTTON");
     UIButton* selfButton = (UIButton*)selfPtr;
-    selfButton->m_userOnClick = onClick;
+    selfButton->userOnClick = onClick;
 }

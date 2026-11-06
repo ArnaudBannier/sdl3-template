@@ -27,61 +27,61 @@ void UIObject_init(void* selfPtr, UISystem* uiSystem, const char* objectName)
     assert(objectName && "objectName must not be NULL");
     UIObject* selfObj = (UIObject*)selfPtr;
 
-    selfObj->m_magicNumber = MAGIC_NUMBER_UI_OBJECT;
-    selfObj->m_type = UI_TYPE_OBJECT;
-    selfObj->m_enabled = true;
-    selfObj->m_orphan = true;
-    selfObj->m_objectName = SDL_strdup(objectName);
-    selfObj->m_uiSystem = uiSystem;
+    selfObj->magicNumber = MAGIC_NUMBER_UI_OBJECT;
+    selfObj->type = UI_TYPE_OBJECT;
+    selfObj->enabled = true;
+    selfObj->orphan = true;
+    selfObj->objectName = SDL_strdup(objectName);
+    selfObj->uiSystem = uiSystem;
 
-    selfObj->m_parentId = UIObjectId_null;
-    selfObj->m_firstChildId = UIObjectId_null;
-    selfObj->m_nextSiblingId = UIObjectId_null;
+    selfObj->parentId = UIObjectId_null;
+    selfObj->firstChildId = UIObjectId_null;
+    selfObj->nextSiblingId = UIObjectId_null;
 
-    selfObj->m_transform.localRect.anchorMin = Vec2_set(0.f, 0.f);
-    selfObj->m_transform.localRect.anchorMax = Vec2_set(1.f, 1.f);
-    selfObj->m_transform.localRect.offsetMin = Vec2_set(0.f, 0.f);
-    selfObj->m_transform.localRect.offsetMax = Vec2_set(0.f, 0.f);
+    selfObj->transform.localRect.anchorMin = Vec2_set(0.f, 0.f);
+    selfObj->transform.localRect.anchorMax = Vec2_set(1.f, 1.f);
+    selfObj->transform.localRect.offsetMin = Vec2_set(0.f, 0.f);
+    selfObj->transform.localRect.offsetMax = Vec2_set(0.f, 0.f);
 
-    selfObj->m_layer.layer = DEFAULT_UI_LAYER;
-    selfObj->m_layer.orderInLayer = 0;
+    selfObj->layer.layer = DEFAULT_UI_LAYER;
+    selfObj->layer.orderInLayer = 0;
 
-    selfObj->m_gizmosColor = g_colors.cyan5;
-    selfObj->m_gizmosIsFilled = false;
-    selfObj->m_gizmosOpacity = 1.0f;
+    selfObj->gizmosColor = g_colors.cyan5;
+    selfObj->gizmosIsFilled = false;
+    selfObj->gizmosOpacity = 1.0f;
 
     UISystem_addObject(uiSystem, selfObj);
 
     // Virtual methods
-    selfObj->m_onRender = UIObjectVM_onRender;
-    selfObj->m_onDrawGizmos = UIObjectVM_onDrawGizmos;
-    selfObj->m_onUpdate = UIObjectVM_onUpdate;
-    selfObj->m_onDestroy = UIObjectVM_onDestroy;
+    selfObj->onRender = UIObjectVM_onRender;
+    selfObj->onDrawGizmos = UIObjectVM_onDrawGizmos;
+    selfObj->onUpdate = UIObjectVM_onUpdate;
+    selfObj->onDestroy = UIObjectVM_onDestroy;
 }
 
 static void UIObject_destroyRecursive(UIObject* self)
 {
     assert(UIObject_isOfType(self, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
 
-    UIObjectId childId = self->m_firstChildId;
+    UIObjectId childId = self->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(self->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(self->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_destroyRecursive(child);
     }
 
     // Appel du destructeur virtuel
-    self->m_onDestroy(self);
+    self->onDestroy(self);
 
-    UISystem_removeObjectId(self->m_uiSystem, self->m_id);
+    UISystem_removeObjectId(self->uiSystem, self->id);
 
     free(self);
 }
@@ -98,8 +98,8 @@ bool UIObject_isOfType(const void* selfPtr, UIType type)
 {
     if (!selfPtr) return false;
     const UIObject* obj = (UIObject*)selfPtr;
-    if (obj->m_magicNumber != MAGIC_NUMBER_UI_OBJECT) return false;
-    return (obj->m_type & type) != 0;
+    if (obj->magicNumber != MAGIC_NUMBER_UI_OBJECT) return false;
+    return (obj->type & type) != 0;
 }
 
 void UIObject_setParent(void* selfPtr, void* parent)
@@ -113,7 +113,7 @@ void UIObject_setParent(void* selfPtr, void* parent)
     {
         assert(UIObject_isOfType(parent, UI_TYPE_OBJECT) && "parent must be of type UI_TYPE_OBJECT");
         UIObject* parentObj = (UIObject*)parent;
-        UIObject_setParentId(selfPtr, parentObj->m_id);
+        UIObject_setParentId(selfPtr, parentObj->id);
     }
 }
 
@@ -122,37 +122,37 @@ void UIObject_setParentId(void* selfPtr, UIObjectId parentId)
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
 
     UIObject* selfObj = (UIObject*)selfPtr;
-    if (UIObjectId_equal(selfObj->m_parentId, parentId)) return;
+    if (UIObjectId_equal(selfObj->parentId, parentId)) return;
 
-    UIObject* currParent = UISystem_getObjectById(selfObj->m_uiSystem, selfObj->m_parentId);
-    UIObject* nextParent = UISystem_getObjectById(selfObj->m_uiSystem, parentId);
+    UIObject* currParent = UISystem_getObjectById(selfObj->uiSystem, selfObj->parentId);
+    UIObject* nextParent = UISystem_getObjectById(selfObj->uiSystem, parentId);
     if (currParent)
     {
         UIObject* prevChild = NULL;
-        UIObject* currChild = UISystem_getObjectById(selfObj->m_uiSystem, currParent->m_firstChildId);
+        UIObject* currChild = UISystem_getObjectById(selfObj->uiSystem, currParent->firstChildId);
         while (currChild)
         {
             if (currChild == selfObj)
             {
                 if (prevChild)
                 {
-                    prevChild->m_nextSiblingId = currChild->m_nextSiblingId;
+                    prevChild->nextSiblingId = currChild->nextSiblingId;
                 }
                 else
                 {
-                    currParent->m_firstChildId = currChild->m_nextSiblingId;
+                    currParent->firstChildId = currChild->nextSiblingId;
                 }
                 break;
             }
             prevChild = currChild;
-            currChild = UISystem_getObjectById(selfObj->m_uiSystem, currChild->m_nextSiblingId);
+            currChild = UISystem_getObjectById(selfObj->uiSystem, currChild->nextSiblingId);
         }
     }
-    selfObj->m_parentId = parentId;
+    selfObj->parentId = parentId;
     if (nextParent)
     {
-        selfObj->m_nextSiblingId = nextParent->m_firstChildId;
-        nextParent->m_firstChildId = selfObj->m_id;
+        selfObj->nextSiblingId = nextParent->firstChildId;
+        nextParent->firstChildId = selfObj->id;
     }
 }
 
@@ -160,7 +160,7 @@ UIObject* UIObject_getParent(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    return UISystem_getObjectById(selfObj->m_uiSystem, selfObj->m_parentId);
+    return UISystem_getObjectById(selfObj->uiSystem, selfObj->parentId);
 }
 
 void UIObject_update(void* selfPtr)
@@ -168,21 +168,21 @@ void UIObject_update(void* selfPtr)
     UIObject* selfObj = (UIObject*)selfPtr;
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
 
-    if (selfObj->m_enabled == false) return;
+    if (selfObj->enabled == false) return;
 
-    selfObj->m_onUpdate(selfObj);
+    selfObj->onUpdate(selfObj);
 
-    UIObjectId childId = selfObj->m_firstChildId;
+    UIObjectId childId = selfObj->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(selfObj->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(selfObj->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_update(child);
     }
@@ -193,21 +193,21 @@ void UIObject_render(void* selfPtr, GraphicsSystem* graphicsSystem)
     UIObject* selfObj = (UIObject*)selfPtr;
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
 
-    if (selfObj->m_enabled == false) return;
+    if (selfObj->enabled == false) return;
 
-    selfObj->m_onRender(selfObj, graphicsSystem);
+    selfObj->onRender(selfObj, graphicsSystem);
 
-    UIObjectId childId = selfObj->m_firstChildId;
+    UIObjectId childId = selfObj->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(selfObj->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(selfObj->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_render(child, graphicsSystem);
     }
@@ -218,21 +218,21 @@ void UIObject_drawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
     UIObject* selfObj = (UIObject*)selfPtr;
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
 
-    if (selfObj->m_enabled == false) return;
+    if (selfObj->enabled == false) return;
 
-    selfObj->m_onDrawGizmos(selfObj, gizmosSystem);
+    selfObj->onDrawGizmos(selfObj, gizmosSystem);
 
-    UIObjectId childId = selfObj->m_firstChildId;
+    UIObjectId childId = selfObj->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(selfObj->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(selfObj->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_drawGizmos(child, gizmosSystem);
     }
@@ -241,19 +241,19 @@ void UIObject_drawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
 void UIObject_clearOrphanStatus(void* selfPtr)
 {
     UIObject* selfObj = (UIObject*)selfPtr;
-    selfObj->m_orphan = false;
+    selfObj->orphan = false;
 
-    UIObjectId childId = selfObj->m_firstChildId;
+    UIObjectId childId = selfObj->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(selfObj->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(selfObj->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_clearOrphanStatus(child);
     }
@@ -272,15 +272,15 @@ void UIObjectVM_onDrawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
     GizmosRect gizmosRect = { 0 };
     RenderBlendMod blendMod = { 0 };
 
-    UITransform_getGizmos(&selfObj->m_transform, &transform, &gizmosRect);
+    UITransform_getGizmos(&selfObj->transform, &transform, &gizmosRect);
     blendMod.mode = SDL_BLENDMODE_BLEND;
-    blendMod.alpha = selfObj->m_gizmosOpacity;
-    gizmosRect.filled = selfObj->m_gizmosIsFilled;
+    blendMod.alpha = selfObj->gizmosOpacity;
+    gizmosRect.filled = selfObj->gizmosIsFilled;
 
     GizmosCmd cmd = { 0 };
     cmd.transform = &transform;
     cmd.rect = &gizmosRect;
-    cmd.color = &selfObj->m_gizmosColor;
+    cmd.color = &selfObj->gizmosColor;
     cmd.blendMod = &blendMod;
     GizmosSystem_addCommand(gizmosSystem, &cmd);
 }
@@ -288,14 +288,14 @@ void UIObjectVM_onDrawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
 void UIObjectVM_onUpdate(void* selfPtr)
 {
     UIObject* selfObj = (UIObject*)selfPtr;
-    UIObject* parent = UISystem_getObjectById(selfObj->m_uiSystem, selfObj->m_parentId);
-    UITransform_updateAABB(&selfObj->m_transform, parent ? &parent->m_transform : NULL);
+    UIObject* parent = UISystem_getObjectById(selfObj->uiSystem, selfObj->parentId);
+    UITransform_updateAABB(&selfObj->transform, parent ? &parent->transform : NULL);
 }
 
 void UIObjectVM_onDestroy(void* selfPtr)
 {
     UIObject* selfObj = (UIObject*)selfPtr;
-    SDL_free(selfObj->m_objectName);
+    SDL_free(selfObj->objectName);
 }
 
 void UIObject_getViewportRect(void* selfPtr, SDL_FRect* outRect)
@@ -303,7 +303,7 @@ void UIObject_getViewportRect(void* selfPtr, SDL_FRect* outRect)
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
 
-    UITransform_getViewportRect(&selfObj->m_transform, selfObj->m_uiSystem, outRect);
+    UITransform_getViewportRect(&selfObj->transform, selfObj->uiSystem, outRect);
 }
 
 void UIObject_printHierarchy(void* selfPtr, int level)
@@ -314,19 +314,19 @@ void UIObject_printHierarchy(void* selfPtr, int level)
     {
         printf("  ");
     }
-    printf("- %s (Type: 0x%04X)\n", selfObj->m_objectName, selfObj->m_type);
+    printf("- %s (Type: 0x%04X)\n", selfObj->objectName, selfObj->type);
 
-    UIObjectId childId = selfObj->m_firstChildId;
+    UIObjectId childId = selfObj->firstChildId;
     while (UIObjectId_isNull(childId) == false)
     {
-        UIObject* child = UISystem_getObjectById(selfObj->m_uiSystem, childId);
+        UIObject* child = UISystem_getObjectById(selfObj->uiSystem, childId);
         if (child == NULL)
         {
             // This should not happen, but if it does, we break the loop to avoid an infinite loop.
             assert(false && "Child object not found in UISystem");
             break;
         }
-        childId = child->m_nextSiblingId;
+        childId = child->nextSiblingId;
 
         UIObject_printHierarchy(child, level + 1);
     }

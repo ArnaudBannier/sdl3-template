@@ -15,9 +15,9 @@ UIManager* UIManager_create(GameContext* context)
     UIManager* self = (UIManager*)calloc(1, sizeof(UIManager));
     ASSERT_NEW(self);
 
-    self->m_context = context;
-    self->m_mainMenu = NULL;
-    self->m_settingsPage = NULL;
+    self->context = context;
+    self->mainMenu = NULL;
+    self->settingsPage = NULL;
 
     return self;
 }
@@ -26,55 +26,55 @@ void UIManager_destroy(UIManager* self)
 {
     if (!self) return;
 
-    MainMenu_destroy(self->m_mainMenu);
-    SettingsPage_destroy(self->m_settingsPage);
+    MainMenu_destroy(self->mainMenu);
+    SettingsPage_destroy(self->settingsPage);
     free(self);
 }
 
 static void UIManager_applyPageChange(UIManager* self)
 {
     // Title main menu
-    if (self->m_activePages[TITLE_UI_PAGE_MAIN_MENU])
+    if (self->activePages[TITLE_UI_PAGE_MAIN_MENU])
     {
-        if (!self->m_mainMenu)
+        if (!self->mainMenu)
         {
-            self->m_mainMenu = MainMenu_create(self->m_context, self);
+            self->mainMenu = MainMenu_create(self->context, self);
         }
     }
     else
     {
-        MainMenu_destroy(self->m_mainMenu);
-        self->m_mainMenu = NULL;
+        MainMenu_destroy(self->mainMenu);
+        self->mainMenu = NULL;
     }
 
     // Settings page
-    if (self->m_activePages[TITLE_UI_PAGE_SETTINGS])
+    if (self->activePages[TITLE_UI_PAGE_SETTINGS])
     {
-        if (!self->m_settingsPage)
+        if (!self->settingsPage)
         {
-            self->m_settingsPage = SettingsPage_create(self->m_context, self);
+            self->settingsPage = SettingsPage_create(self->context, self);
         }
     }
     else
     {
-        SettingsPage_destroy(self->m_settingsPage);
-        self->m_settingsPage = NULL;
+        SettingsPage_destroy(self->settingsPage);
+        self->settingsPage = NULL;
     }
 }
 
 void UIManager_update(UIManager* self)
 {
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     Input* gameInput = GameContext_getInput(context);
 
     UIManager_applyPageChange(self);
 
-    if (self->m_mainMenu)
+    if (self->mainMenu)
     {
-        MainMenu_update(self->m_mainMenu);
+        MainMenu_update(self->mainMenu);
     }
-    if (self->m_settingsPage)
+    if (self->settingsPage)
     {
-        SettingsPage_update(self->m_settingsPage);
+        SettingsPage_update(self->settingsPage);
     }
 }

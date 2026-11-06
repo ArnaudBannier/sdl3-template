@@ -21,12 +21,12 @@ MainScene* MainScene_create(GameEngine* engine)
 
     Scene* selfScene = (Scene*)self;
     Scene_init(selfScene, engine);
-    selfScene->m_onStart = MainScene_onStart;
-    selfScene->m_onQuit = MainScene_onQuit;
-    selfScene->m_onUpdate = MainScene_onUpdate;
-    selfScene->m_onFixedUpdate = MainScene_onFixedUpdate;
-    selfScene->m_onRender = MainScene_onRender;
-    selfScene->m_onDestroy = MainScene_onDestroy;
+    selfScene->onStart = MainScene_onStart;
+    selfScene->onQuit = MainScene_onQuit;
+    selfScene->onUpdate = MainScene_onUpdate;
+    selfScene->onFixedUpdate = MainScene_onFixedUpdate;
+    selfScene->onRender = MainScene_onRender;
+    selfScene->onDestroy = MainScene_onDestroy;
 
     GameContext* context = GameEngine_getContext(engine);
     self->uiManager = UIManager_create(context);

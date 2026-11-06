@@ -25,27 +25,27 @@ void UISelectable_init(void* selfPtr, UISystem* uiSystem, const char* objectName
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
     UIObject_init(selfObject, uiSystem, objectName);
 
-    selfObject->m_type |= UI_TYPE_SELECTABLE;
-    selfObject->m_gizmosColor = g_colors.grape5;
-    selfObject->m_gizmosIsFilled = true;
-    selfObject->m_gizmosOpacity = 0.25f;
+    selfObject->type |= UI_TYPE_SELECTABLE;
+    selfObject->gizmosColor = g_colors.grape5;
+    selfObject->gizmosIsFilled = true;
+    selfObject->gizmosOpacity = 0.25f;
 
-    selfSelectable->m_handledActionFlags = 0;
-    selfSelectable->m_focusState = UI_FOCUS_STATE_NORMAL;
-    selfSelectable->m_audioOnClick = -1;
-    selfSelectable->m_audioOnFocused = -1;
-    selfSelectable->m_audioOnPressed = -1;
+    selfSelectable->handledActionFlags = 0;
+    selfSelectable->focusState = UI_FOCUS_STATE_NORMAL;
+    selfSelectable->audioOnClick = -1;
+    selfSelectable->audioOnFocused = -1;
+    selfSelectable->audioOnPressed = -1;
 
     // Virtual methods
-    selfObject->m_onRender = UISelectableVM_onRender;
-    selfObject->m_onUpdate = UISelectableVM_onUpdate;
-    selfObject->m_onDestroy = UISelectableVM_onDestroy;
-    selfObject->m_onDrawGizmos = UISelectableVM_onDrawGizmos;
-    selfSelectable->m_onFocus = UISelectableVM_onFocus;
-    selfSelectable->m_onFocusChanged = UISelectableVM_onFocusChanged;
+    selfObject->onRender = UISelectableVM_onRender;
+    selfObject->onUpdate = UISelectableVM_onUpdate;
+    selfObject->onDestroy = UISelectableVM_onDestroy;
+    selfObject->onDrawGizmos = UISelectableVM_onDrawGizmos;
+    selfSelectable->onFocus = UISelectableVM_onFocus;
+    selfSelectable->onFocusChanged = UISelectableVM_onFocusChanged;
 
-    selfSelectable->m_userOnFocus = NULL;
-    selfSelectable->m_userOnFocusChanged = NULL;
+    selfSelectable->userOnFocus = NULL;
+    selfSelectable->userOnFocusChanged = NULL;
 }
 
 void UISelectable_setFocusState(void* selfPtr, UIFocusState state)
@@ -53,15 +53,15 @@ void UISelectable_setFocusState(void* selfPtr, UIFocusState state)
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
 
-    if (selfSelectable->m_focusState == state) return;
+    if (selfSelectable->focusState == state) return;
 
-    int prevState = selfSelectable->m_focusState;
-    selfSelectable->m_focusState = state;
+    int prevState = selfSelectable->focusState;
+    selfSelectable->focusState = state;
 
-    selfSelectable->m_onFocusChanged(selfSelectable, state, prevState);
-    if (selfSelectable->m_userOnFocusChanged)
+    selfSelectable->onFocusChanged(selfSelectable, state, prevState);
+    if (selfSelectable->userOnFocusChanged)
     {
-        selfSelectable->m_userOnFocusChanged(selfSelectable, state, prevState);
+        selfSelectable->userOnFocusChanged(selfSelectable, state, prevState);
     }
 }
 

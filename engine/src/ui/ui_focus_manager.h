@@ -15,19 +15,19 @@
 
 typedef struct UIFocusManagerElement
 {
-    UISelectable* m_selectable;
-    UIObjectId m_id;
+    UISelectable* selectable;
+    UIObjectId id;
 } UIFocusManagerElement;
 
 typedef struct UIFocusManager
 {
-    UISystem* m_uiSystem;
+    UISystem* uiSystem;
 
-    UIFocusManagerElement m_elements[MAX_UI_SELECTABLES_IN_GROUP];
-    int m_elementCount;
+    UIFocusManagerElement elements[MAX_UI_SELECTABLES_IN_GROUP];
+    int elementCount;
 
-    UISelectable* m_focused;
-    bool m_enabled;
+    UISelectable* focused;
+    bool enabled;
 } UIFocusManager;
 
 UIFocusManager* UIFocusManager_create(UISystem* uiSystem);

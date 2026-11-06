@@ -18,11 +18,11 @@ void UIImageVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem);
 
 typedef struct UIImage
 {
-    UIObject m_baseObject;
-    SpriteGroup* m_spriteGroup;
-    int m_spriteIndex;
-    RenderBlendMod m_blendMod;
-    RenderColorMod m_colorMod;
+    UIObject baseObject;
+    SpriteGroup* spriteGroup;
+    int spriteIndex;
+    RenderBlendMod blendMod;
+    RenderColorMod colorMod;
 } UIImage;
 
 UIImage* UIImage_create(UISystem* uiSystem, const char* objectName, SpriteGroup* spriteGroup, int spriteIndex);
@@ -36,27 +36,27 @@ INLINE void UIImage_setColorMod(void* selfPtr, SDL_Color colorMod)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_IMAGE) && "self must be of type UI_TYPE_IMAGE");
     UIImage* selfImage = (UIImage*)selfPtr;
-    RenderColorMod_setColor(&(selfImage->m_colorMod), colorMod);
+    RenderColorMod_setColor(&(selfImage->colorMod), colorMod);
 }
 
 INLINE void UIImage_setOpacity(void* selfPtr, float opacity)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_IMAGE) && "self must be of type UI_TYPE_IMAGE");
     UIImage* selfImage = (UIImage*)selfPtr;
-    selfImage->m_blendMod.alpha = opacity;
+    selfImage->blendMod.alpha = opacity;
 }
 
 INLINE void UIImage_setSpriteIndex(void* selfPtr, int spriteIndex)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_IMAGE) && "self must be of type UI_TYPE_IMAGE");
     UIImage* selfImage = (UIImage*)selfPtr;
-    selfImage->m_spriteIndex = spriteIndex;
+    selfImage->spriteIndex = spriteIndex;
 }
 
 INLINE void UIImage_setSprite(void* selfPtr, SpriteGroup* spriteGroup, int spriteIndex)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_IMAGE) && "self must be of type UI_TYPE_IMAGE");
     UIImage* selfImage = (UIImage*)selfPtr;
-    selfImage->m_spriteGroup = spriteGroup;
-    selfImage->m_spriteIndex = spriteIndex;
+    selfImage->spriteGroup = spriteGroup;
+    selfImage->spriteIndex = spriteIndex;
 }

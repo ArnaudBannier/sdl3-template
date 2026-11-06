@@ -12,10 +12,10 @@ typedef struct AudioTrackGroup AudioTrackGroup;
 
 typedef struct AudioSystem
 {
-    MIX_Mixer* m_mixer;
-    AudioTrackGroup* m_groups;
-    size_t m_groupCapacity;
-    SDL_PropertiesID m_playProperties;
+    MIX_Mixer* mixer;
+    AudioTrackGroup* groups;
+    size_t groupCapacity;
+    SDL_PropertiesID playProperties;
 } AudioSystem;
 
 AudioSystem* AudioSystem_create(MIX_Mixer* mixer, size_t groupCapacity);

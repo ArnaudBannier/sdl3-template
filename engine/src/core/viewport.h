@@ -14,7 +14,7 @@
 typedef struct Viewport
 {
     /// @brief Rectangle du viewport en pixels écran.
-    SDL_FRect m_rect;
+    SDL_FRect rect;
 
 } Viewport;
 
@@ -44,7 +44,7 @@ void Viewport_apply(Viewport* self, SDL_Renderer* renderer);
 INLINE SDL_FRect Viewport_getRect(const Viewport* self)
 {
     assert(self && "Viewport must not be NULL");
-    return self->m_rect;
+    return self->rect;
 }
 
 /// @brief Renvoie la largeur du viewport en pixels.
@@ -53,7 +53,7 @@ INLINE SDL_FRect Viewport_getRect(const Viewport* self)
 INLINE float Viewport_getWidth(const Viewport* self)
 {
     assert(self && "Viewport must not be NULL");
-    return self->m_rect.w;
+    return self->rect.w;
 }
 
 /// @brief Renvoie la hauteur du viewport en pixels.
@@ -62,7 +62,7 @@ INLINE float Viewport_getWidth(const Viewport* self)
 INLINE float Viewport_getHeight(const Viewport* self)
 {
     assert(self && "Viewport must not be NULL");
-    return self->m_rect.h;
+    return self->rect.h;
 }
 
 /// @brief Renvoie le ratio d'aspect (largeur / hauteur) du viewport.
@@ -71,5 +71,5 @@ INLINE float Viewport_getHeight(const Viewport* self)
 INLINE float Viewport_getAspectRatio(const Viewport* self)
 {
     assert(self && "Viewport must not be NULL");
-    return self->m_rect.w / self->m_rect.h;
+    return self->rect.w / self->rect.h;
 }

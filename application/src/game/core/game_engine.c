@@ -22,11 +22,11 @@ GameEngine* GameEngine_create()
     GameEngine* self = (GameEngine*)calloc(1, sizeof(GameEngine));
     ASSERT_NEW(self);
 
-    self->m_context = GameContext_create();
-    self->m_sceneManager = SceneManager_create(self);
-    self->m_realtime = true;
-    self->m_timeStepMS = 10; // 100 FPS
-    self->m_aspectRatio = 16.f / 9.f;
+    self->context = GameContext_create();
+    self->sceneManager = SceneManager_create(self);
+    self->realtime = true;
+    self->timeStepMS = 10; // 100 FPS
+    self->aspectRatio = 16.f / 9.f;
 
     return self;
 }
@@ -34,8 +34,8 @@ GameEngine* GameEngine_create()
 void GameEngine_destroy(GameEngine* self)
 {
     if (!self) return;
-    SceneManager_destroy(self->m_sceneManager);
-    GameContext_destroy(self->m_context);
+    SceneManager_destroy(self->sceneManager);
+    GameContext_destroy(self->context);
     free(self);
 }
 
@@ -49,12 +49,12 @@ void GameEngine_mainLoop(GameEngine* self)
         // Met à jour le temps
         Timer_update(g_engine.time);
 
-        Input* input = GameContext_getInput(self->m_context);
+        Input* input = GameContext_getInput(self->context);
         if (input->app.quitPressed) return;
 
         GameEngine_update(self);
 
-        if (self->m_quit) return;
+        if (self->quit) return;
 
         // Rend la scène
         GameEngine_render(self);
@@ -66,14 +66,14 @@ void GameEngine_mainLoop(GameEngine* self)
 
 void GameEngine_quit(GameEngine* self)
 {
-    self->m_quit = true;
+    self->quit = true;
 }
 
 static void GameEngine_update(GameEngine* self)
 {
     assert(self && "self must not be NULL");
     SDL_Renderer* renderer = g_engine.sdl.renderer;
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     Viewport* viewport = GameContext_getViewport(context);
     AssetManager* assetManager = GameContext_getAssetManager(context);
     ParticleSystem* particleSystem = GameContext_getParticleSystem(context);
@@ -83,7 +83,7 @@ static void GameEngine_update(GameEngine* self)
     GameEngine_updateInput(self);
 
     Game_updateSizes();
-    Viewport_updateMain(viewport, renderer, self->m_aspectRatio);
+    Viewport_updateMain(viewport, renderer, self->aspectRatio);
     Viewport_apply(viewport, renderer);
 
     const float renderScale = g_engine.sizes.mainRenderScale;
@@ -91,19 +91,19 @@ static void GameEngine_update(GameEngine* self)
     GraphicsSystem_setRenderScale(graphicsSystem, renderScale);
 
     const Uint64 deltaMS = Timer_getDeltaMS(g_engine.time);
-    const Uint64 timeStepMS = self->m_timeStepMS;
+    const Uint64 timeStepMS = self->timeStepMS;
 
     UISystem_update(uiSystem);
-    if (self->m_realtime)
+    if (self->realtime)
     {
         // Fixed update
-        self->m_stepAccuMS += deltaMS;
-        while (self->m_stepAccuMS >= timeStepMS)
+        self->stepAccuMS += deltaMS;
+        while (self->stepAccuMS >= timeStepMS)
         {
-            self->m_stepAccuMS -= timeStepMS;
+            self->stepAccuMS -= timeStepMS;
             GameEngine_fixedUpdateGame(self, (float)timeStepMS / 1000.f);
         }
-        context->m_stepAlpha = (float)self->m_stepAccuMS / (float)timeStepMS;
+        context->stepAlpha = (float)self->stepAccuMS / (float)timeStepMS;
 
         // Update
         GameEngine_updateGame(self, (float)deltaMS / 1000.f);
@@ -111,10 +111,10 @@ static void GameEngine_update(GameEngine* self)
     }
     else
     {
-        context->m_stepAlpha = 1.f;
-        if (self->m_makeStep)
+        context->stepAlpha = 1.f;
+        if (self->makeStep)
         {
-            self->m_makeStep = false;
+            self->makeStep = false;
             GameEngine_fixedUpdateGame(self, (float)timeStepMS / 1000.f);
             GameEngine_updateGame(self, (float)timeStepMS / 1000.f);
             ParticleSystem_update(particleSystem, (float)timeStepMS / 1000.f);
@@ -126,31 +126,31 @@ static void GameEngine_update(GameEngine* self)
 static void GameEngine_updateInput(GameEngine* self)
 {
     assert(self && "self must not be NULL");
-    Input* input = GameContext_getInput(self->m_context);
+    Input* input = GameContext_getInput(self->context);
     Input_update(input);
 
     if (input->debug.makeStepPressed)
     {
-        self->m_makeStep = true;
+        self->makeStep = true;
     }
     if (input->debug.changeModePressed)
     {
-        self->m_realtime = !self->m_realtime;
+        self->realtime = !self->realtime;
     }
     if (input->debug.objectGizmosPressed)
     {
-        self->m_drawObjectGizmos = !self->m_drawObjectGizmos;
+        self->drawObjectGizmos = !self->drawObjectGizmos;
     }
     if (input->debug.uiGizmosPressed)
     {
-        self->m_drawUIGizmos = !self->m_drawUIGizmos;
+        self->drawUIGizmos = !self->drawUIGizmos;
     }
 }
 
 static void GameEngine_updateGame(GameEngine* self, float dt)
 {
     assert(self && "self must not be NULL");
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     SceneManager* sceneManager = GameEngine_getSceneManager(self);
 
     SceneManager_update(sceneManager, dt);
@@ -159,7 +159,7 @@ static void GameEngine_updateGame(GameEngine* self, float dt)
 static void GameEngine_fixedUpdateGame(GameEngine* self, float timeStep)
 {
     assert(self && "self must not be NULL");
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     SceneManager* sceneManager = GameEngine_getSceneManager(self);
 
     SceneManager_fixedUpdate(sceneManager, timeStep);
@@ -168,7 +168,7 @@ static void GameEngine_fixedUpdateGame(GameEngine* self, float timeStep)
 static void GameEngine_render(GameEngine* self)
 {
     assert(self && "self must not be NULL");
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     SDL_Renderer* renderer = g_engine.sdl.renderer;
     ParticleSystem* particleSystem = GameContext_getParticleSystem(context);
     UISystem* uiSystem = GameContext_getUISystem(context);
@@ -196,13 +196,13 @@ static void GameEngine_render(GameEngine* self)
     GraphicsSystem_render(graphics, renderer, camera, uiSystem);
 
     // Gizmos
-    if (self->m_drawObjectGizmos)
+    if (self->drawObjectGizmos)
     {
         GizmosSystem_clear(gizmos);
         GizmosSystem_render(gizmos, renderer, camera, uiSystem);
     }
 
-    if (self->m_drawUIGizmos)
+    if (self->drawUIGizmos)
     {
         GizmosSystem_clear(gizmos);
         UISystem_drawGizmos(uiSystem, gizmos);

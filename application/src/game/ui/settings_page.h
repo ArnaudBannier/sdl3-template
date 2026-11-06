@@ -12,19 +12,19 @@
 typedef struct GameContext GameContext;
 typedef struct SettingsPage
 {
-    GameContext* m_context;
-    UIManager* m_uiManager;
-    UIFocusManager* m_focusManager;
+    GameContext* context;
+    UIManager* uiManager;
+    UIFocusManager* focusManager;
 
-    UIObject* m_mainPanel;
-    UIList* m_fullscreenList;
-    UIList* m_musicGainList;
-    UIList* m_sfxGainList;
-    UIList* m_uiGainList;
+    UIObject* mainPanel;
+    UIList* fullscreenList;
+    UIList* musicGainList;
+    UIList* sfxGainList;
+    UIList* uiGainList;
 
-    float m_prevMusicGain;
-    float m_prevSfxGain;
-    float m_prevUIGain;
+    float prevMusicGain;
+    float prevSfxGain;
+    float prevUIGain;
 } SettingsPage;
 
 SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager);

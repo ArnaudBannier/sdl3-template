@@ -19,52 +19,52 @@
 /// Gère les conversions entre coordonnées UI virtuelles (640×360) et viewport.
 typedef struct UISystem
 {
-    AssetManager* m_assetManager;
+    AssetManager* assetManager;
 
-    AudioSystem* m_audioSystem;
+    AudioSystem* audioSystem;
 
     /// @brief Pointeur vers le viewport utilisé (non possédé).
-    Viewport* m_viewport;
+    Viewport* viewport;
 
-    int m_audioGroupIndex;
+    int audioGroupIndex;
 
     /// @brief Largeur virtuelle en pixels.
-    float m_virtualWidth;
+    float virtualWidth;
 
     /// @brief Hauteur virtuelle en pixels.
-    float m_virtualHeight;
+    float virtualHeight;
 
-    UIObject* m_canvas;
+    UIObject* canvas;
 
     /// @brief Pointer to an array of uiObjects.
     /// This is the dense array where active uiObjects are stored.
-    UIObject** m_uiObjects;
+    UIObject** uiObjects;
 
     /// @brief Pointer to an array of generation counters for each uiObject slot.
     /// Used to validate UIObjectIds. When a uiObject is destroyed, its generation is incremented to invalidate old IDs.
     /// This array is indexed by the sparse index from UIObjectId.
-    uint32_t* m_generations;
+    uint32_t* generations;
 
-    /// @brief Pointer to an array mapping sparse indices (from UIObjectId) to dense indices (in m_uiObjects).
-    int* m_sparseToDense;
+    /// @brief Pointer to an array mapping sparse indices (from UIObjectId) to dense indices (in uiObjects).
+    int* sparseToDense;
 
-    /// @brief Pointer to an array mapping dense indices (in m_uiObjects) back to sparse indices (for UIObjectId).
-    int* m_denseToSparse;
+    /// @brief Pointer to an array mapping dense indices (in uiObjects) back to sparse indices (for UIObjectId).
+    int* denseToSparse;
 
     /// @brief The current number of active uiObjects in the UI system.
     /// This is also the next dense index to use when creating a new uiObject.
-    int m_uiObjectCount;
+    int uiObjectCount;
 
     /// @brief The maximum capacity of uiObjects that the UI system can handle.
-    int m_capacity;
+    int capacity;
 
     /// @brief The head of the free list for uiObject slots.
     /// This is an index into the arrays that indicates the next free slot.
-    int m_firstFreeIndex;
+    int firstFreeIndex;
 
     /// @brief Pointer to an array that forms a linked list of free sparse indices.
     /// When a uiObject is destroyed, its sparse index is added to this free list.
-    int* m_nextFree;
+    int* nextFree;
 } UISystem;
 
 /// @brief Crée un nouveau système UI.
@@ -92,7 +92,7 @@ void UISystem_drawGizmos(UISystem* self, GizmosSystem* gizmosSystem);
 INLINE void UISystem_setAudioGroupIndex(UISystem* self, int audioGroupIndex)
 {
     assert(self && "self must not be NULL");
-    self->m_audioGroupIndex = audioGroupIndex;
+    self->audioGroupIndex = audioGroupIndex;
 }
 
 /// @brief Convertit une coordonnée X du viewport vers le système UI virtuel.
@@ -129,7 +129,7 @@ float UISystem_uiToViewLength(const UISystem* self, float length);
 INLINE UIObject* UISystem_getCanvas(const UISystem* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_canvas;
+    return self->canvas;
 }
 
 bool UISystem_hasObjectId(UISystem* self, UIObjectId id);

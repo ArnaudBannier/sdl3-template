@@ -24,25 +24,25 @@ AssetManager* AssetManager_create(
     AssetManager* self = (AssetManager*)calloc(1, sizeof(AssetManager));
     ASSERT_NEW(self);
 
-    self->m_spriteCapacity = spriteCapacity;
-    self->m_fontCapacity = fontCapacity;
-    self->m_audioCapacity = audioCapacity;
-    self->m_defaultViewportWidth = 1920;
-    self->m_renderer = renderer;
-    self->m_mixer = mixer;
-    self->m_assetsPath = assetsPath;
+    self->spriteCapacity = spriteCapacity;
+    self->fontCapacity = fontCapacity;
+    self->audioCapacity = audioCapacity;
+    self->defaultViewportWidth = 1920;
+    self->renderer = renderer;
+    self->mixer = mixer;
+    self->assetsPath = assetsPath;
 
-    self->m_spriteData = (SpriteSheetData*)calloc(spriteCapacity, sizeof(SpriteSheetData));
-    ASSERT_NEW(self->m_spriteData);
+    self->spriteData = (SpriteSheetData*)calloc(spriteCapacity, sizeof(SpriteSheetData));
+    ASSERT_NEW(self->spriteData);
 
-    self->m_fontData = (FontData*)calloc(fontCapacity, sizeof(FontData));
-    ASSERT_NEW(self->m_fontData);
+    self->fontData = (FontData*)calloc(fontCapacity, sizeof(FontData));
+    ASSERT_NEW(self->fontData);
 
-    self->m_audioData = (AudioData*)calloc(audioCapacity, sizeof(AudioData));
-    ASSERT_NEW(self->m_audioData);
+    self->audioData = (AudioData*)calloc(audioCapacity, sizeof(AudioData));
+    ASSERT_NEW(self->audioData);
 
-    self->m_storage = SDL_OpenTitleStorage(assetsPath, 0);
-    ASSERT_NEW(self->m_storage);
+    self->storage = SDL_OpenTitleStorage(assetsPath, 0);
+    ASSERT_NEW(self->storage);
 
     return self;
 }
@@ -51,37 +51,37 @@ void AssetManager_destroy(AssetManager* self)
 {
     if (!self) return;
 
-    if (self->m_spriteData)
+    if (self->spriteData)
     {
         // Libère les spriteSheet
-        for (int i = 0; i < self->m_spriteCapacity; i++)
+        for (int i = 0; i < self->spriteCapacity; i++)
         {
-            AssetManager_clearSpriteSheet(self, self->m_spriteData + i);
+            AssetManager_clearSpriteSheet(self, self->spriteData + i);
         }
-        free(self->m_spriteData);
+        free(self->spriteData);
     }
 
-    if (self->m_fontData)
+    if (self->fontData)
     {
         // Libère les fonts
-        for (int i = 0; i < self->m_fontCapacity; i++)
+        for (int i = 0; i < self->fontCapacity; i++)
         {
-            AssetManager_clearFont(self, self->m_fontData + i);
+            AssetManager_clearFont(self, self->fontData + i);
         }
-        free(self->m_fontData);
+        free(self->fontData);
     }
 
-    if (self->m_audioData)
+    if (self->audioData)
     {
         // Libère les musiques et sons
-        for (int i = 0; i < self->m_audioCapacity; i++)
+        for (int i = 0; i < self->audioCapacity; i++)
         {
-            AssetManager_clearAudio(self, self->m_audioData + i);
+            AssetManager_clearAudio(self, self->audioData + i);
         }
-        free(self->m_audioData);
+        free(self->audioData);
     }
 
-    bool success = SDL_CloseStorage(self->m_storage);
+    bool success = SDL_CloseStorage(self->storage);
     if (!success)
     {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to close storage");
@@ -111,20 +111,20 @@ void AssetManager_addSpriteSheet(
     AssetManager* self, int sheetId, const char* texFileName, const char* descFileName)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= sheetId && sheetId < self->m_spriteCapacity && "The sheetId is not valid");
+    assert(0 <= sheetId && sheetId < self->spriteCapacity && "The sheetId is not valid");
 
-    SpriteSheetData* spriteData = &(self->m_spriteData[sheetId]);
-    if (spriteData->m_spriteSheet)
+    SpriteSheetData* spriteData = &(self->spriteData[sheetId]);
+    if (spriteData->spriteSheet)
     {
         SDL_LogError(
             SDL_LOG_CATEGORY_APPLICATION,
-            "Unable to add sprite sheet %s%s", self->m_assetsPath, texFileName
+            "Unable to add sprite sheet %s%s", self->assetsPath, texFileName
         );
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "The sprite sheet with ID %d already exists", sheetId);
         assert(false && "The sheetId is already used");
         return;
     }
-    spriteData->m_texFileName = AssetManager_makeDatPath(texFileName);
+    spriteData->texFileName = AssetManager_makeDatPath(texFileName);
     char* descDatFileName = AssetManager_makeDatPath(descFileName);
 
     Uint64 descFileSize = 0;
@@ -132,7 +132,7 @@ void AssetManager_addSpriteSheet(
     AssetManager_readFileToBuffer(self, descDatFileName, &descBuffer, &descFileSize);
     free(descDatFileName); descDatFileName = NULL;
 
-    spriteData->m_spriteSheet = SpriteSheet_create(self, sheetId, (char*)descBuffer, (int)descFileSize);
+    spriteData->spriteSheet = SpriteSheet_create(self, sheetId, (char*)descBuffer, (int)descFileSize);
     SDL_free(descBuffer); descBuffer = NULL;
 }
 
@@ -140,78 +140,78 @@ void AssetManager_addFont(
     AssetManager* self, int fontId, const char* fileName, float size)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= fontId && fontId < self->m_fontCapacity && "The fontId is not valid");
+    assert(0 <= fontId && fontId < self->fontCapacity && "The fontId is not valid");
 
-    FontData* fontData = &(self->m_fontData[fontId]);
-    if (fontData->m_fileName)
+    FontData* fontData = &(self->fontData[fontId]);
+    if (fontData->fileName)
     {
         SDL_LogError(
             SDL_LOG_CATEGORY_APPLICATION,
-            "Unable to add font %s%s", self->m_assetsPath, fileName
+            "Unable to add font %s%s", self->assetsPath, fileName
         );
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "The font with ID %d already exists", fontId);
         assert(false && "The fontId is already used");
         return;
     }
-    fontData->m_fileName = AssetManager_makeDatPath(fileName);
-    fontData->m_size = size;
+    fontData->fileName = AssetManager_makeDatPath(fileName);
+    fontData->size = size;
 }
 
 void AssetManager_addAudio(AssetManager* self, int audioId, const char* fileName, bool predecode)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= audioId && audioId < self->m_audioCapacity && "The audioId is not valid");
+    assert(0 <= audioId && audioId < self->audioCapacity && "The audioId is not valid");
 
-    AudioData* audioData = &(self->m_audioData[audioId]);
-    if (audioData->m_fileName)
+    AudioData* audioData = &(self->audioData[audioId]);
+    if (audioData->fileName)
     {
         SDL_LogError(
             SDL_LOG_CATEGORY_APPLICATION,
-            "Unable to add audio %s%s", self->m_assetsPath, fileName
+            "Unable to add audio %s%s", self->assetsPath, fileName
         );
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "The audio with ID %d already exists", audioId);
         assert(false && "The audioId is already used");
         return;
     }
-    audioData->m_fileName = AssetManager_makeDatPath(fileName);
-    audioData->m_predecode = predecode;
+    audioData->fileName = AssetManager_makeDatPath(fileName);
+    audioData->predecode = predecode;
 }
 
 SpriteSheet* AssetManager_getSpriteSheet(AssetManager* self, int sheetId)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= sheetId && sheetId < self->m_spriteCapacity && "The sheetId is not valid");
+    assert(0 <= sheetId && sheetId < self->spriteCapacity && "The sheetId is not valid");
 
-    SpriteSheetData* spriteData = &(self->m_spriteData[sheetId]);
-    if (spriteData->m_spriteSheet == NULL)
+    SpriteSheetData* spriteData = &(self->spriteData[sheetId]);
+    if (spriteData->spriteSheet == NULL)
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No sprite sheet with ID %d", sheetId);
         assert(false && "No sprite sheet with this sheetId");
         return NULL;
     }
 
-    return spriteData->m_spriteSheet;
+    return spriteData->spriteSheet;
 }
 
 SDL_Texture* AssetManager_getSpriteSheetTexture(AssetManager* self, int sheetId)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= sheetId && sheetId < self->m_spriteCapacity && "The sheetId is not valid");
+    assert(0 <= sheetId && sheetId < self->spriteCapacity && "The sheetId is not valid");
 
-    SpriteSheetData* spriteData = &(self->m_spriteData[sheetId]);
-    if (spriteData->m_texture) return spriteData->m_texture;
+    SpriteSheetData* spriteData = &(self->spriteData[sheetId]);
+    if (spriteData->texture) return spriteData->texture;
 
-    if (spriteData->m_texFileName == NULL)
+    if (spriteData->texFileName == NULL)
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No sprite sheet with ID %d", sheetId);
         assert(false && "No sprite sheet with this sheetId");
         return NULL;
     }
 
-    spriteData->m_texture = AssetManager_loadTexture(self, self->m_renderer, spriteData->m_texFileName);
-    if (SpriteSheet_isPixelArt(spriteData->m_spriteSheet))
+    spriteData->texture = AssetManager_loadTexture(self, self->renderer, spriteData->texFileName);
+    if (SpriteSheet_isPixelArt(spriteData->spriteSheet))
     {
-        bool success = SDL_SetTextureScaleMode(spriteData->m_texture, SDL_SCALEMODE_NEAREST);
+        bool success = SDL_SetTextureScaleMode(spriteData->texture, SDL_SCALEMODE_NEAREST);
         if (!success)
         {
             SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to set texture scale mode");
@@ -220,18 +220,18 @@ SDL_Texture* AssetManager_getSpriteSheetTexture(AssetManager* self, int sheetId)
         }
     }
 
-    return spriteData->m_texture;
+    return spriteData->texture;
 }
 
 TTF_Font* AssetManager_getFont(AssetManager* self, int fontId)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= fontId && fontId < self->m_fontCapacity && "The fontId is not valid");
+    assert(0 <= fontId && fontId < self->fontCapacity && "The fontId is not valid");
 
-    FontData* fontData = &(self->m_fontData[fontId]);
-    if (fontData->m_font) return fontData->m_font;
+    FontData* fontData = &(self->fontData[fontId]);
+    if (fontData->font) return fontData->font;
 
-    if (fontData->m_fileName == NULL)
+    if (fontData->fileName == NULL)
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No font with ID %d", fontId);
         assert(false && "No font with this fontId");
@@ -239,18 +239,18 @@ TTF_Font* AssetManager_getFont(AssetManager* self, int fontId)
     }
 
     AssetManager_loadFont(self, fontData);
-    return fontData->m_font;
+    return fontData->font;
 }
 
 MIX_Audio* AssetManager_getAudio(AssetManager* self, int audioId)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= audioId && audioId < self->m_audioCapacity && "The audioId is not valid");
+    assert(0 <= audioId && audioId < self->audioCapacity && "The audioId is not valid");
 
-    AudioData* audioData = &(self->m_audioData[audioId]);
-    if (audioData->m_audio) return audioData->m_audio;
+    AudioData* audioData = &(self->audioData[audioId]);
+    if (audioData->audio) return audioData->audio;
 
-    if (audioData->m_fileName == NULL)
+    if (audioData->fileName == NULL)
     {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No audio with ID %d", audioId);
         assert(false && "No audio with this audioId");
@@ -258,7 +258,7 @@ MIX_Audio* AssetManager_getAudio(AssetManager* self, int audioId)
     }
 
     AssetManager_loadAudio(self, audioData);
-    return audioData->m_audio;
+    return audioData->audio;
 }
 
 void AssetManager_cacheSpriteSheet(AssetManager* self, int sheetId)
@@ -282,42 +282,42 @@ void AssetManager_cacheAudio(AssetManager* self, int audioId)
 void AssetManager_setAudioGain(AssetManager* self, int audioId, float gain)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= audioId && audioId < self->m_audioCapacity && "The audioId is not valid");
+    assert(0 <= audioId && audioId < self->audioCapacity && "The audioId is not valid");
 
-    AudioData* audioData = &(self->m_audioData[audioId]);
-    audioData->m_gain = gain;
+    AudioData* audioData = &(self->audioData[audioId]);
+    audioData->gain = gain;
 }
 
 float AssetManager_getAudioGain(AssetManager* self, int audioId)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= audioId && audioId < self->m_audioCapacity && "The audioId is not valid");
-    return self->m_audioData[audioId].m_gain;
+    assert(0 <= audioId && audioId < self->audioCapacity && "The audioId is not valid");
+    return self->audioData[audioId].gain;
 }
 
 static void AssetManager_clearSpriteSheet(AssetManager* self, SpriteSheetData* data)
 {
-    if (data->m_spriteSheet)
+    if (data->spriteSheet)
     {
-        SpriteSheet_destroy(data->m_spriteSheet);
+        SpriteSheet_destroy(data->spriteSheet);
     }
-    if (data->m_texture)
+    if (data->texture)
     {
-        SDL_DestroyTexture(data->m_texture);
+        SDL_DestroyTexture(data->texture);
     }
-    free(data->m_texFileName);
+    free(data->texFileName);
     memset(data, 0, sizeof(SpriteSheetData));
 }
 
 static void AssetManager_loadFont(AssetManager* self, FontData* data)
 {
     Uint64 fileSize = 0;
-    AssetManager_createIOStream(self, data->m_fileName, &data->m_ioStream, &data->m_buffer, &fileSize);
+    AssetManager_createIOStream(self, data->fileName, &data->ioStream, &data->buffer, &fileSize);
 
-    data->m_font = TTF_OpenFontIO(data->m_ioStream, false, data->m_size);
-    if (data->m_font == NULL)
+    data->font = TTF_OpenFontIO(data->ioStream, false, data->size);
+    if (data->font == NULL)
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to load font %s", data->m_fileName);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to load font %s", data->fileName);
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
         assert(false);
         abort();
@@ -326,12 +326,12 @@ static void AssetManager_loadFont(AssetManager* self, FontData* data)
 
 static void AssetManager_clearFont(AssetManager* self, FontData* data)
 {
-    if (data->m_font)
+    if (data->font)
     {
-        TTF_CloseFont(data->m_font);
-        AssetManager_destroyIOStream(self, data->m_ioStream, data->m_buffer);
+        TTF_CloseFont(data->font);
+        AssetManager_destroyIOStream(self, data->ioStream, data->buffer);
     }
-    free(data->m_fileName);
+    free(data->fileName);
     memset(data, 0, sizeof(FontData));
 }
 
@@ -340,13 +340,13 @@ static void AssetManager_loadAudio(AssetManager* self, AudioData* data)
     Uint64 fileSize = 0;
     void* buffer = NULL;
     SDL_IOStream* ioStream = NULL;
-    AssetManager_createIOStream(self, data->m_fileName, &ioStream, &buffer, &fileSize);
+    AssetManager_createIOStream(self, data->fileName, &ioStream, &buffer, &fileSize);
 
     const bool closeIO = false;
-    data->m_audio = MIX_LoadAudio_IO(self->m_mixer, ioStream, data->m_predecode, closeIO);
-    if (data->m_audio == NULL)
+    data->audio = MIX_LoadAudio_IO(self->mixer, ioStream, data->predecode, closeIO);
+    if (data->audio == NULL)
     {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to load audio %s", data->m_fileName);
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to load audio %s", data->fileName);
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
         assert(false);
         abort();
@@ -357,11 +357,11 @@ static void AssetManager_loadAudio(AssetManager* self, AudioData* data)
 
 void AssetManager_clearAudio(AssetManager* self, AudioData* data)
 {
-    if (data->m_audio)
+    if (data->audio)
     {
-        MIX_DestroyAudio(data->m_audio);
+        MIX_DestroyAudio(data->audio);
     }
-    free(data->m_fileName);
+    free(data->fileName);
     memset(data, 0, sizeof(AudioData));
 }
 
@@ -370,7 +370,7 @@ void AssetManager_readFileToBuffer(
 {
     assert(outBuffer && outLength && "The output buffer and length must be valid");
     Uint64 fileSize = 0;
-    bool success = SDL_GetStorageFileSize(self->m_storage, fileName, &fileSize);
+    bool success = SDL_GetStorageFileSize(self->storage, fileName, &fileSize);
     if (!success)
     {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to get file size");
@@ -380,7 +380,7 @@ void AssetManager_readFileToBuffer(
     }
     void* mem = SDL_malloc((size_t)fileSize);
     ASSERT_NEW(mem);
-    success = SDL_ReadStorageFile(self->m_storage, fileName, mem, fileSize);
+    success = SDL_ReadStorageFile(self->storage, fileName, mem, fileSize);
     if (!success)
     {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to read file");
@@ -440,17 +440,17 @@ SDL_Texture* AssetManager_loadTexture(AssetManager* self, SDL_Renderer* renderer
 void AssetManager_updateFontSizes(AssetManager* self, float renderScale)
 {
     assert(self && "self must not be NULL");
-    for (int i = 0; i < self->m_fontCapacity; i++)
+    for (int i = 0; i < self->fontCapacity; i++)
     {
-        FontData* fontData = &(self->m_fontData[i]);
-        TTF_Font* font = fontData->m_font;
+        FontData* fontData = &(self->fontData[i]);
+        TTF_Font* font = fontData->font;
         if (!font) continue;
 
-        const float newSize = roundf(fontData->m_size * renderScale);
+        const float newSize = roundf(fontData->size * renderScale);
         bool success = TTF_SetFontSize(font, newSize);
         if (!success)
         {
-            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to update font size %s", fontData->m_fileName);
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to update font size %s", fontData->fileName);
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError());
             assert(false);
         }

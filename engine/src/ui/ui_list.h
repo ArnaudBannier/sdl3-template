@@ -38,37 +38,37 @@ typedef enum UIListState
 
 typedef struct UIList
 {
-    UISelectable m_baseSelectable;
+    UISelectable baseSelectable;
 
-    UITransform m_labelTransform;
-    UITransform m_itemTransform;
+    UITransform labelTransform;
+    UITransform itemTransform;
 
-    RenderText m_labelText;
-    RenderText m_itemText;
+    RenderText labelText;
+    RenderText itemText;
 
-    int m_itemCount;
-    int m_itemIdx;
-    int m_configFlags;
-    bool m_isActive;
-    UIListState m_listState;
+    int itemCount;
+    int itemIdx;
+    int configFlags;
+    bool isActive;
+    UIListState listState;
 
-    char* m_labelString;
-    char** m_itemStrings;
-    SDL_Color m_itemColors[UI_LIST_STATE_COUNT];
-    SDL_Color m_labelColors[UI_LIST_STATE_COUNT];
-    SDL_Color m_backColors[UI_LIST_STATE_COUNT];
+    char* labelString;
+    char** itemStrings;
+    SDL_Color itemColors[UI_LIST_STATE_COUNT];
+    SDL_Color labelColors[UI_LIST_STATE_COUNT];
+    SDL_Color backColors[UI_LIST_STATE_COUNT];
 
-    SpriteGroup* m_spriteGroup;
-    int m_spriteIndices[UI_LIST_STATE_COUNT];
+    SpriteGroup* spriteGroup;
+    int spriteIndices[UI_LIST_STATE_COUNT];
 
-    bool m_hasPrevItem;
-    bool m_hasNextItem;
-    bool m_useColorMod;
-    UIButton* m_prevButton;
-    UIButton* m_nextButton;
+    bool hasPrevItem;
+    bool hasNextItem;
+    bool useColorMod;
+    UIButton* prevButton;
+    UIButton* nextButton;
 
-    void (*m_onItemChanged)(void* selfPtr, int currItemIdx, int prevItemIdx, bool increase);
-    void (*m_userOnItemChanged)(void* selfPtr, int currItemIdx, int prevItemIdx, bool increase);
+    void (*onItemChanged)(void* selfPtr, int currItemIdx, int prevItemIdx, bool increase);
+    void (*userOnItemChanged)(void* selfPtr, int currItemIdx, int prevItemIdx, bool increase);
 } UIList;
 
 UIList* UIList_create(UISystem* uiSystem, const char* objectName, TTF_Font* font, int itemCount, int configFlags);
@@ -84,9 +84,9 @@ INLINE void UIList_setLabelString(void* selfPtr, const char* text)
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     assert(text && "ttfText must not be NULL");
     UIList* selfList = (UIList*)selfPtr;
-    assert(selfList->m_labelString && "Existing label string must not be NULL");
-    SDL_free(selfList->m_labelString);
-    selfList->m_labelString = SDL_strdup(text);
+    assert(selfList->labelString && "Existing label string must not be NULL");
+    SDL_free(selfList->labelString);
+    selfList->labelString = SDL_strdup(text);
 }
 
 INLINE void UIList_setItemString(void* selfPtr, int itemIdx, const char* text)
@@ -94,25 +94,25 @@ INLINE void UIList_setItemString(void* selfPtr, int itemIdx, const char* text)
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     assert(text && "ttfText must not be NULL");
     UIList* selfList = (UIList*)selfPtr;
-    assert(itemIdx >= 0 && itemIdx < selfList->m_itemCount && "itemIdx out of bounds");
-    assert(selfList->m_itemStrings[itemIdx] && "Existing item string must not be NULL");
-    SDL_free(selfList->m_itemStrings[itemIdx]);
-    selfList->m_itemStrings[itemIdx] = SDL_strdup(text);
+    assert(itemIdx >= 0 && itemIdx < selfList->itemCount && "itemIdx out of bounds");
+    assert(selfList->itemStrings[itemIdx] && "Existing item string must not be NULL");
+    SDL_free(selfList->itemStrings[itemIdx]);
+    selfList->itemStrings[itemIdx] = SDL_strdup(text);
 }
 
 INLINE void UIList_setSelectedItem(void* selfPtr, int itemIdx)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    assert(itemIdx >= 0 && itemIdx < selfList->m_itemCount && "itemIdx out of bounds");
-    selfList->m_itemIdx = itemIdx;
+    assert(itemIdx >= 0 && itemIdx < selfList->itemCount && "itemIdx out of bounds");
+    selfList->itemIdx = itemIdx;
 }
 
 INLINE int UIList_getSelectedItem(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    return selfList->m_itemIdx;
+    return selfList->itemIdx;
 }
 
 INLINE void UIList_setOnItemChangedCallback(
@@ -121,97 +121,97 @@ INLINE void UIList_setOnItemChangedCallback(
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_userOnItemChanged = onItemChanged;
+    selfList->userOnItemChanged = onItemChanged;
 }
 
 INLINE UIButton* UIList_getPrevButton(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    return selfList->m_prevButton;
+    return selfList->prevButton;
 }
 
 INLINE UIButton* UIList_getNextButton(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    return selfList->m_nextButton;
+    return selfList->nextButton;
 }
 
 INLINE void UIList_setTextColor(void* selfPtr, UIListState state, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_itemColors[state] = color;
-    selfList->m_labelColors[state] = color;
+    selfList->itemColors[state] = color;
+    selfList->labelColors[state] = color;
 }
 
 INLINE void UIList_setLabelColor(void* selfPtr, UIListState state, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_labelColors[state] = color;
+    selfList->labelColors[state] = color;
 }
 
 INLINE void UIList_setItemColor(void* selfPtr, UIListState state, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_itemColors[state] = color;
+    selfList->itemColors[state] = color;
 }
 
 INLINE void UIList_setBackgroundColor(void* selfPtr, UIListState state, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_backColors[state] = color;
+    selfList->backColors[state] = color;
 }
 
 INLINE void UIList_setItemAnchor(void* selfPtr, Vec2 anchor)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_itemText.anchor = anchor;
+    selfList->itemText.anchor = anchor;
 }
 
 INLINE void UIList_setLabelAnchor(void* selfPtr, Vec2 anchor)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_labelText.anchor = anchor;
+    selfList->labelText.anchor = anchor;
 }
 
 INLINE void UIList_setSpriteGroup(void* selfPtr, SpriteGroup* spriteGroup)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_spriteGroup = spriteGroup;
+    selfList->spriteGroup = spriteGroup;
 }
 
 INLINE void UIList_setSpriteIndex(void* selfPtr, UIListState state, int spriteIndex)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_spriteIndices[state] = spriteIndex;
+    selfList->spriteIndices[state] = spriteIndex;
 }
 
 INLINE void UIList_setUseColorMod(void* selfPtr, bool useColorMod)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_useColorMod = useColorMod;
+    selfList->useColorMod = useColorMod;
 }
 
 INLINE void UIList_setLabelRect(void* selfPtr, UIRect rect)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_labelTransform.localRect = rect;
+    selfList->labelTransform.localRect = rect;
 }
 
 INLINE void UIList_setItemRect(void* selfPtr, UIRect rect)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_LIST) && "self must be of type UI_TYPE_LIST");
     UIList* selfList = (UIList*)selfPtr;
-    selfList->m_itemTransform.localRect = rect;
+    selfList->itemTransform.localRect = rect;
 }

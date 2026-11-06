@@ -31,23 +31,23 @@ void UISelectableVM_onFocus(void* selfPtr, UIInput* input);
 
 typedef struct UISelectable
 {
-    UIObject m_baseObject;
+    UIObject baseObject;
 
-    UIFocusState m_focusState;
-    int m_handledActionFlags;
+    UIFocusState focusState;
+    int handledActionFlags;
 
-    int m_audioOnFocused;
-    int m_audioOnPressed;
-    int m_audioOnClick;
+    int audioOnFocused;
+    int audioOnPressed;
+    int audioOnClick;
 
-    int m_userId;
-    void* m_userData;
+    int userId;
+    void* userData;
 
-    void (*m_onFocusChanged)(void* selfPtr, UIFocusState currState, UIFocusState prevState);
-    void (*m_userOnFocusChanged)(void* selfPtr, UIFocusState currState, UIFocusState prevState);
+    void (*onFocusChanged)(void* selfPtr, UIFocusState currState, UIFocusState prevState);
+    void (*userOnFocusChanged)(void* selfPtr, UIFocusState currState, UIFocusState prevState);
 
-    void (*m_onFocus)(void* selfPtr, UIInput* input);
-    void (*m_userOnFocus)(void* selfPtr, UIInput* input);
+    void (*onFocus)(void* selfPtr, UIInput* input);
+    void (*userOnFocus)(void* selfPtr, UIInput* input);
 
 } UISelectable;
 
@@ -62,14 +62,14 @@ INLINE void UISelectable_setHandledActions(void* selfPtr, int actionFlags)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_handledActionFlags = actionFlags;
+    selfSelectable->handledActionFlags = actionFlags;
 }
 
 INLINE bool UISelectable_shouldHandleAction(void* selfPtr, int actionFlags)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return ((selfSelectable->m_handledActionFlags & actionFlags) != 0);
+    return ((selfSelectable->handledActionFlags & actionFlags) != 0);
 }
 
 void UISelectable_setFocusState(void* selfPtr, UIFocusState state);
@@ -78,35 +78,35 @@ INLINE UIFocusState UISelectable_getFocusState(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_focusState;
+    return selfSelectable->focusState;
 }
 
 INLINE void UISelectable_setUserData(void* selfPtr, void* userData)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_userData = userData;
+    selfSelectable->userData = userData;
 }
 
 INLINE void* UISelectable_getUserData(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_userData;
+    return selfSelectable->userData;
 }
 
 INLINE void UISelectable_setUserId(void* selfPtr, int userId)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_userId = userId;
+    selfSelectable->userId = userId;
 }
 
 INLINE int UISelectable_getUserId(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_userId;
+    return selfSelectable->userId;
 }
 
 INLINE void UISelectable_setOnFocusChangedCallback(
@@ -115,17 +115,17 @@ INLINE void UISelectable_setOnFocusChangedCallback(
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_onFocusChanged = onFocusChanged;
+    selfSelectable->onFocusChanged = onFocusChanged;
 }
 
 INLINE void UISelectable_onFocus(void* selfPtr, UIInput* input)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_onFocus(selfSelectable, input);
-    if (selfSelectable->m_userOnFocus)
+    selfSelectable->onFocus(selfSelectable, input);
+    if (selfSelectable->userOnFocus)
     {
-        selfSelectable->m_userOnFocus(selfSelectable, input);
+        selfSelectable->userOnFocus(selfSelectable, input);
     }
 }
 
@@ -133,40 +133,40 @@ INLINE void UISelectable_setAudioOnFocused(void* selfPtr, int audioId)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_audioOnFocused = audioId;
+    selfSelectable->audioOnFocused = audioId;
 }
 
 INLINE void UISelectable_setAudioOnPressed(void* selfPtr, int audioId)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_audioOnPressed = audioId;
+    selfSelectable->audioOnPressed = audioId;
 }
 
 INLINE void UISelectable_setAudioOnClick(void* selfPtr, int audioId)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    selfSelectable->m_audioOnClick = audioId;
+    selfSelectable->audioOnClick = audioId;
 }
 
 INLINE int UISelectable_getAudioOnFocused(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_audioOnFocused;
+    return selfSelectable->audioOnFocused;
 }
 
 INLINE int UISelectable_getAudioOnPressed(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_audioOnPressed;
+    return selfSelectable->audioOnPressed;
 }
 
 INLINE int UISelectable_getAudioOnClick(void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_SELECTABLE) && "self must be of type UI_TYPE_SELECTABLE");
     UISelectable* selfSelectable = (UISelectable*)selfPtr;
-    return selfSelectable->m_audioOnClick;
+    return selfSelectable->audioOnClick;
 }

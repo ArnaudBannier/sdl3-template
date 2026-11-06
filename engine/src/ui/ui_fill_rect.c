@@ -25,20 +25,20 @@ void UIFillRect_init(void* selfPtr, UISystem* uiSystem, const char* objectName, 
     UIFillRect* selfFillRect = (UIFillRect*)selfPtr;
     UIObject_init(selfObject, uiSystem, objectName);
 
-    selfObject->m_type |= UI_TYPE_FILL_RECT;
-    selfFillRect->m_rect.filled = true;
-    selfFillRect->m_rect.color = color;
-    selfObject->m_gizmosColor = g_colors.gray5;
-    selfObject->m_gizmosIsFilled = false;
-    selfObject->m_gizmosOpacity = 1.f;
-    selfFillRect->m_blendMod.mode = SDL_BLENDMODE_BLEND;
-    selfFillRect->m_blendMod.alpha = 1.f;
+    selfObject->type |= UI_TYPE_FILL_RECT;
+    selfFillRect->rect.filled = true;
+    selfFillRect->rect.color = color;
+    selfObject->gizmosColor = g_colors.gray5;
+    selfObject->gizmosIsFilled = false;
+    selfObject->gizmosOpacity = 1.f;
+    selfFillRect->blendMod.mode = SDL_BLENDMODE_BLEND;
+    selfFillRect->blendMod.alpha = 1.f;
 
     // Virtual methods
-    selfObject->m_onRender = UIFillRectVM_onRender;
-    selfObject->m_onUpdate = UIFillRectVM_onUpdate;
-    selfObject->m_onDestroy = UIFillRectVM_onDestroy;
-    selfObject->m_onDrawGizmos = UIFillRectVM_onDrawGizmos;
+    selfObject->onRender = UIFillRectVM_onRender;
+    selfObject->onUpdate = UIFillRectVM_onUpdate;
+    selfObject->onDestroy = UIFillRectVM_onDestroy;
+    selfObject->onDrawGizmos = UIFillRectVM_onDrawGizmos;
 }
 
 void UIFillRectVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
@@ -50,13 +50,13 @@ void UIFillRectVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
     RenderAnchor anchor = { 0 };
     RenderDim dim = { 0 };
 
-    UITransform_getComponents(&(selfObj->m_transform), &transform, &dim, &anchor);
+    UITransform_getComponents(&(selfObj->transform), &transform, &dim, &anchor);
     GraphicsCmd cmd = { 0 };
-    cmd.sortingLayer = &(selfObj->m_layer);
-    cmd.rect = &(selfFillRect->m_rect);
+    cmd.sortingLayer = &(selfObj->layer);
+    cmd.rect = &(selfFillRect->rect);
     cmd.anchor = &anchor;
     cmd.transform = &transform;
     cmd.dimensions = &dim;
-    cmd.blendMod = &(selfFillRect->m_blendMod);
+    cmd.blendMod = &(selfFillRect->blendMod);
     GraphicsSystem_addCommand(graphicsSystem, &cmd);
 }

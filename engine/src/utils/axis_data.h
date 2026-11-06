@@ -11,9 +11,9 @@
 
 typedef struct AxisData
 {
-    Vec2 m_axis;
-    float m_deadZoneSquared;
-    int m_flags;
+    Vec2 axis;
+    float deadZoneSquared;
+    int flags;
 } AxisData;
 
 void AxisData_init(AxisData *self, float deadZone);

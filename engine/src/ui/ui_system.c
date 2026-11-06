@@ -20,46 +20,46 @@ UISystem* UISystem_create(
     assert(viewport && "viewport must not be NULL");
     const float aspectRatio = Viewport_getAspectRatio(viewport);
 
-    self->m_assetManager = assets;
-    self->m_audioSystem = audioSystem;
-    self->m_viewport = viewport;
-    self->m_virtualWidth = virtualWidth;
-    self->m_virtualHeight = virtualWidth / aspectRatio;
-    self->m_audioGroupIndex = 0;
+    self->assetManager = assets;
+    self->audioSystem = audioSystem;
+    self->viewport = viewport;
+    self->virtualWidth = virtualWidth;
+    self->virtualHeight = virtualWidth / aspectRatio;
+    self->audioGroupIndex = 0;
 
-    self->m_capacity = capacity;
-    self->m_uiObjectCount = 0;
-    self->m_uiObjects = (UIObject**)calloc(capacity, sizeof(UIObject*));
-    ASSERT_NEW(self->m_uiObjects);
+    self->capacity = capacity;
+    self->uiObjectCount = 0;
+    self->uiObjects = (UIObject**)calloc(capacity, sizeof(UIObject*));
+    ASSERT_NEW(self->uiObjects);
 
-    self->m_generations = (uint32_t*)calloc(capacity, sizeof(uint32_t));
-    ASSERT_NEW(self->m_generations);
+    self->generations = (uint32_t*)calloc(capacity, sizeof(uint32_t));
+    ASSERT_NEW(self->generations);
 
-    self->m_sparseToDense = (int*)calloc(capacity, sizeof(int));
-    ASSERT_NEW(self->m_sparseToDense);
+    self->sparseToDense = (int*)calloc(capacity, sizeof(int));
+    ASSERT_NEW(self->sparseToDense);
 
-    self->m_denseToSparse = (int*)calloc(capacity, sizeof(int));
-    ASSERT_NEW(self->m_denseToSparse);
+    self->denseToSparse = (int*)calloc(capacity, sizeof(int));
+    ASSERT_NEW(self->denseToSparse);
 
-    self->m_nextFree = (int*)calloc(capacity, sizeof(int));
-    ASSERT_NEW(self->m_nextFree);
+    self->nextFree = (int*)calloc(capacity, sizeof(int));
+    ASSERT_NEW(self->nextFree);
 
     for (int i = 0; i < capacity; i++)
     {
-        self->m_generations[i] = 1;
+        self->generations[i] = 1;
     }
 
     // Initialize the free list
     for (int i = 0; i < capacity - 1; i++)
     {
-        self->m_nextFree[i] = i + 1;
+        self->nextFree[i] = i + 1;
     }
-    self->m_nextFree[capacity - 1] = -1; // End of free list
-    self->m_firstFreeIndex = 0;
+    self->nextFree[capacity - 1] = -1; // End of free list
+    self->firstFreeIndex = 0;
 
     // Create the root canvas object
-    self->m_canvas = UIObject_create(self, "ui-system-canvas");
-    UIObject_setGizmosColor(self->m_canvas, g_colors.lime5);
+    self->canvas = UIObject_create(self, "ui-system-canvas");
+    UIObject_setGizmosColor(self->canvas, g_colors.lime5);
 
     return self;
 }
@@ -67,98 +67,98 @@ UISystem* UISystem_create(
 void UISystem_destroy(UISystem* self)
 {
     if (!self) return;
-    if (self->m_uiObjects)
+    if (self->uiObjects)
     {
-        for (int i = 0; i < self->m_uiObjectCount; i++)
+        for (int i = 0; i < self->uiObjectCount; i++)
         {
         #if defined(_MSC_VER)
         #  pragma warning(push)
         #  pragma warning(disable:6001)
         #endif
-            UIObject* object = self->m_uiObjects[i];
-            assert(object && "UIObject in m_uiObjects should not be NULL");
-            assert(object->m_onDestroy && "UIObject in m_uiObjects should have a valid m_onDestroy function");
+            UIObject* object = self->uiObjects[i];
+            assert(object && "UIObject in uiObjects should not be NULL");
+            assert(object->onDestroy && "UIObject in uiObjects should have a valid onDestroy function");
 
-            object->m_onDestroy(object);
+            object->onDestroy(object);
             free(object);
         #if defined(_MSC_VER)
         #  pragma warning(pop)
         #endif
         }
-        free(self->m_uiObjects);
+        free(self->uiObjects);
     }
 
-    free(self->m_generations);
-    free(self->m_sparseToDense);
-    free(self->m_denseToSparse);
-    free(self->m_nextFree);
+    free(self->generations);
+    free(self->sparseToDense);
+    free(self->denseToSparse);
+    free(self->nextFree);
     free(self);
 }
 
 void UISystem_update(UISystem* self)
 {
-    const float aspectRatio = Viewport_getAspectRatio(self->m_viewport);
-    self->m_virtualHeight = self->m_virtualWidth / aspectRatio;
+    const float aspectRatio = Viewport_getAspectRatio(self->viewport);
+    self->virtualHeight = self->virtualWidth / aspectRatio;
 
     UIRect rect = { 0 };
     rect.anchorMin = Vec2_set(0.f, 0.f);
     rect.anchorMax = Vec2_set(0.f, 0.f);
     rect.offsetMin = Vec2_set(0.f, 0.f);
-    rect.offsetMax.x = self->m_virtualWidth;
-    rect.offsetMax.y = self->m_virtualHeight;
-    UIObject_setRect(self->m_canvas, rect);
+    rect.offsetMax.x = self->virtualWidth;
+    rect.offsetMax.y = self->virtualHeight;
+    UIObject_setRect(self->canvas, rect);
 
     // Mark all objects as orphaned before updating.
-    for (int i = 0; i < self->m_uiObjectCount; i++)
+    for (int i = 0; i < self->uiObjectCount; i++)
     {
-        self->m_uiObjects[i]->m_orphan = true;
+        self->uiObjects[i]->orphan = true;
     }
     // Clear orphan status for objects that are still in the tree.
-    UIObject_clearOrphanStatus(self->m_canvas);
+    UIObject_clearOrphanStatus(self->canvas);
 
     // Update the UI tree
-    UIObject_update(self->m_canvas);
+    UIObject_update(self->canvas);
 }
 
 void UISystem_render(UISystem* self, GraphicsSystem* graphicsSystem)
 {
     // Render the UI tree
-    UIObject_render(self->m_canvas, graphicsSystem);
+    UIObject_render(self->canvas, graphicsSystem);
 }
 
 
 void UISystem_drawGizmos(UISystem* self, GizmosSystem* gizmosSystem)
 {
     // Draw gizmos for the UI tree
-    UIObject_drawGizmos(self->m_canvas, gizmosSystem);
+    UIObject_drawGizmos(self->canvas, gizmosSystem);
 }
 
 float UISystem_viewToUIX(const UISystem* self, float x)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    SDL_FRect viewportRect = Viewport_getRect(self->m_viewport);
+    SDL_FRect viewportRect = Viewport_getRect(self->viewport);
     const float ratioX = x / viewportRect.w;
-    return self->m_virtualWidth * ratioX;
+    return self->virtualWidth * ratioX;
 }
 
 float UISystem_viewToUIY(const UISystem* self, float y)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    SDL_FRect viewportRect = Viewport_getRect(self->m_viewport);
+    SDL_FRect viewportRect = Viewport_getRect(self->viewport);
     const float ratioY = y / viewportRect.h;
-    return self->m_virtualHeight * (1.f - ratioY);
+    return self->virtualHeight * (1.f - ratioY);
 }
 
 float UISystem_viewToUILength(const UISystem* self, float length)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    const float viewToUIScale = self->m_virtualWidth / Viewport_getWidth(self->m_viewport);
+    const float viewToUIScale = self->virtualWidth / Viewport_getWidth(self->viewport);
     return length * viewToUIScale;
 }
 
@@ -181,37 +181,37 @@ Vec2 UISystem_uiToViewV(const UISystem* self, Vec2 uiPosition)
 float UISystem_uiToViewX(const UISystem* self, float positionX)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    SDL_FRect viewportRect = Viewport_getRect(self->m_viewport);
-    const float ratioX = positionX / self->m_virtualWidth;
+    SDL_FRect viewportRect = Viewport_getRect(self->viewport);
+    const float ratioX = positionX / self->virtualWidth;
     return ratioX * viewportRect.w;
 }
 
 float UISystem_uiToViewY(const UISystem* self, float positionY)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    SDL_FRect viewportRect = Viewport_getRect(self->m_viewport);
-    const float ratioY = positionY / self->m_virtualHeight;
+    SDL_FRect viewportRect = Viewport_getRect(self->viewport);
+    const float ratioY = positionY / self->virtualHeight;
     return (1.f - ratioY) * viewportRect.h;
 }
 
 float UISystem_uiToViewLength(const UISystem* self, float length)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_viewport && "viewport must not be NULL");
+    assert(self->viewport && "viewport must not be NULL");
 
-    const float uiToViewScale = Viewport_getWidth(self->m_viewport) / self->m_virtualWidth;
+    const float uiToViewScale = Viewport_getWidth(self->viewport) / self->virtualWidth;
     return length * uiToViewScale;
 }
 
 bool UISystem_hasObjectId(UISystem* self, UIObjectId id)
 {
     assert(self && "self must not be NULL");
-    if (id.index >= (uint32_t)self->m_capacity) return false;
-    if (self->m_generations[id.index] != id.generation) return false;
+    if (id.index >= (uint32_t)self->capacity) return false;
+    if (self->generations[id.index] != id.generation) return false;
     return true;
 }
 
@@ -219,40 +219,40 @@ bool UISystem_hasObject(UISystem* self, UIObject* object)
 {
     assert(self && "self must not be NULL");
     if (!object) return false;
-    return UISystem_hasObjectId(self, object->m_id);
+    return UISystem_hasObjectId(self, object->id);
 }
 
 UIObject* UISystem_getObjectById(UISystem* self, UIObjectId id)
 {
     assert(self && "self must not be NULL");
     if (UIObjectId_isNull(id)) return NULL;
-    if (id.index >= (uint32_t)self->m_capacity) return NULL;
-    if (self->m_generations[id.index] != id.generation) return NULL;
+    if (id.index >= (uint32_t)self->capacity) return NULL;
+    if (self->generations[id.index] != id.generation) return NULL;
 
-    int denseIndex = self->m_sparseToDense[id.index];
-    return self->m_uiObjects[denseIndex];
+    int denseIndex = self->sparseToDense[id.index];
+    return self->uiObjects[denseIndex];
 }
 
 void UISystem_addObject(UISystem* self, UIObject* object)
 {
     assert(self && "self must not be NULL");
-    if (self->m_firstFreeIndex == -1)
+    if (self->firstFreeIndex == -1)
     {
         assert(false && "UISystem capacity exceeded");
         return;
     }
 
-    int sparseIndex = self->m_firstFreeIndex;
-    int denseIndex = self->m_uiObjectCount++;
-    self->m_firstFreeIndex = self->m_nextFree[sparseIndex];
+    int sparseIndex = self->firstFreeIndex;
+    int denseIndex = self->uiObjectCount++;
+    self->firstFreeIndex = self->nextFree[sparseIndex];
 
-    self->m_sparseToDense[sparseIndex] = denseIndex;
-    self->m_denseToSparse[denseIndex] = sparseIndex;
+    self->sparseToDense[sparseIndex] = denseIndex;
+    self->denseToSparse[denseIndex] = sparseIndex;
 
-    self->m_uiObjects[denseIndex] = object;
+    self->uiObjects[denseIndex] = object;
 
-    object->m_id.index = (uint32_t)sparseIndex;
-    object->m_id.generation = self->m_generations[sparseIndex];
+    object->id.index = (uint32_t)sparseIndex;
+    object->id.generation = self->generations[sparseIndex];
 
     SDL_LogInfo(
         SDL_LOG_CATEGORY_SYSTEM,
@@ -262,37 +262,37 @@ void UISystem_addObject(UISystem* self, UIObject* object)
     SDL_LogInfo(
         SDL_LOG_CATEGORY_SYSTEM,
         "UISystem size: %d / %d\n",
-        self->m_uiObjectCount, self->m_capacity
+        self->uiObjectCount, self->capacity
     );
 }
 
 void UISystem_removeObjectId(UISystem* self, UIObjectId id)
 {
     assert(self && "self must not be NULL");
-    if (id.index >= (uint32_t)self->m_capacity) return;
-    if (self->m_generations[id.index] != id.generation) return;
+    if (id.index >= (uint32_t)self->capacity) return;
+    if (self->generations[id.index] != id.generation) return;
 
-    int denseIndex = self->m_sparseToDense[id.index];
-    int lastDenseIndex = self->m_uiObjectCount - 1;
+    int denseIndex = self->sparseToDense[id.index];
+    int lastDenseIndex = self->uiObjectCount - 1;
 
     if (denseIndex != lastDenseIndex)
     {
         // Move the last body to the freed slot
-        self->m_uiObjects[denseIndex] = self->m_uiObjects[lastDenseIndex];
+        self->uiObjects[denseIndex] = self->uiObjects[lastDenseIndex];
         // Update mappings
-        int movedSparseIndex = self->m_denseToSparse[lastDenseIndex];
-        self->m_sparseToDense[movedSparseIndex] = denseIndex;
-        self->m_denseToSparse[denseIndex] = movedSparseIndex;
+        int movedSparseIndex = self->denseToSparse[lastDenseIndex];
+        self->sparseToDense[movedSparseIndex] = denseIndex;
+        self->denseToSparse[denseIndex] = movedSparseIndex;
     }
 
-    self->m_uiObjectCount--;
+    self->uiObjectCount--;
 
     // Add the freed slot back to the free list
-    self->m_nextFree[id.index] = self->m_firstFreeIndex;
-    self->m_firstFreeIndex = id.index;
+    self->nextFree[id.index] = self->firstFreeIndex;
+    self->firstFreeIndex = id.index;
 
     // Increment the generation to invalidate old IDs
-    self->m_generations[id.index]++;
+    self->generations[id.index]++;
 
     SDL_LogInfo(
         SDL_LOG_CATEGORY_SYSTEM,
@@ -301,17 +301,17 @@ void UISystem_removeObjectId(UISystem* self, UIObjectId id)
     SDL_LogInfo(
         SDL_LOG_CATEGORY_SYSTEM,
         "UISystem size: %d / %d\n",
-        self->m_uiObjectCount, self->m_capacity
+        self->uiObjectCount, self->capacity
     );
 }
 
 void UISystem_playSFX(UISystem* self, int audioId)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_audioSystem && "audio system must not be NULL");
+    assert(self->audioSystem && "audio system must not be NULL");
     if (audioId < 0) return;
 
-    AssetManager* assets = self->m_assetManager;
+    AssetManager* assets = self->assetManager;
     assert(assets && "asset manager must not be NULL");
     MIX_Audio* audio = AssetManager_getAudio(assets, audioId);
     assert(audio);
@@ -320,5 +320,5 @@ void UISystem_playSFX(UISystem* self, int audioId)
     AudioPlayOptions_init(&options);
     options.gain = AssetManager_getAudioGain(assets, audioId);
 
-    AudioSystem_play(self->m_audioSystem, self->m_audioGroupIndex, audio, &options);
+    AudioSystem_play(self->audioSystem, self->audioGroupIndex, audio, &options);
 }

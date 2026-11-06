@@ -17,21 +17,21 @@ typedef struct AudioData AudioData;
 /// Cela correspond aux ressources utilisées (textures, fontes, musiques, son...)
 typedef struct AssetManager
 {
-    SDL_Renderer* m_renderer;
-    SDL_Storage* m_storage;
-    const char* m_assetsPath;
-    MIX_Mixer* m_mixer;
+    SDL_Renderer* renderer;
+    SDL_Storage* storage;
+    const char* assetsPath;
+    MIX_Mixer* mixer;
 
-    int m_spriteCapacity;
-    SpriteSheetData* m_spriteData;
+    int spriteCapacity;
+    SpriteSheetData* spriteData;
 
-    int m_fontCapacity;
-    FontData* m_fontData;
+    int fontCapacity;
+    FontData* fontData;
 
-    int m_audioCapacity;
-    AudioData* m_audioData;
+    int audioCapacity;
+    AudioData* audioData;
 
-    int m_defaultViewportWidth;
+    int defaultViewportWidth;
 } AssetManager;
 
 /// @brief Crée le gestionnaire des assets du jeu.
@@ -99,12 +99,12 @@ float AssetManager_getAudioGain(AssetManager* self, int audioId);
 INLINE void AssetManager_setDefaultViewportWidth(AssetManager* self, int width)
 {
     assert(width > 0 && "The default viewport width must be positive");
-    self->m_defaultViewportWidth = width;
+    self->defaultViewportWidth = width;
 }
 
 INLINE int AssetManager_getDefaultViewportWidth(AssetManager* self)
 {
-    return self->m_defaultViewportWidth;
+    return self->defaultViewportWidth;
 }
 
 void AssetManager_updateFontSizes(AssetManager* self, float renderScale);
@@ -121,24 +121,24 @@ void AssetManager_readFileToBuffer(
 
 struct SpriteSheetData
 {
-    SpriteSheet* m_spriteSheet;
-    SDL_Texture* m_texture;
-    char* m_texFileName;
+    SpriteSheet* spriteSheet;
+    SDL_Texture* texture;
+    char* texFileName;
 };
 
 struct FontData
 {
-    TTF_Font* m_font;
-    char* m_fileName;
-    void* m_buffer;
-    SDL_IOStream* m_ioStream;
-    float m_size;
+    TTF_Font* font;
+    char* fileName;
+    void* buffer;
+    SDL_IOStream* ioStream;
+    float size;
 };
 
 struct AudioData
 {
-    MIX_Audio* m_audio;
-    char* m_fileName;
-    bool m_predecode;
-    float m_gain;
+    MIX_Audio* audio;
+    char* fileName;
+    bool predecode;
+    float gain;
 };

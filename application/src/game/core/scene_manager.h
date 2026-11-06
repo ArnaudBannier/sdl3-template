@@ -13,15 +13,15 @@ typedef struct GameContext GameContext;
 
 typedef struct Scene
 {
-    uint64_t m_magicNumber;
-    GameEngine* m_engine;
+    uint64_t magicNumber;
+    GameEngine* engine;
 
-    void (*m_onStart)(void* selfPtr);
-    void (*m_onQuit)(void* selfPtr);
-    void (*m_onUpdate)(void* selfPtr, float dt);
-    void (*m_onFixedUpdate)(void* selfPtr, float timeStep);
-    void (*m_onRender)(void* selfPtr);
-    void (*m_onDestroy)(void* selfPtr);
+    void (*onStart)(void* selfPtr);
+    void (*onQuit)(void* selfPtr);
+    void (*onUpdate)(void* selfPtr, float dt);
+    void (*onFixedUpdate)(void* selfPtr, float timeStep);
+    void (*onRender)(void* selfPtr);
+    void (*onDestroy)(void* selfPtr);
 } Scene;
 
 void Scene_init(void* selfPtr, GameEngine* engine);
@@ -31,10 +31,10 @@ GameContext* Scene_getContext(void* selfPtr);
 
 typedef struct SceneManager
 {
-    GameEngine* m_engine;
-    int m_currSceneId;
-    int m_nextSceneId;
-    Scene* m_scenes[MAX_SCENE_COUNT];
+    GameEngine* engine;
+    int currSceneId;
+    int nextSceneId;
+    Scene* scenes[MAX_SCENE_COUNT];
 } SceneManager;
 
 SceneManager* SceneManager_create(GameEngine* engine);

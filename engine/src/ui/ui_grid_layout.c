@@ -24,54 +24,54 @@ void UIGridLayout_init(void* selfPtr, UISystem* uiSystem, const char* objectName
     UIObject_init(selfPtr, uiSystem, objectName);
     UIObject* selfObj = (UIObject*)selfPtr;
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    selfObj->m_type |= UI_TYPE_GRID_LAYOUT;
-    selfObj->m_gizmosColor = g_colors.orange5;
-    selfObj->m_gizmosIsFilled = false;
-    selfObj->m_gizmosOpacity = 1.f;
-    selfGrid->m_rowCount = rowCount;
-    selfGrid->m_colCount = columnCount;
-    selfGrid->m_elementCount = 0;
+    selfObj->type |= UI_TYPE_GRID_LAYOUT;
+    selfObj->gizmosColor = g_colors.orange5;
+    selfObj->gizmosIsFilled = false;
+    selfObj->gizmosOpacity = 1.f;
+    selfGrid->rowCount = rowCount;
+    selfGrid->colCount = columnCount;
+    selfGrid->elementCount = 0;
 
-    selfGrid->m_padding = Vec2_set(0.f, 0.f);
-    selfGrid->m_anchor = Vec2_set(0.5f, 0.5f);
-    selfGrid->m_rowSizes = (float*)calloc(rowCount, sizeof(float));
-    selfGrid->m_colSizes = (float*)calloc(columnCount, sizeof(float));
-    selfGrid->m_rowSpacings = (float*)calloc(rowCount, sizeof(float));
-    selfGrid->m_colSpacings = (float*)calloc(columnCount, sizeof(float));
-    selfGrid->m_rowOffsets = (float*)calloc((size_t)rowCount + 1, sizeof(float));
-    selfGrid->m_colOffsets = (float*)calloc((size_t)columnCount + 1, sizeof(float));
-    ASSERT_NEW(selfGrid->m_rowSizes);
-    ASSERT_NEW(selfGrid->m_colSizes);
-    ASSERT_NEW(selfGrid->m_rowSpacings);
-    ASSERT_NEW(selfGrid->m_colSpacings);
-    ASSERT_NEW(selfGrid->m_rowOffsets);
-    ASSERT_NEW(selfGrid->m_colOffsets);
+    selfGrid->padding = Vec2_set(0.f, 0.f);
+    selfGrid->anchor = Vec2_set(0.5f, 0.5f);
+    selfGrid->rowSizes = (float*)calloc(rowCount, sizeof(float));
+    selfGrid->colSizes = (float*)calloc(columnCount, sizeof(float));
+    selfGrid->rowSpacings = (float*)calloc(rowCount, sizeof(float));
+    selfGrid->colSpacings = (float*)calloc(columnCount, sizeof(float));
+    selfGrid->rowOffsets = (float*)calloc((size_t)rowCount + 1, sizeof(float));
+    selfGrid->colOffsets = (float*)calloc((size_t)columnCount + 1, sizeof(float));
+    ASSERT_NEW(selfGrid->rowSizes);
+    ASSERT_NEW(selfGrid->colSizes);
+    ASSERT_NEW(selfGrid->rowSpacings);
+    ASSERT_NEW(selfGrid->colSpacings);
+    ASSERT_NEW(selfGrid->rowOffsets);
+    ASSERT_NEW(selfGrid->colOffsets);
 
     for (int i = 0; i < rowCount; i++)
     {
-        selfGrid->m_rowSizes[i] = -1.f;
+        selfGrid->rowSizes[i] = -1.f;
     }
     for (int i = 0; i < columnCount; i++)
     {
-        selfGrid->m_colSizes[i] = -1.f;
+        selfGrid->colSizes[i] = -1.f;
     }
 
     // Virtual methods
-    selfObj->m_onDestroy = UIGridLayoutVM_onDestroy;
-    selfObj->m_onRender = UIGridLayoutVM_onRender;
-    selfObj->m_onUpdate = UIGridLayoutVM_onUpdate;
-    selfObj->m_onDrawGizmos = UIGridLayoutVM_onDrawGizmos;
+    selfObj->onDestroy = UIGridLayoutVM_onDestroy;
+    selfObj->onRender = UIGridLayoutVM_onRender;
+    selfObj->onUpdate = UIGridLayoutVM_onUpdate;
+    selfObj->onDrawGizmos = UIGridLayoutVM_onDrawGizmos;
 }
 
 void UIGridLayoutVM_onDestroy(void* selfPtr)
 {
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    free(selfGrid->m_colSizes);
-    free(selfGrid->m_rowSizes);
-    free(selfGrid->m_colOffsets);
-    free(selfGrid->m_rowOffsets);
-    free(selfGrid->m_rowSpacings);
-    free(selfGrid->m_colSpacings);
+    free(selfGrid->colSizes);
+    free(selfGrid->rowSizes);
+    free(selfGrid->colOffsets);
+    free(selfGrid->rowOffsets);
+    free(selfGrid->rowSpacings);
+    free(selfGrid->colSpacings);
 
     UIObjectVM_onDestroy(selfPtr);
 }
@@ -79,9 +79,9 @@ void UIGridLayoutVM_onDestroy(void* selfPtr)
 static int UIGridLayout_findCell(void* selfPtr, void* object)
 {
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    for (int i = 0; i < selfGrid->m_elementCount; i++)
+    for (int i = 0; i < selfGrid->elementCount; i++)
     {
-        if (selfGrid->m_cells[i].uiObject != object) continue;
+        if (selfGrid->cells[i].uiObject != object) continue;
         return i;
     }
     return -1;
@@ -93,29 +93,29 @@ void UIGridLayout_addObject(void* selfPtr, void* object, int rowIdx, int columnI
     assert(UIObject_isOfType(object, UI_TYPE_OBJECT) && "object must be of type UI_TYPE_OBJECT");
 
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    if (rowIdx < 0 || rowIdx >= selfGrid->m_rowCount ||
-        columnIdx < 0 || columnIdx >= selfGrid->m_colCount ||
+    if (rowIdx < 0 || rowIdx >= selfGrid->rowCount ||
+        columnIdx < 0 || columnIdx >= selfGrid->colCount ||
         (object == NULL))
     {
         assert(false);
         return;
     }
 
-    rowSpan = Int_clamp(rowSpan, 1, selfGrid->m_rowCount - rowIdx);
-    columnSpan = Int_clamp(columnSpan, 1, selfGrid->m_colCount - columnIdx);
+    rowSpan = Int_clamp(rowSpan, 1, selfGrid->rowCount - rowIdx);
+    columnSpan = Int_clamp(columnSpan, 1, selfGrid->colCount - columnIdx);
 
     int cellIndex = UIGridLayout_findCell(selfPtr, object);
     if (cellIndex < 0)
     {
-        cellIndex = selfGrid->m_elementCount;
+        cellIndex = selfGrid->elementCount;
         if (cellIndex >= UI_GRID_MAX_ELEMENTS)
         {
             assert(false);
             return;
         }
-        selfGrid->m_elementCount++;
+        selfGrid->elementCount++;
     }
-    UIGridCell* cell = selfGrid->m_cells + cellIndex;
+    UIGridCell* cell = selfGrid->cells + cellIndex;
     cell->uiObject = object;
     cell->rowIdx = rowIdx;
     cell->colIdx = columnIdx;
@@ -131,21 +131,21 @@ static void UIGridLayout_updateOffsets(void* selfPtr)
 {
     UIObject* selfObj = (UIObject*)selfPtr;
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    const Vec2 dimensions = UITransform_getSize(&(selfObj->m_transform));
-    const size_t rowCount = selfGrid->m_rowCount;
-    const size_t colCount = selfGrid->m_colCount;
-    const float* rowSpacings = selfGrid->m_rowSpacings;
-    const float* colSpacings = selfGrid->m_colSpacings;
-    const float* rowSizes = selfGrid->m_rowSizes;
-    const float* colSizes = selfGrid->m_colSizes;
-    float* rowOffsets = selfGrid->m_rowOffsets;
-    float* colOffsets = selfGrid->m_colOffsets;
+    const Vec2 dimensions = UITransform_getSize(&(selfObj->transform));
+    const size_t rowCount = selfGrid->rowCount;
+    const size_t colCount = selfGrid->colCount;
+    const float* rowSpacings = selfGrid->rowSpacings;
+    const float* colSpacings = selfGrid->colSpacings;
+    const float* rowSizes = selfGrid->rowSizes;
+    const float* colSizes = selfGrid->colSizes;
+    float* rowOffsets = selfGrid->rowOffsets;
+    float* colOffsets = selfGrid->colOffsets;
     Vec2 spacing = Vec2_zero;
 
     for (int i = 0; i < colCount; i++) spacing.x += colSpacings[i];
     for (int i = 0; i < rowCount; i++) spacing.y += rowSpacings[i];
 
-    Vec2 fixedDim = Vec2_add(Vec2_scale(selfGrid->m_padding, 2.f), spacing);
+    Vec2 fixedDim = Vec2_add(Vec2_scale(selfGrid->padding, 2.f), spacing);
     Vec2 stretchSum = Vec2_zero;
     for (int i = 0; i < colCount; i++)
     {
@@ -203,31 +203,31 @@ void UIGridLayoutVM_onUpdate(void* selfPtr)
 
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
     UIObject* selfObj = (UIObject*)selfPtr;
-    const size_t rowCount = selfGrid->m_rowCount;
-    const size_t colCount = selfGrid->m_colCount;
-    const float* rowOffsets = selfGrid->m_rowOffsets;
-    const float* colOffsets = selfGrid->m_colOffsets;
-    const float* rowSpacings = selfGrid->m_rowSpacings;
-    const float* colSpacings = selfGrid->m_colSpacings;
-    const Vec2 padding = selfGrid->m_padding;
+    const size_t rowCount = selfGrid->rowCount;
+    const size_t colCount = selfGrid->colCount;
+    const float* rowOffsets = selfGrid->rowOffsets;
+    const float* colOffsets = selfGrid->colOffsets;
+    const float* rowSpacings = selfGrid->rowSpacings;
+    const float* colSpacings = selfGrid->colSpacings;
+    const Vec2 padding = selfGrid->padding;
     const Vec2 gridDim = Vec2_set(
-        colOffsets[selfGrid->m_colCount],
-        rowOffsets[selfGrid->m_rowCount]
+        colOffsets[selfGrid->colCount],
+        rowOffsets[selfGrid->rowCount]
     );
-    Vec2 availableDim = UITransform_getSize(&(selfObj->m_transform));
+    Vec2 availableDim = UITransform_getSize(&(selfObj->transform));
     availableDim.x -= 2.f * padding.x;
     availableDim.y -= 2.f * padding.y;
-    const Vec2 gridAnchor = selfGrid->m_anchor;
+    const Vec2 gridAnchor = selfGrid->anchor;
     const Vec2 gridOffset = Vec2_set(
         +padding.x + gridAnchor.x * (availableDim.x - gridDim.x),
         +padding.y + (gridAnchor.y - 1.f) * (availableDim.y - gridDim.y) + availableDim.y
     );
 
-    for (int i = 0; i < selfGrid->m_elementCount; i++)
+    for (int i = 0; i < selfGrid->elementCount; i++)
     {
-        UIGridCell cell = selfGrid->m_cells[i];
+        UIGridCell cell = selfGrid->cells[i];
         UIObject* object = (UIObject*)(cell.uiObject);
-        UIRect* rect = &(object->m_transform.localRect);
+        UIRect* rect = &(object->transform.localRect);
 
         rect->anchorMin = Vec2_zero;
         rect->anchorMax = Vec2_zero;
@@ -245,27 +245,27 @@ void UIGridLayoutVM_onDrawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
 {
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
     UIObject* selfObj = (UIObject*)selfPtr;
-    UISystem* uiSystem = selfObj->m_uiSystem;
-    const size_t rowCount = selfGrid->m_rowCount;
-    const size_t colCount = selfGrid->m_colCount;
-    const float* rowOffsets = selfGrid->m_rowOffsets;
-    const float* colOffsets = selfGrid->m_colOffsets;
-    const float* rowSpacings = selfGrid->m_rowSpacings;
-    const float* colSpacings = selfGrid->m_colSpacings;
-    const Vec2 padding = selfGrid->m_padding;
+    UISystem* uiSystem = selfObj->uiSystem;
+    const size_t rowCount = selfGrid->rowCount;
+    const size_t colCount = selfGrid->colCount;
+    const float* rowOffsets = selfGrid->rowOffsets;
+    const float* colOffsets = selfGrid->colOffsets;
+    const float* rowSpacings = selfGrid->rowSpacings;
+    const float* colSpacings = selfGrid->colSpacings;
+    const Vec2 padding = selfGrid->padding;
     const Vec2 gridDim = Vec2_set(
-        colOffsets[selfGrid->m_colCount],
-        rowOffsets[selfGrid->m_rowCount]
+        colOffsets[selfGrid->colCount],
+        rowOffsets[selfGrid->rowCount]
     );
-    Vec2 availableDim = UITransform_getSize(&(selfObj->m_transform));
+    Vec2 availableDim = UITransform_getSize(&(selfObj->transform));
     availableDim.x -= 2.f * padding.x;
     availableDim.y -= 2.f * padding.y;
-    const Vec2 gridAanchor = selfGrid->m_anchor;
+    const Vec2 gridAanchor = selfGrid->anchor;
     const Vec2 gridOffset = Vec2_set(
         +padding.x + gridAanchor.x * (availableDim.x - gridDim.x),
         +padding.y + (gridAanchor.y - 1.f) * (availableDim.y - gridDim.y) + availableDim.y
     );
-    const AABB* aabb = &(selfObj->m_transform.aabb);
+    const AABB* aabb = &(selfObj->transform.aabb);
 
     Transform transform = { 0 };
     GizmosRect gizmosRect = { 0 };
@@ -274,13 +274,13 @@ void UIGridLayoutVM_onDrawGizmos(void* selfPtr, GizmosSystem* gizmosSystem)
     GizmosCmd cmd = { 0 };
     cmd.transform = &transform;
     cmd.rect = &gizmosRect;
-    cmd.color = &selfObj->m_gizmosColor;
+    cmd.color = &selfObj->gizmosColor;
     cmd.blendMod = &blendMod;
 
     gizmosRect.anchor = Vec2_anchor_south_west;
-    gizmosRect.filled = selfObj->m_gizmosIsFilled;
+    gizmosRect.filled = selfObj->gizmosIsFilled;
     blendMod.mode = SDL_BLENDMODE_BLEND;
-    blendMod.alpha = selfObj->m_gizmosOpacity;
+    blendMod.alpha = selfObj->gizmosOpacity;
     transform.space = TRANSFORM_SPACE_UI;
 
     AABB childAABB = { 0 };
@@ -309,25 +309,25 @@ void UIGridLayout_setRowSize(void* selfPtr, int index, float size)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    assert(index >= 0 && index < selfGrid->m_rowCount && "index out of bounds");
-    selfGrid->m_rowSizes[index] = size;
+    assert(index >= 0 && index < selfGrid->rowCount && "index out of bounds");
+    selfGrid->rowSizes[index] = size;
 }
 
 void UIGridLayout_setColumnSize(void* selfPtr, int index, float size)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    assert(index >= 0 && index < selfGrid->m_colCount && "index out of bounds");
-    selfGrid->m_colSizes[index] = size;
+    assert(index >= 0 && index < selfGrid->colCount && "index out of bounds");
+    selfGrid->colSizes[index] = size;
 }
 
 void UIGridLayout_setRowSizes(void* selfPtr, float size)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    for (int i = 0; i < selfGrid->m_rowCount; i++)
+    for (int i = 0; i < selfGrid->rowCount; i++)
     {
-        selfGrid->m_rowSizes[i] = size;
+        selfGrid->rowSizes[i] = size;
     }
 }
 
@@ -335,9 +335,9 @@ void UIGridLayout_setColumnSizes(void* selfPtr, float size)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    for (int i = 0; i < selfGrid->m_colCount; i++)
+    for (int i = 0; i < selfGrid->colCount; i++)
     {
-        selfGrid->m_colSizes[i] = size;
+        selfGrid->colSizes[i] = size;
     }
 }
 
@@ -345,70 +345,70 @@ void UIGridLayout_setRowSpacing(void* selfPtr, int index, float spacing)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    assert(index >= 0 && index < selfGrid->m_rowCount - 1 && "index out of bounds");
-    selfGrid->m_rowSpacings[index] = spacing;
+    assert(index >= 0 && index < selfGrid->rowCount - 1 && "index out of bounds");
+    selfGrid->rowSpacings[index] = spacing;
 }
 
 void UIGridLayout_setColumnSpacing(void* selfPtr, int index, float spacing)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    assert(index >= 0 && index < selfGrid->m_colCount - 1 && "index out of bounds");
-    selfGrid->m_colSpacings[index] = spacing;
+    assert(index >= 0 && index < selfGrid->colCount - 1 && "index out of bounds");
+    selfGrid->colSpacings[index] = spacing;
 }
 
 void UIGridLayout_setRowSpacings(void* selfPtr, float spacing)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    for (int i = 0; i < selfGrid->m_rowCount - 1; i++)
+    for (int i = 0; i < selfGrid->rowCount - 1; i++)
     {
-        selfGrid->m_rowSpacings[i] = spacing;
+        selfGrid->rowSpacings[i] = spacing;
     }
-    selfGrid->m_rowSpacings[selfGrid->m_rowCount - 1] = 0.f;
+    selfGrid->rowSpacings[selfGrid->rowCount - 1] = 0.f;
 }
 
 void UIGridLayout_setColumnSpacings(void* selfPtr, float spacing)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    for (int i = 0; i < selfGrid->m_colCount - 1; i++)
+    for (int i = 0; i < selfGrid->colCount - 1; i++)
     {
-        selfGrid->m_colSpacings[i] = spacing;
+        selfGrid->colSpacings[i] = spacing;
     }
-    selfGrid->m_colSpacings[selfGrid->m_colCount - 1] = 0.f;
+    selfGrid->colSpacings[selfGrid->colCount - 1] = 0.f;
 }
 
 void UIGridLayout_setPadding(void* selfPtr, Vec2 padding)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    selfGrid->m_padding = padding;
+    selfGrid->padding = padding;
 }
 
 void UIGridLayout_setAnchor(void* selfPtr, Vec2 anchor)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_GRID_LAYOUT) && "self must be of type UI_TYPE_GRID_LAYOUT");
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    selfGrid->m_anchor = anchor;
+    selfGrid->anchor = anchor;
 }
 
 Vec2 UIGridLayout_getMinimumSize(void* selfPtr)
 {
     UIObject* selfObj = (UIObject*)selfPtr;
     UIGridLayout* selfGrid = (UIGridLayout*)selfPtr;
-    const size_t rowCount = selfGrid->m_rowCount;
-    const size_t colCount = selfGrid->m_colCount;
-    const float* rowSpacings = selfGrid->m_rowSpacings;
-    const float* colSpacings = selfGrid->m_colSpacings;
-    const float* rowSizes = selfGrid->m_rowSizes;
-    const float* colSizes = selfGrid->m_colSizes;
+    const size_t rowCount = selfGrid->rowCount;
+    const size_t colCount = selfGrid->colCount;
+    const float* rowSpacings = selfGrid->rowSpacings;
+    const float* colSpacings = selfGrid->colSpacings;
+    const float* rowSizes = selfGrid->rowSizes;
+    const float* colSizes = selfGrid->colSizes;
     Vec2 spacing = Vec2_zero;
 
     for (int i = 0; i < colCount; i++) spacing.x += colSpacings[i];
     for (int i = 0; i < rowCount; i++) spacing.y += rowSpacings[i];
 
-    Vec2 fixedDim = Vec2_add(Vec2_scale(selfGrid->m_padding, 2.f), spacing);
+    Vec2 fixedDim = Vec2_add(Vec2_scale(selfGrid->padding, 2.f), spacing);
     Vec2 stretchSum = Vec2_zero;
     for (int i = 0; i < colCount; i++)
     {

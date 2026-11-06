@@ -13,10 +13,10 @@ typedef struct GameContext GameContext;
 
 typedef struct MainMenu
 {
-    GameContext* m_context;
-    UIManager* m_uiManager;
-    UIFocusManager* m_focusManager;
-    UIObject* m_mainPanel;
+    GameContext* context;
+    UIManager* uiManager;
+    UIFocusManager* focusManager;
+    UIObject* mainPanel;
 } MainMenu;
 
 MainMenu* MainMenu_create(GameContext* context, UIManager* manager);

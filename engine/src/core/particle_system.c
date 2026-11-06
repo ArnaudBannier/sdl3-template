@@ -139,11 +139,11 @@ ParticleSystem* ParticleSystem_create(SpriteAnimManager* animManager, int capaci
     ParticleSystem* self = (ParticleSystem*)calloc(1, sizeof(ParticleSystem));
     ASSERT_NEW(self);
 
-    self->m_animManager = animManager;
-    self->m_particleCount = 0;
-    self->m_poolCapacity = capacity;
-    self->m_particlePool = (Particle*)calloc(capacity, sizeof(Particle));
-    ASSERT_NEW(self->m_particlePool);
+    self->animManager = animManager;
+    self->particleCount = 0;
+    self->poolCapacity = capacity;
+    self->particlePool = (Particle*)calloc(capacity, sizeof(Particle));
+    ASSERT_NEW(self->particlePool);
 
     return self;
 }
@@ -151,31 +151,31 @@ ParticleSystem* ParticleSystem_create(SpriteAnimManager* animManager, int capaci
 void ParticleSystem_destroy(ParticleSystem* self)
 {
     if (!self) return;
-    free(self->m_particlePool);
+    free(self->particlePool);
     free(self);
 }
 
 void ParticleSystem_emitParticle(ParticleSystem* self, const Particle* particle)
 {
     assert(self && "self must not be NULL");
-    if (self->m_particleCount >= self->m_poolCapacity) return;
+    if (self->particleCount >= self->poolCapacity) return;
 
-    self->m_particlePool[self->m_particleCount] = *particle;
-    self->m_particleCount++;
+    self->particlePool[self->particleCount] = *particle;
+    self->particleCount++;
 }
 
 void ParticleSystem_update(ParticleSystem* self, float dt)
 {
-    SpriteAnimManager* animManager = self->m_animManager;
-    for (int i = 0; i < self->m_particleCount;)
+    SpriteAnimManager* animManager = self->animManager;
+    for (int i = 0; i < self->particleCount;)
     {
-        Particle* particle = &(self->m_particlePool[i]);
+        Particle* particle = &(self->particlePool[i]);
         const bool isAlive = Particle_update(particle, animManager, dt);
         if (isAlive == false)
         {
             // Swap with the last alive particle
-            self->m_particlePool[i] = self->m_particlePool[self->m_particleCount - 1];
-            self->m_particleCount--;
+            self->particlePool[i] = self->particlePool[self->particleCount - 1];
+            self->particleCount--;
         }
         else i++;
     }
@@ -183,10 +183,10 @@ void ParticleSystem_update(ParticleSystem* self, float dt)
 
 void ParticleSystem_render(ParticleSystem* self, GraphicsSystem* graphicsSystem)
 {
-    SpriteAnimManager* animManager = self->m_animManager;
-    for (int i = 0; i < self->m_particleCount; i++)
+    SpriteAnimManager* animManager = self->animManager;
+    for (int i = 0; i < self->particleCount; i++)
     {
-        Particle* particle = &(self->m_particlePool[i]);
+        Particle* particle = &(self->particlePool[i]);
         Particle_render(particle, graphicsSystem, animManager);
     }
 }

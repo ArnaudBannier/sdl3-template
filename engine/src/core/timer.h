@@ -13,44 +13,44 @@ typedef struct Timer
 {
     /// @brief Temps de départ.
     /// Exprimé en millisecondes.
-    Uint64 m_startTime;
+    Uint64 startTime;
 
     /// @brief Temps du dernier appel à Timer_update().
     /// Exprimé en millisecondes.
-    Uint64 m_currentTime;
+    Uint64 currentTime;
 
     /// @brief Temps de l'avant dernier appel à Timer_update().
     /// Exprimé en millisecondes.
-    Uint64 m_previousTime;
+    Uint64 previousTime;
 
     /// @brief Ecart entre les deux derniers appels à Timer_update().
     /// Ce membre est affecté par le facteur d'échelle.
     /// Exprimé en millisecondes.
-    Uint64 m_delta;
+    Uint64 delta;
 
     /// @brief Ecart entre les deux derniers appels à Timer_update().
     /// Ce membre n'est pas affecté par le facteur d'échelle.
     /// Exprimé en millisecondes.
-    Uint64 m_unscaledDelta;
+    Uint64 unscaledDelta;
 
     /// @brief Facteur d'échelle appliqué au temps.
-    float m_scale;
+    float scale;
 
     /// @brief Ecart de temps maximum entre deux appels à Timer_update().
     /// Exprimé en millisecondes.
-    Uint64 m_maxDelta;
+    Uint64 maxDelta;
 
     /// @brief Ecart entre le lancement du timer Timer_start()
     /// et le dernier appel à Timer_update().
     /// Ce membre est affecté par le facteur d'échelle.
     /// Exprimé en millisecondes.
-    Uint64 m_elapsed;
+    Uint64 elapsed;
 
     /// @brief Ecart entre le lancement du timer Timer_start()
     /// et le dernier appel à Timer_update().
     /// Ce membre n'est pas affecté par le facteur d'échelle.
     /// Exprimé en millisecondes.
-    Uint64 m_unscaledElapsed;
+    Uint64 unscaledElapsed;
 } Timer;
 
 /// @brief Crée un nouveau timer.
@@ -78,7 +78,7 @@ INLINE void Timer_setTimeScale(Timer* self, float scale)
 {
     assert(self && "The Timer must be created");
     assert(scale >= 0.0f);
-    self->m_scale = scale;
+    self->scale = scale;
 }
 
 /// @brief Renvoie le facteur d'échelle de temps d'un timer.
@@ -87,7 +87,7 @@ INLINE void Timer_setTimeScale(Timer* self, float scale)
 INLINE float Timer_getTimeScale(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return self->m_scale;
+    return self->scale;
 }
 
 /// @brief Renvoie l'écart de temps (en secondes) entre les deux derniers
@@ -97,7 +97,7 @@ INLINE float Timer_getTimeScale(Timer* self)
 INLINE float Timer_getDelta(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return (float)(self->m_delta) / 1000.f;
+    return (float)(self->delta) / 1000.f;
 }
 
 /// @brief Renvoie l'écart de temps (en millisecondes) entre les deux derniers
@@ -107,7 +107,7 @@ INLINE float Timer_getDelta(Timer* self)
 INLINE Uint64 Timer_getDeltaMS(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return self->m_delta;
+    return self->delta;
 }
 
 /// @brief Renvoie l'écart de temps (en secondes) entre les deux derniers
@@ -119,7 +119,7 @@ INLINE Uint64 Timer_getDeltaMS(Timer* self)
 INLINE float Timer_getUnscaledDelta(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return (float)(self->m_unscaledDelta) / 1000.f;
+    return (float)(self->unscaledDelta) / 1000.f;
 }
 
 /// @brief Renvoie l'écart de temps (en millisecondes) entre les deux derniers
@@ -131,7 +131,7 @@ INLINE float Timer_getUnscaledDelta(Timer* self)
 INLINE Uint64 Timer_getUnscaledDeltaMS(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return self->m_unscaledDelta;
+    return self->unscaledDelta;
 }
 
 /// @brief Renvoie l'écart de temps (en secondes) entre le lancement du timer
@@ -141,7 +141,7 @@ INLINE Uint64 Timer_getUnscaledDeltaMS(Timer* self)
 INLINE float Timer_getElapsed(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return (float)(self->m_elapsed) / 1000.f;
+    return (float)(self->elapsed) / 1000.f;
 }
 
 /// @brief Renvoie l'écart de temps (en millisecondes) entre le lancement du timer
@@ -151,7 +151,7 @@ INLINE float Timer_getElapsed(Timer* self)
 INLINE Uint64 Timer_getElapsedMS(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return self->m_elapsed;
+    return self->elapsed;
 }
 
 /// @brief Renvoie l'écart de temps (en secondes) entre le lancement du timer
@@ -163,7 +163,7 @@ INLINE Uint64 Timer_getElapsedMS(Timer* self)
 INLINE float Timer_getUnscaledElapsed(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return (float)(self->m_unscaledElapsed) / 1000.f;
+    return (float)(self->unscaledElapsed) / 1000.f;
 }
 
 /// @brief Renvoie l'écart de temps (en millisecondes) entre le lancement du timer
@@ -175,5 +175,5 @@ INLINE float Timer_getUnscaledElapsed(Timer* self)
 INLINE Uint64 Timer_getUnscaledElapsedMS(Timer* self)
 {
     assert(self && "The Timer must be created");
-    return self->m_unscaledElapsed;
+    return self->unscaledElapsed;
 }

@@ -22,11 +22,11 @@ typedef enum TitleUIPageId
 
 typedef struct UIManager
 {
-    GameContext* m_context;
-    bool m_activePages[TITLE_UI_PAGE_COUNT];
+    GameContext* context;
+    bool activePages[TITLE_UI_PAGE_COUNT];
 
-    MainMenu* m_mainMenu;
-    SettingsPage* m_settingsPage;
+    MainMenu* mainMenu;
+    SettingsPage* settingsPage;
 } UIManager;
 
 UIManager* UIManager_create(GameContext* context);
@@ -41,7 +41,7 @@ INLINE void UIManager_openPage(UIManager* self, TitleUIPageId pageId)
         assert(false && "Invalid page");
         return;
     }
-    self->m_activePages[pageId] = true;
+    self->activePages[pageId] = true;
 }
 
 INLINE void UIManager_closePage(UIManager* self, TitleUIPageId pageId)
@@ -52,7 +52,7 @@ INLINE void UIManager_closePage(UIManager* self, TitleUIPageId pageId)
         assert(false && "Invalid page");
         return;
     }
-    self->m_activePages[pageId] = false;
+    self->activePages[pageId] = false;
 }
 
 INLINE void UIManager_closePages(UIManager* self)
@@ -60,6 +60,6 @@ INLINE void UIManager_closePages(UIManager* self)
     assert(self && "self must not be NULL");
     for (int i = 0; i < TITLE_UI_PAGE_COUNT; ++i)
     {
-        self->m_activePages[i] = false;
+        self->activePages[i] = false;
     }
 }

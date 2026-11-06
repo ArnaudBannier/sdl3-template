@@ -25,21 +25,21 @@ void UIImage_init(void* selfPtr, UISystem* uiSystem, const char* objectName, Spr
     UIImage* selfImage = (UIImage*)selfPtr;
     UIObject_init(selfObject, uiSystem, objectName);
 
-    selfObject->m_type |= UI_TYPE_IMAGE;
-    selfObject->m_gizmosColor = g_colors.teal5;
-    selfObject->m_gizmosIsFilled = false;
-    selfObject->m_gizmosOpacity = 1.f;
-    selfImage->m_spriteGroup = spriteGroup;
-    selfImage->m_spriteIndex = spriteIndex;
+    selfObject->type |= UI_TYPE_IMAGE;
+    selfObject->gizmosColor = g_colors.teal5;
+    selfObject->gizmosIsFilled = false;
+    selfObject->gizmosOpacity = 1.f;
+    selfImage->spriteGroup = spriteGroup;
+    selfImage->spriteIndex = spriteIndex;
 
-    RenderColorMod_init(&(selfImage->m_colorMod));
-    RenderBlendMod_init(&(selfImage->m_blendMod));
+    RenderColorMod_init(&(selfImage->colorMod));
+    RenderBlendMod_init(&(selfImage->blendMod));
 
     // Virtual methods
-    selfObject->m_onRender = UIImageVM_onRender;
-    selfObject->m_onUpdate = UIImageVM_onUpdate;
-    selfObject->m_onDestroy = UIImageVM_onDestroy;
-    selfObject->m_onDrawGizmos = UIImageVM_onDrawGizmos;
+    selfObject->onRender = UIImageVM_onRender;
+    selfObject->onUpdate = UIImageVM_onUpdate;
+    selfObject->onDestroy = UIImageVM_onDestroy;
+    selfObject->onDrawGizmos = UIImageVM_onDrawGizmos;
 }
 
 void UIImageVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
@@ -52,16 +52,16 @@ void UIImageVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem)
     RenderDim dim = { 0 };
     RenderTexture texture = { 0 };
 
-    UITransform_getComponents(&(selfObj->m_transform), &transform, &dim, &anchor);
-    RenderTexture_setFromGroup(&texture, selfImage->m_spriteGroup, selfImage->m_spriteIndex);
+    UITransform_getComponents(&(selfObj->transform), &transform, &dim, &anchor);
+    RenderTexture_setFromGroup(&texture, selfImage->spriteGroup, selfImage->spriteIndex);
 
     GraphicsCmd cmd = { 0 };
-    cmd.sortingLayer = &(selfObj->m_layer);
+    cmd.sortingLayer = &(selfObj->layer);
     cmd.anchor = &anchor;
     cmd.transform = &transform;
     cmd.dimensions = &dim;
     cmd.texture = &texture;
-    cmd.blendMod = &(selfImage->m_blendMod);
-    cmd.colorMod = &(selfImage->m_colorMod);
+    cmd.blendMod = &(selfImage->blendMod);
+    cmd.colorMod = &(selfImage->colorMod);
     GraphicsSystem_addCommand(graphicsSystem, &cmd);
 }

@@ -17,9 +17,9 @@ void UIFillRectVM_onRender(void* selfPtr, GraphicsSystem* graphicsSystem);
 
 typedef struct UIFillRect
 {
-    UIObject m_baseObject;
-    RenderRect m_rect;
-    RenderBlendMod m_blendMod;
+    UIObject baseObject;
+    RenderRect rect;
+    RenderBlendMod blendMod;
 } UIFillRect;
 
 UIFillRect* UIFillRect_create(UISystem* uiSystem, const char* objectName, SDL_Color color);
@@ -33,12 +33,12 @@ INLINE void UIFillRect_setColor(void* selfPtr, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_FILL_RECT) && "self must be of type UI_TYPE_FILL_RECT");
     UIFillRect* selfFillRect = (UIFillRect*)selfPtr;
-    selfFillRect->m_rect.color = color;
+    selfFillRect->rect.color = color;
 }
 
 INLINE void UIFillRect_setOpacity(void* selfPtr, float opacity)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_FILL_RECT) && "self must be of type UI_TYPE_FILL_RECT");
     UIFillRect* selfFillRect = (UIFillRect*)selfPtr;
-    selfFillRect->m_blendMod.alpha = opacity;
+    selfFillRect->blendMod.alpha = opacity;
 }

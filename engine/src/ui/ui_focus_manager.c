@@ -11,10 +11,10 @@ UIFocusManager* UIFocusManager_create(UISystem* uiSystem)
     UIFocusManager* self = (UIFocusManager*)calloc(1, sizeof(UIFocusManager));
     ASSERT_NEW(self);
 
-    self->m_uiSystem = uiSystem;
-    self->m_enabled = true;
-    self->m_elementCount = 0;
-    self->m_focused = NULL;
+    self->uiSystem = uiSystem;
+    self->enabled = true;
+    self->elementCount = 0;
+    self->focused = NULL;
 
     return self;
 }
@@ -30,7 +30,7 @@ void UIFocusManager_addSelectable(UIFocusManager* self, void* selectable)
     assert(self && "self must not be NULL");
     assert(selectable && "selectable must not be NULL");
 
-    if (self->m_elementCount >= MAX_UI_SELECTABLES_IN_GROUP)
+    if (self->elementCount >= MAX_UI_SELECTABLES_IN_GROUP)
     {
         assert(false && "Maximum number of selectables reached");
         return;
@@ -38,18 +38,18 @@ void UIFocusManager_addSelectable(UIFocusManager* self, void* selectable)
 
     const UIObjectId id = UIObject_getObjectId(selectable);
 
-    for (int i = 0; i < self->m_elementCount; i++)
+    for (int i = 0; i < self->elementCount; i++)
     {
-        UIFocusManagerElement* element = &self->m_elements[i];
-        if (UIObjectId_equal(element->m_id, id))
+        UIFocusManagerElement* element = &self->elements[i];
+        if (UIObjectId_equal(element->id, id))
         {
             printf("Selectable is already in the focus manager\n");
             return;
         }
     }
-    self->m_elements[self->m_elementCount].m_id = id;
-    self->m_elements[self->m_elementCount].m_selectable = selectable;
-    self->m_elementCount++;
+    self->elements[self->elementCount].id = id;
+    self->elements[self->elementCount].selectable = selectable;
+    self->elementCount++;
 }
 
 void UIFocusManager_removeSelectable(UIFocusManager* self, void* selectable)
@@ -57,20 +57,20 @@ void UIFocusManager_removeSelectable(UIFocusManager* self, void* selectable)
     assert(self && "self must not be NULL");
     assert(selectable && "selectable must not be NULL");
 
-    if (self->m_focused == selectable)
+    if (self->focused == selectable)
     {
-        self->m_focused = NULL;
+        self->focused = NULL;
     }
 
     const UIObjectId id = UIObject_getObjectId(selectable);
 
-    for (int i = 0; i < self->m_elementCount; i++)
+    for (int i = 0; i < self->elementCount; i++)
     {
-        UIFocusManagerElement* element = &self->m_elements[i];
-        if (UIObjectId_equal(element->m_id, id))
+        UIFocusManagerElement* element = &self->elements[i];
+        if (UIObjectId_equal(element->id, id))
         {
-            self->m_elements[i] = self->m_elements[self->m_elementCount - 1];
-            self->m_elementCount--;
+            self->elements[i] = self->elements[self->elementCount - 1];
+            self->elementCount--;
             break;
         }
     }
@@ -79,39 +79,39 @@ void UIFocusManager_removeSelectable(UIFocusManager* self, void* selectable)
 void UIFocusManager_clear(UIFocusManager* self)
 {
     assert(self && "self must not be NULL");
-    self->m_elementCount = 0;
-    self->m_focused = NULL;
+    self->elementCount = 0;
+    self->focused = NULL;
 }
 
 static void UIFocusManager_setFocusOn(UIFocusManager* self, UISelectable* selectable)
 {
-    if (self->m_focused == selectable) return;
-    if (self->m_focused)
+    if (self->focused == selectable) return;
+    if (self->focused)
     {
-        UISelectable_setFocusState(self->m_focused, UI_FOCUS_STATE_NORMAL);
+        UISelectable_setFocusState(self->focused, UI_FOCUS_STATE_NORMAL);
 
         if (selectable)
         {
             int audioId = UISelectable_getAudioOnFocused(selectable);
-            UISystem_playSFX(self->m_uiSystem, audioId);
+            UISystem_playSFX(self->uiSystem, audioId);
         }
     }
-    self->m_focused = selectable;
-    UISelectable_setFocusState(self->m_focused, UI_FOCUS_STATE_FOCUSED);
+    self->focused = selectable;
+    UISelectable_setFocusState(self->focused, UI_FOCUS_STATE_FOCUSED);
 }
 
 void UIFocusManager_setFocused(UIFocusManager* self, void* selectable)
 {
     assert(self && "self must not be NULL");
 
-    if (self->m_focused && self->m_focused == selectable) return;
+    if (self->focused && self->focused == selectable) return;
 
     const UIObjectId id = UIObject_getObjectId(selectable);
-    for (int i = 0; i < self->m_elementCount; i++)
+    for (int i = 0; i < self->elementCount; i++)
     {
-        UIFocusManagerElement* element = &self->m_elements[i];
-        if (!UIObjectId_equal(element->m_id, id)) continue;
-        UIFocusManager_setFocusOn(self, element->m_selectable);
+        UIFocusManagerElement* element = &self->elements[i];
+        if (!UIObjectId_equal(element->id, id)) continue;
+        UIFocusManager_setFocusOn(self, element->selectable);
         return;
     }
 
@@ -129,17 +129,17 @@ static void UIFocusManager_searchNext(UIFocusManager* self, UIInput* input)
     Vec2 directionPerp = Vec2_perp(direction);
 
     AABB currAABB = { 0 };
-    UIObject_getAABB(self->m_focused, &currAABB);
+    UIObject_getAABB(self->focused, &currAABB);
 
     UISelectable* bestNext = NULL;
     AABB bestNextAABB = { 0 };
     float bestDistance = INFINITY;
 
-    for (int i = 0; i < self->m_elementCount; i++)
+    for (int i = 0; i < self->elementCount; i++)
     {
-        UIFocusManagerElement* element = &self->m_elements[i];
-        UISelectable* next = element->m_selectable;
-        if (next == self->m_focused) continue;
+        UIFocusManagerElement* element = &self->elements[i];
+        UISelectable* next = element->selectable;
+        if (next == self->focused) continue;
         if (UISelectable_getFocusState(next) == UI_FOCUS_STATE_DISABLED) continue;
 
         AABB nextAABB = { 0 };
@@ -170,31 +170,31 @@ static void UIFocusManager_searchNext(UIFocusManager* self, UIInput* input)
 
 static void UIFocusManager_updateMouse(UIFocusManager* self, UIInput* input)
 {
-    UISystem* uiSystem = self->m_uiSystem;
+    UISystem* uiSystem = self->uiSystem;
     Vec2 mouseUIPos = input->mouseUIPos;
     AABB aabb = { 0 };
 
     if (input->mouseMoved)
     {
-        for (int i = 0; i < self->m_elementCount; i++)
+        for (int i = 0; i < self->elementCount; i++)
         {
-            UIFocusManagerElement* element = &self->m_elements[i];
-            UISelectable* selectable = element->m_selectable;
+            UIFocusManagerElement* element = &self->elements[i];
+            UISelectable* selectable = element->selectable;
             UIFocusState state = UISelectable_getFocusState(selectable);
             if (state == UI_FOCUS_STATE_DISABLED) continue;
 
             UIObject_getAABB(selectable, &aabb);
             if (AABB_containsPoint(&aabb, mouseUIPos) == false) continue;
 
-            if (self->m_focused == selectable) break;
+            if (self->focused == selectable) break;
 
             UIFocusManager_setFocusOn(self, selectable);
             break;
         }
     }
-    if (self->m_focused && input->lastInputType == UI_INPUT_TYPE_MOUSE)
+    if (self->focused && input->lastInputType == UI_INPUT_TYPE_MOUSE)
     {
-        UISelectable_onFocus(self->m_focused, input);
+        UISelectable_onFocus(self->focused, input);
     }
 }
 
@@ -206,11 +206,11 @@ static void UIFocusManager_updateGamepad(UIFocusManager* self, UIInput* input)
     if (input->leftPressed) navFlags |= UI_ACTION_LEFT;
     if (input->rightPressed) navFlags |= UI_ACTION_RIGHT;
 
-    if (self->m_focused && input->lastInputType != UI_INPUT_TYPE_MOUSE)
+    if (self->focused && input->lastInputType != UI_INPUT_TYPE_MOUSE)
     {
-        UISelectable_onFocus(self->m_focused, input);
+        UISelectable_onFocus(self->focused, input);
 
-        if ((UISelectable_shouldHandleAction(self->m_focused, navFlags) == false) && (navFlags != 0))
+        if ((UISelectable_shouldHandleAction(self->focused, navFlags) == false) && (navFlags != 0))
         {
             UIFocusManager_searchNext(self, input);
         }
@@ -219,18 +219,18 @@ static void UIFocusManager_updateGamepad(UIFocusManager* self, UIInput* input)
 
 static void UIFocusManager_validate(UIFocusManager* self)
 {
-    UISystem* uiSystem = self->m_uiSystem;
-    for (int i = 0; i < self->m_elementCount;)
+    UISystem* uiSystem = self->uiSystem;
+    for (int i = 0; i < self->elementCount;)
     {
-        UIFocusManagerElement* element = &self->m_elements[i];
-        if (UISystem_hasObjectId(uiSystem, element->m_id) == false)
+        UIFocusManagerElement* element = &self->elements[i];
+        if (UISystem_hasObjectId(uiSystem, element->id) == false)
         {
             SDL_LogWarn(
                 SDL_LOG_CATEGORY_SYSTEM,
                 "Selectable not found in canvas, removing from focus manager\n"
             );
-            self->m_elements[i] = self->m_elements[self->m_elementCount - 1];
-            self->m_elementCount--;
+            self->elements[i] = self->elements[self->elementCount - 1];
+            self->elementCount--;
             continue;
         }
         i++;
@@ -238,15 +238,15 @@ static void UIFocusManager_validate(UIFocusManager* self)
 
     bool focusedIsValid = false;
     int firstValidIndex = -1;
-    for (int i = 0; i < self->m_elementCount; i++)
+    for (int i = 0; i < self->elementCount; i++)
     {
-        UISelectable* selectable = self->m_elements[i].m_selectable;
+        UISelectable* selectable = self->elements[i].selectable;
         UIFocusState state = UISelectable_getFocusState(selectable);
         if (state == UI_FOCUS_STATE_DISABLED) continue;
 
         if (firstValidIndex < 0) firstValidIndex = i;
 
-        if (selectable == self->m_focused)
+        if (selectable == self->focused)
         {
             focusedIsValid = true;
             continue;
@@ -254,11 +254,11 @@ static void UIFocusManager_validate(UIFocusManager* self)
         UISelectable_setFocusState(selectable, UI_FOCUS_STATE_NORMAL);
     }
 
-    if (!focusedIsValid) self->m_focused = NULL;
+    if (!focusedIsValid) self->focused = NULL;
 
-    if (self->m_focused == NULL && firstValidIndex >= 0)
+    if (self->focused == NULL && firstValidIndex >= 0)
     {
-        UIFocusManager_setFocusOn(self, self->m_elements[firstValidIndex].m_selectable);
+        UIFocusManager_setFocusOn(self, self->elements[firstValidIndex].selectable);
     }
 }
 
@@ -267,11 +267,11 @@ void UIFocusManager_update(UIFocusManager* self, UIInput* input)
     assert(self && "self must not be NULL");
     assert(input && "input must not be NULL");
 
-    if (!self->m_enabled) return;
-    if (self->m_elementCount == 0) return;
+    if (!self->enabled) return;
+    if (self->elementCount == 0) return;
 
     UIFocusManager_validate(self);
-    if (!self->m_focused) return;
+    if (!self->focused) return;
 
     UIFocusManager_updateMouse(self, input);
     UIFocusManager_updateGamepad(self, input);

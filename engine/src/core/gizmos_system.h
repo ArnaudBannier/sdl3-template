@@ -16,9 +16,9 @@ typedef struct GizmosCoreCmd GizmosCoreCmd;
 
 typedef struct GizmosSystem
 {
-    GizmosCoreCmd* m_commands;
-    size_t m_count;
-    size_t m_capacity;
+    GizmosCoreCmd* commands;
+    size_t count;
+    size_t capacity;
 } GizmosSystem;
 
 GizmosSystem* GizmosSystem_create();

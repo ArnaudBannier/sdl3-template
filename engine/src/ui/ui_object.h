@@ -52,29 +52,29 @@ extern const UIObjectId UIObjectId_null;
 
 struct UIObject
 {
-    uint64_t m_magicNumber;
-    UIType m_type;
-    char* m_objectName;
-    bool m_enabled;
+    uint64_t magicNumber;
+    UIType type;
+    char* objectName;
+    bool enabled;
 
-    bool m_orphan;
-    UISystem* m_uiSystem;
-    UIObjectId m_id;
+    bool orphan;
+    UISystem* uiSystem;
+    UIObjectId id;
 
-    RenderSortingLayer m_layer;
-    UITransform m_transform;
-    UIObjectId m_parentId;
-    UIObjectId m_firstChildId;
-    UIObjectId m_nextSiblingId;
+    RenderSortingLayer layer;
+    UITransform transform;
+    UIObjectId parentId;
+    UIObjectId firstChildId;
+    UIObjectId nextSiblingId;
 
-    SDL_Color m_gizmosColor;
-    bool m_gizmosIsFilled;
-    float m_gizmosOpacity;
+    SDL_Color gizmosColor;
+    bool gizmosIsFilled;
+    float gizmosOpacity;
 
-    void (*m_onRender)(void* selfPtr, GraphicsSystem* graphicsSystem);
-    void (*m_onDrawGizmos)(void* selfPtr, GizmosSystem* gizmosSystem);
-    void (*m_onUpdate)(void* selfPtr);
-    void (*m_onDestroy)(void* selfPtr);
+    void (*onRender)(void* selfPtr, GraphicsSystem* graphicsSystem);
+    void (*onDrawGizmos)(void* selfPtr, GizmosSystem* gizmosSystem);
+    void (*onUpdate)(void* selfPtr);
+    void (*onDestroy)(void* selfPtr);
 };
 
 UIObject* UIObject_create(UISystem* uiSystem, const char* objectName);
@@ -95,31 +95,31 @@ bool UIObject_isOfType(const void* selfPtr, UIType type);
 INLINE void UIObject_setRect(void* selfPtr, UIRect rect)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    ((UIObject*)selfPtr)->m_transform.localRect = rect;
+    ((UIObject*)selfPtr)->transform.localRect = rect;
 }
 
 INLINE void UIObject_setEnabled(void* selfPtr, bool enabled)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    ((UIObject*)selfPtr)->m_enabled = enabled;
+    ((UIObject*)selfPtr)->enabled = enabled;
 }
 
 INLINE bool UIObject_isEnabled(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    return ((UIObject*)selfPtr)->m_enabled;
+    return ((UIObject*)selfPtr)->enabled;
 }
 
 INLINE UIObjectId UIObject_getObjectId(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    return ((UIObject*)selfPtr)->m_id;
+    return ((UIObject*)selfPtr)->id;
 }
 
 INLINE UIObjectId UIObject_getParentId(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    return ((UIObject*)selfPtr)->m_parentId;
+    return ((UIObject*)selfPtr)->parentId;
 }
 
 UIObject* UIObject_getParent(const void* selfPtr);
@@ -127,56 +127,56 @@ UIObject* UIObject_getParent(const void* selfPtr);
 INLINE const char* UIObject_getObjectName(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
-    return ((UIObject*)selfPtr)->m_objectName;
+    return ((UIObject*)selfPtr)->objectName;
 }
 
 INLINE void UIObject_getAABB(const void* selfPtr, AABB* out)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    *out = selfObj->m_transform.aabb;
+    *out = selfObj->transform.aabb;
 }
 
 INLINE UISystem* UIObject_getUISystem(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    return selfObj->m_uiSystem;
+    return selfObj->uiSystem;
 }
 
 INLINE RenderSortingLayer UIObject_getRenderLayer(const void* selfPtr)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    return selfObj->m_layer;
+    return selfObj->layer;
 }
 
 INLINE void UIObject_setRenderLayer(void* selfPtr, RenderSortingLayer layer)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    selfObj->m_layer = layer;
+    selfObj->layer = layer;
 }
 
 INLINE void UIObject_setGizmosColor(void* selfPtr, SDL_Color color)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    selfObj->m_gizmosColor = color;
+    selfObj->gizmosColor = color;
 }
 
 INLINE void UIObject_setGizmosFilled(void* selfPtr, bool isFilled)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    selfObj->m_gizmosIsFilled = isFilled;
+    selfObj->gizmosIsFilled = isFilled;
 }
 
 INLINE void UIObject_setGizmosOpacity(void* selfPtr, float opacity)
 {
     assert(UIObject_isOfType(selfPtr, UI_TYPE_OBJECT) && "self must be of type UI_TYPE_OBJECT");
     UIObject* selfObj = (UIObject*)selfPtr;
-    selfObj->m_gizmosOpacity = opacity;
+    selfObj->gizmosOpacity = opacity;
 }
 
 void UIObject_printHierarchy(void* selfPtr, int level);

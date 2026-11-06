@@ -54,10 +54,10 @@ void UIInput_init(UIInput* self, UISystem* uiSystem)
     self->config.controller.axisY = SDL_GAMEPAD_AXIS_LEFTY;
 
     // Internal data
-    self->m_uiSystem = uiSystem;
-    self->m_data.m_activeZone = 1 << 14;
-    self->m_data.m_axisX = 0;
-    self->m_data.m_axisY = 0;
+    self->uiSystem = uiSystem;
+    self->data.activeZone = 1 << 14;
+    self->data.axisX = 0;
+    self->data.axisY = 0;
 }
 
 void UIInput_beforeEventLoop(UIInput* self)
@@ -124,30 +124,30 @@ static void UIInput_processControllerAxisMotion(UIInput* self, int axis, Sint16 
     self->lastInputType = UI_INPUT_TYPE_CONTROLLER;
 
     UIInputControllerConfig* config = &(self->config.controller);
-    UIInputData* data = &(self->m_data);
+    UIInputData* data = &(self->data);
     if (axis == config->axisX)
     {
-        if (value >= data->m_activeZone && data->m_axisX < data->m_activeZone)
+        if (value >= data->activeZone && data->axisX < data->activeZone)
         {
             self->rightPressed = true;
         }
-        else if (value <= -data->m_activeZone && data->m_axisX > -data->m_activeZone)
+        else if (value <= -data->activeZone && data->axisX > -data->activeZone)
         {
             self->leftPressed = true;
         }
-        data->m_axisX = value;
+        data->axisX = value;
     }
     else if (axis == config->axisY)
     {
-        if (value >= data->m_activeZone && data->m_axisY < data->m_activeZone)
+        if (value >= data->activeZone && data->axisY < data->activeZone)
         {
             self->downPressed = true;
         }
-        else if (value <= -data->m_activeZone && data->m_axisY > -data->m_activeZone)
+        else if (value <= -data->activeZone && data->axisY > -data->activeZone)
         {
             self->upPressed = true;
         }
-        data->m_axisY = value;
+        data->axisY = value;
     }
 }
 
@@ -288,7 +288,7 @@ void UIInput_afterEventLoop(UIInput* self)
     self->mousePxPos.x = mouseX;
     self->mousePxPos.y = mouseY;
 
-    const UISystem* uiSystem = self->m_uiSystem;
+    const UISystem* uiSystem = self->uiSystem;
     self->mouseUIPos.x = UISystem_viewToUIX(uiSystem, mouseX);
     self->mouseUIPos.y = UISystem_viewToUIY(uiSystem, mouseY);
 }

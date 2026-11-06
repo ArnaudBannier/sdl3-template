@@ -23,28 +23,28 @@ GameContext* GameContext_create()
     Viewport* viewport = Viewport_create();
     UISystem* uiSystem = UISystem_create(assets, audioSystem, viewport, 640.f, MAX_UI_ELEMENT_COUNT);
 
-    self->m_assets = assets;
-    self->m_animManager = animManager;
-    self->m_viewport = viewport;
-    self->m_uiSystem = uiSystem;
-    self->m_camera = Camera_create(viewport);
-    self->m_input = Input_create(uiSystem);
-    self->m_graphicsSystem = GraphicsSystem_create();
-    self->m_gizmosSystem = GizmosSystem_create();
-    self->m_audioSystem = audioSystem;
+    self->assets = assets;
+    self->animManager = animManager;
+    self->viewport = viewport;
+    self->uiSystem = uiSystem;
+    self->camera = Camera_create(viewport);
+    self->input = Input_create(uiSystem);
+    self->graphicsSystem = GraphicsSystem_create();
+    self->gizmosSystem = GizmosSystem_create();
+    self->audioSystem = audioSystem;
 
-    AudioSystem_addGroup(self->m_audioSystem, GAME_AUDIO_GROUP_MUSIC, GAME_MUSIC_TRACK_COUNT);
-    AudioSystem_addGroup(self->m_audioSystem, GAME_AUDIO_GROUP_SFX, GAME_SFX_TRACK_COUNT);
-    AudioSystem_addGroup(self->m_audioSystem, GAME_AUDIO_GROUP_UI, GAME_UI_TRACK_COUNT);
+    AudioSystem_addGroup(self->audioSystem, GAME_AUDIO_GROUP_MUSIC, GAME_MUSIC_TRACK_COUNT);
+    AudioSystem_addGroup(self->audioSystem, GAME_AUDIO_GROUP_SFX, GAME_SFX_TRACK_COUNT);
+    AudioSystem_addGroup(self->audioSystem, GAME_AUDIO_GROUP_UI, GAME_UI_TRACK_COUNT);
     UISystem_setAudioGroupIndex(uiSystem, GAME_AUDIO_GROUP_UI);
 
-    AudioSystem_setGain(self->m_audioSystem, GAME_AUDIO_GROUP_SFX, 0.5f);
+    AudioSystem_setGain(self->audioSystem, GAME_AUDIO_GROUP_SFX, 0.5f);
 
     AABB worldView = AABB_set(-8.f, -4.5f, +8.f, +4.5f);
-    Camera_setWorldView(self->m_camera, worldView);
+    Camera_setWorldView(self->camera, worldView);
 
     const int particleCapacity = 1 << 12;
-    self->m_particleSystem = ParticleSystem_create(self->m_animManager, particleCapacity);
+    self->particleSystem = ParticleSystem_create(self->animManager, particleCapacity);
 
     return self;
 }
@@ -53,16 +53,16 @@ void GameContext_destroy(GameContext* self)
 {
     if (!self) return;
 
-    AssetManager_destroy(self->m_assets);
-    AudioSystem_destroy(self->m_audioSystem);
-    Input_destroy(self->m_input);
-    Camera_destroy(self->m_camera);
-    Viewport_destroy(self->m_viewport);
-    ParticleSystem_destroy(self->m_particleSystem);
-    SpriteAnimManager_destroy(self->m_animManager);
-    UISystem_destroy(self->m_uiSystem);
-    GraphicsSystem_destroy(self->m_graphicsSystem);
-    GizmosSystem_destroy(self->m_gizmosSystem);
+    AssetManager_destroy(self->assets);
+    AudioSystem_destroy(self->audioSystem);
+    Input_destroy(self->input);
+    Camera_destroy(self->camera);
+    Viewport_destroy(self->viewport);
+    ParticleSystem_destroy(self->particleSystem);
+    SpriteAnimManager_destroy(self->animManager);
+    UISystem_destroy(self->uiSystem);
+    GraphicsSystem_destroy(self->graphicsSystem);
+    GizmosSystem_destroy(self->gizmosSystem);
 
     free(self);
 }
@@ -73,7 +73,7 @@ void GameContext_playSpatialSFX(GameContext* self, int audioId, Transform* trans
     AudioSystem* audioSystem = GameContext_getAudioSystem(self);
     AssetManager* assets = GameContext_getAssetManager(self);
     MIX_Audio* audio = AssetManager_getAudio(assets, audioId);
-    AABB worldView = Camera_getWorldView(self->m_camera);
+    AABB worldView = Camera_getWorldView(self->camera);
     float pan = (transform->position.x - worldView.lower.x) / (worldView.upper.x - worldView.lower.x);
     pan = 2.f * pan - 1.f;
     pan = Float_clamp(0.7f * pan, -1.f, 1.f);

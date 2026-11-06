@@ -178,10 +178,10 @@ static void GameTitlePage_onClick(void* selectable)
 {
     GameTitlePage* self = (GameTitlePage*)UISelectable_getUserData(selectable);
     int action = UISelectable_getUserId(selectable);
-    self->m_nextAction = action;
+    self->nextAction = action;
 }
 ```
-On voit que le callback récupère la structure `GameTitlePage` via `UISelectable_getUserData()` et l'identifiant de l'action via `UISelectable_getUserId()`. Il enregistre ensuite l'intention dans `self->m_nextAction`. C'est cette valeur qui sera lue plus tard par la fonction `update` de la `GameTitlePage` pour exécuter l'action réelle.
+On voit que le callback récupère la structure `GameTitlePage` via `UISelectable_getUserData()` et l'identifiant de l'action via `UISelectable_getUserId()`. Il enregistre ensuite l'intention dans `self->nextAction`. C'est cette valeur qui sera lue plus tard par la fonction `update` de la `GameTitlePage` pour exécuter l'action réelle.
 
 La création des boutons présents dans la `GameTitlePage` avec l'enregistrement du callback et des données utilisateur se fait ainsi :
 ```c
@@ -199,7 +199,7 @@ Vous créez un `UIObject` racine et lui ajoutez un `UIFillRect` semi‑transpare
 Vous placez un `UIGridLayout` à trois lignes et, dans chaque ligne, vous ajoutez respectivement un `UILabel` pour le titre, un `UIButton` "Start" et un `UIButton` "Settings". Vous enregistrez les deux boutons auprès du `UIFocusManager`.
 
 Pour otenir les informations importantes dans les callbacks, vous passez un pointeur vers la structure `MainPage` lors de la création des boutons.
-Le callback du bouton " Start" n'appelle pas directement la scène de jeu : il fixe `GameUIManager->m_nextAction = GAME_UI_ACTION_START`.
+Le callback du bouton " Start" n'appelle pas directement la scène de jeu : il fixe `GameUIManager->nextAction = GAME_UI_ACTION_START`.
 La boucle de jeu lit cette valeur et démarre le niveau. Cette approche garde l'interface indépendante de la logique et facilite le changement ultérieur du comportement.
 
 ## Fichiers associés

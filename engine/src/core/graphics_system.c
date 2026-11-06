@@ -40,15 +40,15 @@ typedef struct GraphicsCoreCmd
 
 static void GraphicsSystem_increaseCapacity(GraphicsSystem* self)
 {
-    size_t newCapacity = self->m_capacity * 2;
+    size_t newCapacity = self->capacity * 2;
     GraphicsCoreCmd* mewCommands = (GraphicsCoreCmd*)realloc(
-        self->m_commands,
+        self->commands,
         newCapacity * sizeof(GraphicsCoreCmd)
     );
     ASSERT_NEW(mewCommands);
 
-    self->m_commands = mewCommands;
-    self->m_capacity = newCapacity;
+    self->commands = mewCommands;
+    self->capacity = newCapacity;
 }
 
 GraphicsSystem* GraphicsSystem_create()
@@ -56,10 +56,10 @@ GraphicsSystem* GraphicsSystem_create()
     GraphicsSystem* self = (GraphicsSystem*)calloc(1, sizeof(GraphicsSystem));
     ASSERT_NEW(self);
 
-    self->m_renderScale = 1.f;
-    self->m_capacity = 16;
-    self->m_commands = (GraphicsCoreCmd*)calloc(self->m_capacity, sizeof(GraphicsCoreCmd));
-    ASSERT_NEW(self->m_commands);
+    self->renderScale = 1.f;
+    self->capacity = 16;
+    self->commands = (GraphicsCoreCmd*)calloc(self->capacity, sizeof(GraphicsCoreCmd));
+    ASSERT_NEW(self->commands);
 
     return self;
 }
@@ -67,7 +67,7 @@ GraphicsSystem* GraphicsSystem_create()
 void GraphicsSystem_destroy(GraphicsSystem* self)
 {
     if (!self) return;
-    free(self->m_commands);
+    free(self->commands);
     free(self);
 }
 
@@ -78,16 +78,16 @@ void GraphicsSystem_addCommand(
     assert(self && "self must not be NULL");
     assert(cmd && "cmd must not be NULL");
 
-    if (self->m_count >= self->m_capacity)
+    if (self->count >= self->capacity)
     {
         GraphicsSystem_increaseCapacity(self);
     }
-    assert(self->m_count < self->m_capacity && "m_count must be less than m_capacity");
+    assert(self->count < self->capacity && "m_count must be less than capacity");
 
-    GraphicsCoreCmd* coreCmd = &self->m_commands[self->m_count];
+    GraphicsCoreCmd* coreCmd = &self->commands[self->count];
     memset(coreCmd, 0, sizeof(GraphicsCoreCmd));
 
-    coreCmd->id = self->m_count++;
+    coreCmd->id = self->count++;
 
     if (cmd->sortingLayer)
     {
@@ -144,7 +144,7 @@ void GraphicsSystem_addCommand(
 void GraphicsSystem_clear(GraphicsSystem* self)
 {
     assert(self && "self must not be NULL");
-    self->m_count = 0;
+    self->count = 0;
 }
 
 static void GraphicsSystem_renderTexture(
@@ -242,7 +242,7 @@ static void GraphicsSystem_renderTexture(
 
         if (region->hasBorders)
         {
-            const float scale = SDL_roundf(region->scale * self->m_renderScale);
+            const float scale = SDL_roundf(region->scale * self->renderScale);
             success = SDL_RenderTexture9Grid(
                 renderer, texture, srcRect,
                 region->left, region->right, region->top, region->bottom, scale, &dstRect
@@ -492,15 +492,15 @@ void GraphicsSystem_render(
 
     // Sort entries
     qsort(
-        self->m_commands,
-        self->m_count,
+        self->commands,
+        self->count,
         sizeof(GraphicsCoreCmd),
         GraphicsSystemCmd_compare
     );
 
     // Render each coreCmd
-    for (size_t i = 0; i < self->m_count; i++)
+    for (size_t i = 0; i < self->count; i++)
     {
-        GraphicsSystem_renderCmd(self, renderer, camera, uiSystem, &self->m_commands[i]);
+        GraphicsSystem_renderCmd(self, renderer, camera, uiSystem, &self->commands[i]);
     }
 }

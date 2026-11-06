@@ -16,12 +16,12 @@ typedef struct Camera
 {
     /// @brief Rectangle représentant la vue de la caméra.
     /// Ces coordonnées sont dans le référentiel monde.
-    AABB m_worldView;
+    AABB worldView;
 
     /// @brief Pointeur vers le viewport utilisé (non possédé).
-    Viewport* m_viewport;
+    Viewport* viewport;
 
-    Vec2 m_scale;
+    Vec2 scale;
 } Camera;
 
 /// @brief Crée une nouvelle caméra.
@@ -42,7 +42,7 @@ void Camera_update(Camera* self);
 INLINE AABB Camera_getWorldView(const Camera* self)
 {
     assert(self && "The Camera must be created");
-    return self->m_worldView;
+    return self->worldView;
 }
 
 /// @brief Définit le rectangle vu par la caméra.

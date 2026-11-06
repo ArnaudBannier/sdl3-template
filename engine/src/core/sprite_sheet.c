@@ -21,7 +21,7 @@ SpriteGroup* SpriteGroup_create(SpriteSheet* spriteSheet)
     SpriteGroup* self = (SpriteGroup*)calloc(1, sizeof(SpriteGroup));
     ASSERT_NEW(self);
 
-    self->m_spriteSheet = spriteSheet;
+    self->spriteSheet = spriteSheet;
 
     return self;
 }
@@ -29,9 +29,9 @@ SpriteGroup* SpriteGroup_create(SpriteSheet* spriteSheet)
 void SpriteGroup_destroy(SpriteGroup* self)
 {
     if (!self) return;
-    if (self->m_name)
+    if (self->name)
     {
-        SDL_free(self->m_name);
+        SDL_free(self->name);
     }
     free(self);
 }
@@ -45,8 +45,8 @@ SpriteSheet* SpriteSheet_create(
     SpriteSheet* self = (SpriteSheet*)calloc(1, sizeof(SpriteSheet));
     ASSERT_NEW(self);
 
-    self->m_assetManager = assetManager;
-    self->m_sheetId = sheetId;
+    self->assetManager = assetManager;
+    self->sheetId = sheetId;
 
     cJSON* root = cJSON_ParseWithLength(descBuffer, (size_t)descLength);
     ASSERT_NEW(root);
@@ -63,25 +63,25 @@ void SpriteSheet_destroy(SpriteSheet* self)
 {
     if (!self) return;
 
-    if (self->m_groups)
+    if (self->groups)
     {
-        for (int i = 0; i < self->m_groupCount; i++)
+        for (int i = 0; i < self->groupCount; i++)
         {
-            SpriteGroup_destroy(self->m_groups[i]);
+            SpriteGroup_destroy(self->groups[i]);
         }
-        free(self->m_groups);
+        free(self->groups);
     }
-    free(self->m_sprites);
+    free(self->sprites);
 }
 
 SpriteGroup* SpriteSheet_getGroupByName(SpriteSheet* self, const char* name)
 {
     assert(self && "self must not be NULL");
-    for (int i = 0; i < self->m_groupCount; i++)
+    for (int i = 0; i < self->groupCount; i++)
     {
-        if (SDL_strcmp(name, self->m_groups[i]->m_name) == 0)
+        if (SDL_strcmp(name, self->groups[i]->name) == 0)
         {
-            return self->m_groups[i];
+            return self->groups[i];
         }
     }
     return NULL;
@@ -90,23 +90,23 @@ SpriteGroup* SpriteSheet_getGroupByName(SpriteSheet* self, const char* name)
 SpriteGroup* SpriteSheet_getGroupByIndex(SpriteSheet* self, int index)
 {
     assert(self && "self must not be NULL");
-    assert(0 <= index && index < self->m_groupCount);
-    return self->m_groups[index];
+    assert(0 <= index && index < self->groupCount);
+    return self->groups[index];
 }
 
 SDL_Texture* SpriteSheet_getTexture(SpriteSheet* self)
 {
     assert(self && "self must not be NULL");
-    if (self->m_cachedTexture) return self->m_cachedTexture;
+    if (self->cachedTexture) return self->cachedTexture;
 
-    self->m_cachedTexture = AssetManager_getSpriteSheetTexture(self->m_assetManager, self->m_sheetId);
-    if (!(self->m_cachedTexture))
+    self->cachedTexture = AssetManager_getSpriteSheetTexture(self->assetManager, self->sheetId);
+    if (!(self->cachedTexture))
     {
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "SpriteGroup_render");
         SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "Unable to get sprite sheet texture");
         assert(false);
     }
-    return self->m_cachedTexture;
+    return self->cachedTexture;
 }
 
 static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
@@ -116,9 +116,9 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
     if (cJSON_IsArray(jRects))
     {
         int spriteCount = cJSON_GetArraySize(jRects);
-        self->m_spriteCount = spriteCount;
-        self->m_sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
-        ASSERT_NEW(self->m_sprites);
+        self->spriteCount = spriteCount;
+        self->sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
+        ASSERT_NEW(self->sprites);
 
         int i = 0;
         cJSON* jRect = NULL;
@@ -141,8 +141,8 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
         }
     }
 
-    assert(self->m_sprites && "The sprites must be created");
-    assert(self->m_spriteCount > 0 && "The sprite count must be greater than zero");
+    assert(self->sprites && "The sprites must be created");
+    assert(self->spriteCount > 0 && "The sprite count must be greater than zero");
 
     cJSON* jBorders = cJSON_GetObjectItem(root, "borders");
     if (cJSON_IsArray(jBorders))
@@ -157,16 +157,16 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
     cJSON* jPixelArt = cJSON_GetObjectItem(root, "pixelArt");
     if (cJSON_IsBool(jPixelArt))
     {
-        self->m_pixelArt = cJSON_IsTrue(jPixelArt);
+        self->pixelArt = cJSON_IsTrue(jPixelArt);
     }
 
     cJSON* jGroups = cJSON_GetObjectItem(root, "groups");
     if (cJSON_IsArray(jGroups))
     {
         int groupCount = cJSON_GetArraySize(jGroups);
-        self->m_groupCount = groupCount;
-        self->m_groups = (SpriteGroup**)calloc(groupCount, sizeof(SpriteGroup*));
-        ASSERT_NEW(self->m_groups);
+        self->groupCount = groupCount;
+        self->groups = (SpriteGroup**)calloc(groupCount, sizeof(SpriteGroup*));
+        ASSERT_NEW(self->groups);
 
         int i = 0;
         cJSON* jGroup = NULL;
@@ -179,7 +179,7 @@ static void SpriteSheet_parseJSON(SpriteSheet* self, cJSON* root)
 
 static void SpriteSheet_parseRect(SpriteSheet* self, cJSON* jRect, int i)
 {
-    TextureRegion* sprite = self->m_sprites + i;
+    TextureRegion* sprite = self->sprites + i;
     SDL_FRect* rect = &sprite->srcRect;
     cJSON* jTmp = NULL;
 
@@ -246,15 +246,15 @@ static void SpriteSheet_parseGeometry(SpriteSheet* self, cJSON* jGeo)
 
         int spriteCount = rowCount * colCount;
 
-        self->m_spriteCount = spriteCount;
-        self->m_sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
-        ASSERT_NEW(self->m_sprites);
+        self->spriteCount = spriteCount;
+        self->sprites = (TextureRegion*)calloc(spriteCount, sizeof(TextureRegion));
+        ASSERT_NEW(self->sprites);
 
         for (int i = 0; i < rowCount; i++)
         {
             for (int j = 0; j < colCount; ++j)
             {
-                TextureRegion* sprite = &(self->m_sprites[i * colCount + j]);
+                TextureRegion* sprite = &(self->sprites[i * colCount + j]);
                 sprite->srcRect.x = (float)(offsetX + j * (w + borderX));
                 sprite->srcRect.y = (float)(offsetY + i * (h + borderY));
                 sprite->srcRect.w = (float)(w);
@@ -288,8 +288,8 @@ static void SpriteSheet_parseBorder(SpriteSheet* self, cJSON* jBorder)
             if (!cJSON_IsNumber(jIdx)) continue;
 
             int spriteIdx = jIdx->valueint;
-            assert(0 <= spriteIdx && spriteIdx < self->m_spriteCount);
-            TextureRegion* sprite = self->m_sprites + spriteIdx;
+            assert(0 <= spriteIdx && spriteIdx < self->spriteCount);
+            TextureRegion* sprite = self->sprites + spriteIdx;
             sprite->hasBorders = true;
             sprite->left = (float)borderL;
             sprite->right = (float)borderR;
@@ -303,22 +303,22 @@ static void SpriteSheet_parseBorder(SpriteSheet* self, cJSON* jBorder)
 static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i)
 {
     SpriteGroup* group = SpriteGroup_create(self);
-    self->m_groups[i] = group;
+    self->groups[i] = group;
     cJSON* jTmp = NULL;
 
     jTmp = cJSON_GetObjectItem(jGroup, "name");
     if (cJSON_IsString(jTmp))
     {
-        group->m_name = SDL_strdup(cJSON_GetStringValue(jTmp));
+        group->name = SDL_strdup(cJSON_GetStringValue(jTmp));
     }
 
     jTmp = cJSON_GetObjectItem(jGroup, "frames");
     if (cJSON_IsArray(jTmp))
     {
         int frameCount = cJSON_GetArraySize(jTmp);
-        group->m_spriteCount = frameCount;
-        group->m_spriteIndices = (int*)calloc(frameCount, sizeof(int));
-        ASSERT_NEW(group->m_spriteIndices);
+        group->spriteCount = frameCount;
+        group->spriteIndices = (int*)calloc(frameCount, sizeof(int));
+        ASSERT_NEW(group->spriteIndices);
 
         int i = 0;
         cJSON* jIdx = NULL;
@@ -326,7 +326,7 @@ static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i)
         {
             if (cJSON_IsNumber(jIdx))
             {
-                (group->m_spriteIndices)[i] = jIdx->valueint;
+                (group->spriteIndices)[i] = jIdx->valueint;
             }
             i++;
         }
@@ -336,31 +336,31 @@ static void SpriteSheet_parseGroup(SpriteSheet* self, cJSON* jGroup, int i)
 float SpriteGroup_getAspectRatio(SpriteGroup* self, int index)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_spriteSheet);
-    assert(index >= 0 && index < self->m_spriteCount);
-    const TextureRegion* sprite = self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
+    assert(self->spriteSheet);
+    assert(index >= 0 && index < self->spriteCount);
+    const TextureRegion* sprite = self->spriteSheet->sprites + self->spriteIndices[index];
     return sprite->srcRect.w / sprite->srcRect.h;
 }
 
 SDL_Texture* SpriteGroup_getTexture(SpriteGroup* self)
 {
     assert(self && "self must not be NULL");
-    return SpriteSheet_getTexture(self->m_spriteSheet);
+    return SpriteSheet_getTexture(self->spriteSheet);
 }
 
 const SDL_FRect* SpriteGroup_getSrcRect(SpriteGroup* self, int index)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_spriteSheet);
-    assert(index >= 0 && index < self->m_spriteCount);
-    const TextureRegion* sprite = self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
+    assert(self->spriteSheet);
+    assert(index >= 0 && index < self->spriteCount);
+    const TextureRegion* sprite = self->spriteSheet->sprites + self->spriteIndices[index];
     return &(sprite->srcRect);
 }
 
 TextureRegion* SpriteGroup_getTextureRegion(SpriteGroup* self, int index)
 {
     assert(self && "self must not be NULL");
-    assert(self->m_spriteSheet);
-    assert(index >= 0 && index < self->m_spriteCount);
-    return self->m_spriteSheet->m_sprites + self->m_spriteIndices[index];
+    assert(self->spriteSheet);
+    assert(index >= 0 && index < self->spriteCount);
+    return self->spriteSheet->sprites + self->spriteIndices[index];
 }

@@ -19,25 +19,25 @@ static void SettingsPage_onClick(void* selectable)
     if (strcmp(objectName, "back-button") == 0)
     {
         // Restore previous audio settings when going back to main page
-        GameContext* context = self->m_context;
+        GameContext* context = self->context;
         AudioSystem* audioSystem = GameContext_getAudioSystem(context);
-        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_MUSIC, self->m_prevMusicGain);
-        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_SFX, self->m_prevSfxGain);
-        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_UI, self->m_prevUIGain);
-        g_gameConfig.musicGain = self->m_prevMusicGain;
-        g_gameConfig.sfxGain = self->m_prevSfxGain;
-        g_gameConfig.uiGain = self->m_prevUIGain;
+        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_MUSIC, self->prevMusicGain);
+        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_SFX, self->prevSfxGain);
+        AudioSystem_setGain(audioSystem, GAME_AUDIO_GROUP_UI, self->prevUIGain);
+        g_gameConfig.musicGain = self->prevMusicGain;
+        g_gameConfig.sfxGain = self->prevSfxGain;
+        g_gameConfig.uiGain = self->prevUIGain;
 
-        UIManager_closePages(self->m_uiManager);
-        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
+        UIManager_closePages(self->uiManager);
+        UIManager_openPage(self->uiManager, TITLE_UI_PAGE_MAIN_MENU);
     }
     else if (strcmp(objectName, "apply-button") == 0)
     {
-        int itemIndex = UIList_getSelectedItem(self->m_fullscreenList);
+        int itemIndex = UIList_getSelectedItem(self->fullscreenList);
         SDL_SetWindowFullscreen(g_engine.sdl.window, itemIndex == 1);
 
-        UIManager_closePages(self->m_uiManager);
-        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
+        UIManager_closePages(self->uiManager);
+        UIManager_openPage(self->uiManager, TITLE_UI_PAGE_MAIN_MENU);
     }
 }
 
@@ -46,7 +46,7 @@ static void SettingsPage_onItemChanged(void* selectable, int currItemIdx, int pr
     SettingsPage* self = (SettingsPage*)UISelectable_getUserData(selectable);
     assert(self && "self must not be NULL");
 
-    GameContext* context = self->m_context;
+    GameContext* context = self->context;
     AudioSystem* audioSystem = GameContext_getAudioSystem(context);
 
     const char* objectName = UIObject_getObjectName(selectable);
@@ -81,24 +81,24 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     SettingsPage* self = (SettingsPage*)calloc(1, sizeof(SettingsPage));
     ASSERT_NEW(self);
 
-    self->m_context = context;
-    self->m_uiManager = manager;
-    self->m_mainPanel = UIObject_create(uiSystem, "main-panel");
-    self->m_focusManager = UIFocusManager_create(uiSystem);
+    self->context = context;
+    self->uiManager = manager;
+    self->mainPanel = UIObject_create(uiSystem, "main-panel");
+    self->focusManager = UIFocusManager_create(uiSystem);
 
-    self->m_prevMusicGain = g_gameConfig.musicGain;
-    self->m_prevSfxGain = g_gameConfig.sfxGain;
-    self->m_prevUIGain = g_gameConfig.uiGain;
+    self->prevMusicGain = g_gameConfig.musicGain;
+    self->prevSfxGain = g_gameConfig.sfxGain;
+    self->prevUIGain = g_gameConfig.uiGain;
 
-    UIObject_setParent(self->m_mainPanel, canvas);
+    UIObject_setParent(self->mainPanel, canvas);
     rect.anchorMin = Vec2_set(0.25f, 0.0f);
     rect.anchorMax = Vec2_set(0.75f, 1.0f);
     rect.offsetMin = Vec2_zero;
     rect.offsetMax = Vec2_zero;
-    UIObject_setRect(self->m_mainPanel, rect);
+    UIObject_setRect(self->mainPanel, rect);
 
     UIGridLayout* layout = UIGridLayout_create(uiSystem, "main-layout", 6, 1);
-    UIObject_setParent(layout, self->m_mainPanel);
+    UIObject_setParent(layout, self->mainPanel);
     UIGridLayout_setRowSizes(layout, 25.0f);
     UIGridLayout_setRowSpacings(layout, 5.f);
     UIGridLayout_setRowSpacing(layout, 0, 20.f);
@@ -125,7 +125,7 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
         uiSystem, "fullscreen-list", font, toggleItemCount,
         UI_LIST_CONFIG_CYCLE | UI_LIST_CONFIG_AUTO_NAVIGATION
     );
-    self->m_fullscreenList = fullscreenList;
+    self->fullscreenList = fullscreenList;
 
     UIList_setLabelString(fullscreenList, "Fullscreen");
     for (int i = 0; i < toggleItemCount; i++)
@@ -147,7 +147,7 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     }
 
     UIGridLayout_addObject(layout, fullscreenList, rowIndex++, 0, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, fullscreenList);
+    UIFocusManager_addSelectable(self->focusManager, fullscreenList);
 
     // Volume lists
     const char* gainItems[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
@@ -158,7 +158,7 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
         uiSystem, "music-gain-list", font, 11,
         UI_LIST_CONFIG_AUTO_NAVIGATION
     );
-    self->m_musicGainList = musicGainList;
+    self->musicGainList = musicGainList;
 
     UIList_setLabelString(musicGainList, "Music volume");
     for (int i = 0; i < gainItemCount; i++)
@@ -173,14 +173,14 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     UIList_setOnItemChangedCallback(musicGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, musicGainList, rowIndex++, 0, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, musicGainList);
+    UIFocusManager_addSelectable(self->focusManager, musicGainList);
 
     // SFX gain list
     UIList* sfxGainList = UIList_create(
         uiSystem, "sfx-gain-list", font, gainItemCount,
         UI_LIST_CONFIG_AUTO_NAVIGATION
     );
-    self->m_sfxGainList = sfxGainList;
+    self->sfxGainList = sfxGainList;
 
     UIList_setLabelString(sfxGainList, "SFX volume");
     for (int i = 0; i < gainItemCount; i++)
@@ -195,14 +195,14 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     UIList_setOnItemChangedCallback(sfxGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, sfxGainList, rowIndex++, 0, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, sfxGainList);
+    UIFocusManager_addSelectable(self->focusManager, sfxGainList);
 
     // UI gain list
     UIList* uiGainList = UIList_create(
         uiSystem, "ui-gain-list", font, gainItemCount,
         UI_LIST_CONFIG_AUTO_NAVIGATION
     );
-    self->m_uiGainList = uiGainList;
+    self->uiGainList = uiGainList;
 
     UIList_setLabelString(uiGainList, "UI volume");
     for (int i = 0; i < gainItemCount; i++)
@@ -217,7 +217,7 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     UIList_setOnItemChangedCallback(uiGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, uiGainList, rowIndex++, 0, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, uiGainList);
+    UIFocusManager_addSelectable(self->focusManager, uiGainList);
 
     // Button layout
     UIGridLayout* buttonlayout = UIGridLayout_create(uiSystem, "button-layout", 1, 2);
@@ -233,7 +233,7 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     UIStyle_setDefaultButton(applyButton, assets);
 
     UIGridLayout_addObject(buttonlayout, applyButton, 0, 0, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, applyButton);
+    UIFocusManager_addSelectable(self->focusManager, applyButton);
 
     // Back button
     UIButton* backButton = UIButton_create(uiSystem, "back-button", font);
@@ -243,9 +243,9 @@ SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
     UIStyle_setDefaultButton(backButton, assets);
 
     UIGridLayout_addObject(buttonlayout, backButton, 0, 1, 1, 1);
-    UIFocusManager_addSelectable(self->m_focusManager, backButton);
+    UIFocusManager_addSelectable(self->focusManager, backButton);
 
-    UIFocusManager_setFocused(self->m_focusManager, fullscreenList);
+    UIFocusManager_setFocused(self->focusManager, fullscreenList);
 
     return self;
 }
@@ -254,14 +254,14 @@ void SettingsPage_destroy(SettingsPage* self)
 {
     if (!self) return;
 
-    UIObject_destroy(self->m_mainPanel);
-    UIFocusManager_destroy(self->m_focusManager);
+    UIObject_destroy(self->mainPanel);
+    UIFocusManager_destroy(self->focusManager);
 
     free(self);
 }
 
 void SettingsPage_update(SettingsPage* self)
 {
-    Input* input = GameContext_getInput(self->m_context);
-    UIFocusManager_update(self->m_focusManager, &input->uiInput);
+    Input* input = GameContext_getInput(self->context);
+    UIFocusManager_update(self->focusManager, &input->uiInput);
 }

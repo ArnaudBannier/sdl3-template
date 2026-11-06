@@ -15,17 +15,17 @@
 
 typedef struct GameEngine
 {
-    GameContext* m_context;
-    SceneManager* m_sceneManager;
+    GameContext* context;
+    SceneManager* sceneManager;
 
-    Uint64 m_timeStepMS;
-    Uint64 m_stepAccuMS;
-    bool m_drawObjectGizmos;
-    bool m_drawUIGizmos;
-    bool m_makeStep;
-    bool m_realtime;
-    bool m_quit;
-    float m_aspectRatio;
+    Uint64 timeStepMS;
+    Uint64 stepAccuMS;
+    bool drawObjectGizmos;
+    bool drawUIGizmos;
+    bool makeStep;
+    bool realtime;
+    bool quit;
+    float aspectRatio;
 } GameEngine;
 
 GameEngine* GameEngine_create();
@@ -37,13 +37,13 @@ void GameEngine_quit(GameEngine* self);
 INLINE GameContext* GameEngine_getContext(GameEngine* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_context;
+    return self->context;
 }
 
 INLINE SceneManager* GameEngine_getSceneManager(GameEngine* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_sceneManager;
+    return self->sceneManager;
 }
 
 extern GameEngine* g_gameEngine;

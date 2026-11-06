@@ -22,10 +22,10 @@ typedef struct TextureRegion
 
 typedef struct SpriteGroup
 {
-    SpriteSheet* m_spriteSheet;
-    char* m_name;
-    int* m_spriteIndices;
-    int m_spriteCount;
+    SpriteSheet* spriteSheet;
+    char* name;
+    int* spriteIndices;
+    int spriteCount;
 } SpriteGroup;
 
 SpriteGroup* SpriteGroup_create(SpriteSheet* spriteSheet);
@@ -34,7 +34,7 @@ void SpriteGroup_destroy(SpriteGroup* self);
 INLINE int SpriteGroup_getSpriteCount(SpriteGroup* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_spriteCount;
+    return self->spriteCount;
 }
 
 const SDL_FRect* SpriteGroup_getSrcRect(SpriteGroup* self, int index);
@@ -45,17 +45,17 @@ SDL_Texture* SpriteGroup_getTexture(SpriteGroup* self);
 /// @brief Structure représentant un atlas de textures.
 typedef struct SpriteSheet
 {
-    AssetManager* m_assetManager;
-    int m_sheetId;
-    SDL_Texture* m_cachedTexture;
+    AssetManager* assetManager;
+    int sheetId;
+    SDL_Texture* cachedTexture;
 
-    SpriteGroup** m_groups;
-    int m_groupCount;
+    SpriteGroup** groups;
+    int groupCount;
 
-    TextureRegion* m_sprites;
-    int m_spriteCount;
+    TextureRegion* sprites;
+    int spriteCount;
 
-    bool m_pixelArt;
+    bool pixelArt;
 } SpriteSheet;
 
 SpriteSheet* SpriteSheet_create(AssetManager* assetManager, int sheetId, const char* descBuffer, Uint64 descLength);
@@ -68,5 +68,5 @@ SDL_Texture* SpriteSheet_getTexture(SpriteSheet* self);
 INLINE bool SpriteSheet_isPixelArt(const SpriteSheet* self)
 {
     assert(self && "self must not be NULL");
-    return self->m_pixelArt;
+    return self->pixelArt;
 }

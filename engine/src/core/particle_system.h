@@ -46,10 +46,10 @@ void Particle_setDelay(Particle* self, float delay);
 
 typedef struct ParticleSystem
 {
-    SpriteAnimManager* m_animManager;
-    Particle* m_particlePool;
-    int m_particleCount;
-    int m_poolCapacity;
+    SpriteAnimManager* animManager;
+    Particle* particlePool;
+    int particleCount;
+    int poolCapacity;
 } ParticleSystem;
 
 ParticleSystem* ParticleSystem_create(SpriteAnimManager* animManager, int capacity);

@@ -31,20 +31,20 @@ typedef struct UIGridCell
 
 typedef struct UIGridLayout
 {
-    UIObject m_baseObject;
+    UIObject baseObject;
 
-    int m_rowCount;
-    int m_colCount;
-    int m_elementCount;
-    Vec2 m_padding;
-    Vec2 m_anchor;
-    float* m_rowSizes;
-    float* m_colSizes;
-    float* m_rowSpacings;
-    float* m_colSpacings;
-    float* m_rowOffsets;
-    float* m_colOffsets;
-    UIGridCell m_cells[UI_GRID_MAX_ELEMENTS];
+    int rowCount;
+    int colCount;
+    int elementCount;
+    Vec2 padding;
+    Vec2 anchor;
+    float* rowSizes;
+    float* colSizes;
+    float* rowSpacings;
+    float* colSpacings;
+    float* rowOffsets;
+    float* colOffsets;
+    UIGridCell cells[UI_GRID_MAX_ELEMENTS];
 } UIGridLayout;
 
 UIGridLayout* UIGridLayout_create(UISystem* uiSystem, const char* objectName, int rowCount, int columnCount);
