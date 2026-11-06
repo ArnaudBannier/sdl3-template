@@ -73,8 +73,7 @@ typedef enum GameAudioGroup
 
 typedef enum SceneType
 {
-    SCENE_TYPE_TITLE,
-    SCENE_TYPE_LEVEL,
+    SCENE_TYPE_MAIN,
 } SceneType;
 
 #define GAME_MUSIC_TRACK_COUNT 2

@@ -11,7 +11,7 @@
 #include "game/input.h"
 #include "game/core/game_engine.h"
 #include "game/core/game_context.h"
-#include "game/scene/title_scene.h"
+#include "game/scene/main_scene.h"
 
 #include <SDL3/SDL_main.h>
 
@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
     g_gameEngine = GameEngine_create();
     SceneManager* sceneManager = GameEngine_getSceneManager(g_gameEngine);
 
-    TitleScene* titleScene = TitleScene_create(g_gameEngine);
-    SceneManager_addScene(sceneManager, titleScene, SCENE_TYPE_TITLE);
+    MainScene* mainScene = MainScene_create(g_gameEngine);
+    SceneManager_addScene(sceneManager, mainScene, SCENE_TYPE_MAIN);
 
     GameContext* context = GameEngine_getContext(g_gameEngine);
     AudioSystem* audioSystem = GameContext_getAudioSystem(context);
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     //--------------------------------------------------------------------------
     // Boucle de jeu
     
-    SceneManager_changeScene(sceneManager, SCENE_TYPE_TITLE);
+    SceneManager_changeScene(sceneManager, SCENE_TYPE_MAIN);
     GameEngine_mainLoop(g_gameEngine);
 
     //--------------------------------------------------------------------------

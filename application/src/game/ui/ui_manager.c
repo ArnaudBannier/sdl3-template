@@ -4,15 +4,15 @@
     See LICENSE.md in the project root for license information.
 */
 
-#include "game/ui/title_ui_manager.h"
-#include "game/ui/title_main_menu.h"
-#include "game/ui/title_settings_page.h"
+#include "game/ui/ui_manager.h"
+#include "game/ui/main_menu.h"
+#include "game/ui/settings_page.h"
 #include "game/core/game_context.h"
 #include "game/game_config.h"
 
-TitleUIManager* TitleUIManager_create(GameContext* context)
+UIManager* UIManager_create(GameContext* context)
 {
-    TitleUIManager* self = (TitleUIManager*)calloc(1, sizeof(TitleUIManager));
+    UIManager* self = (UIManager*)calloc(1, sizeof(UIManager));
     ASSERT_NEW(self);
 
     self->m_context = context;
@@ -22,28 +22,28 @@ TitleUIManager* TitleUIManager_create(GameContext* context)
     return self;
 }
 
-void TitleUIManager_destroy(TitleUIManager* self)
+void UIManager_destroy(UIManager* self)
 {
     if (!self) return;
 
-    TitleMainMenu_destroy(self->m_mainMenu);
-    TitleSettingsPage_destroy(self->m_settingsPage);
+    MainMenu_destroy(self->m_mainMenu);
+    SettingsPage_destroy(self->m_settingsPage);
     free(self);
 }
 
-static void TitleUIManager_applyPageChange(TitleUIManager* self)
+static void UIManager_applyPageChange(UIManager* self)
 {
     // Title main menu
     if (self->m_activePages[TITLE_UI_PAGE_MAIN_MENU])
     {
         if (!self->m_mainMenu)
         {
-            self->m_mainMenu = TitleMainMenu_create(self->m_context, self);
+            self->m_mainMenu = MainMenu_create(self->m_context, self);
         }
     }
     else
     {
-        TitleMainMenu_destroy(self->m_mainMenu);
+        MainMenu_destroy(self->m_mainMenu);
         self->m_mainMenu = NULL;
     }
 
@@ -52,29 +52,29 @@ static void TitleUIManager_applyPageChange(TitleUIManager* self)
     {
         if (!self->m_settingsPage)
         {
-            self->m_settingsPage = TitleSettingsPage_create(self->m_context, self);
+            self->m_settingsPage = SettingsPage_create(self->m_context, self);
         }
     }
     else
     {
-        TitleSettingsPage_destroy(self->m_settingsPage);
+        SettingsPage_destroy(self->m_settingsPage);
         self->m_settingsPage = NULL;
     }
 }
 
-void TitleUIManager_update(TitleUIManager* self)
+void UIManager_update(UIManager* self)
 {
     GameContext* context = self->m_context;
     Input* gameInput = GameContext_getInput(context);
 
-    TitleUIManager_applyPageChange(self);
+    UIManager_applyPageChange(self);
 
     if (self->m_mainMenu)
     {
-        TitleMainMenu_update(self->m_mainMenu);
+        MainMenu_update(self->m_mainMenu);
     }
     if (self->m_settingsPage)
     {
-        TitleSettingsPage_update(self->m_settingsPage);
+        SettingsPage_update(self->m_settingsPage);
     }
 }

@@ -31,23 +31,23 @@ target_sources(${NAME} PRIVATE
     "src/game/core/game_context.h"
     "src/game/core/game_engine.c"
     "src/game/core/game_engine.h"
-    
-    
     "src/game/core/scene_manager.c"
     "src/game/core/scene_manager.h"
-
     
-    "src/game/scene/title_scene.c"
-    "src/game/scene/title_scene.h"
+    "src/game/puzzle/puzzle_core.c"
+    "src/game/puzzle/puzzle_core.h"
+    "src/game/puzzle/puzzle_graphics.c"
+    "src/game/puzzle/puzzle_graphics.h"
     
+    "src/game/scene/main_scene.c"
+    "src/game/scene/main_scene.h"
     
-    
-    "src/game/ui/title_main_menu.c"
-    "src/game/ui/title_main_menu.h"
-    "src/game/ui/title_settings_page.c"
-    "src/game/ui/title_settings_page.h"
-    "src/game/ui/title_ui_manager.c"
-    "src/game/ui/title_ui_manager.h"
+    "src/game/ui/main_menu.c"
+    "src/game/ui/main_menu.h"
+    "src/game/ui/settings_page.c"
+    "src/game/ui/settings_page.h"
+    "src/game/ui/ui_manager.c"
+    "src/game/ui/ui_manager.h"
 )
 
 find_library(MATH_LIBRARY m)

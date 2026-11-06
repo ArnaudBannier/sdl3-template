@@ -175,6 +175,7 @@ static void GameEngine_render(GameEngine* self)
     GraphicsSystem* graphics = GameContext_getGraphicsSystem(context);
     GizmosSystem* gizmos = GameContext_getGizmosSystem(context);
     Camera* camera = GameContext_getCamera(context);
+    SceneManager* sceneManager = GameEngine_getSceneManager(self);
 
     Camera_update(camera);
 
@@ -189,6 +190,7 @@ static void GameEngine_render(GameEngine* self)
     GraphicsSystem_clear(graphics);
     UISystem_render(uiSystem, graphics);
     ParticleSystem_render(particleSystem, graphics);
+    SceneManager_render(sceneManager);
 
     // Graphics
     GraphicsSystem_render(graphics, renderer, camera, uiSystem);

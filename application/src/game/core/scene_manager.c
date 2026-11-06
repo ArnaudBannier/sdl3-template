@@ -24,6 +24,7 @@ bool Scene_isValid(void* selfPtr)
     if (scene->m_onStart == NULL) return false;
     if (scene->m_onQuit == NULL) return false;
     if (scene->m_onUpdate == NULL) return false;
+    if (scene->m_onRender == NULL) return false;
     if (scene->m_onFixedUpdate == NULL) return false;
     return true;
 }
@@ -134,6 +135,24 @@ void SceneManager_fixedUpdate(SceneManager* self, float timeStep)
         if (currScene && currScene->m_onUpdate)
         {
             currScene->m_onFixedUpdate(currScene, timeStep);
+        }
+    }
+}
+
+void SceneManager_render(SceneManager* self)
+{
+    assert(self && "self must not be NULL");
+    assert(self->m_currSceneId < MAX_SCENE_COUNT && "currSceneId must be within valid range");
+    assert(self->m_nextSceneId < MAX_SCENE_COUNT && "nextSceneId must be within valid range");
+
+    SceneManager_applySceneChange(self);
+
+    if (self->m_currSceneId >= 0)
+    {
+        Scene* currScene = self->m_scenes[self->m_currSceneId];
+        if (currScene && currScene->m_onRender)
+        {
+            currScene->m_onRender(currScene);
         }
     }
 }

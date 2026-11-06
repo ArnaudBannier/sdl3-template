@@ -7,13 +7,13 @@
 #pragma once
 
 #include "settings.h"
-#include "game/ui/title_ui_manager.h"
+#include "game/ui/ui_manager.h"
 
 typedef struct GameContext GameContext;
-typedef struct TitleSettingsPage
+typedef struct SettingsPage
 {
     GameContext* m_context;
-    TitleUIManager* m_uiManager;
+    UIManager* m_uiManager;
     UIFocusManager* m_focusManager;
 
     UIObject* m_mainPanel;
@@ -25,8 +25,8 @@ typedef struct TitleSettingsPage
     float m_prevMusicGain;
     float m_prevSfxGain;
     float m_prevUIGain;
-} TitleSettingsPage;
+} SettingsPage;
 
-TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager* manager);
-void TitleSettingsPage_destroy(TitleSettingsPage* self);
-void TitleSettingsPage_update(TitleSettingsPage* self);
+SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager);
+void SettingsPage_destroy(SettingsPage* self);
+void SettingsPage_update(SettingsPage* self);

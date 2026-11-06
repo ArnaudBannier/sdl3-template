@@ -9,8 +9,8 @@
 #include "settings.h"
 
 typedef struct GameContext GameContext;
-typedef struct TitleSettingsPage TitleSettingsPage;
-typedef struct TitleMainMenu TitleMainMenu;
+typedef struct SettingsPage SettingsPage;
+typedef struct MainMenu MainMenu;
 
 typedef enum TitleUIPageId
 {
@@ -20,20 +20,20 @@ typedef enum TitleUIPageId
     TITLE_UI_PAGE_COUNT
 } TitleUIPageId;
 
-typedef struct TitleUIManager
+typedef struct UIManager
 {
     GameContext* m_context;
     bool m_activePages[TITLE_UI_PAGE_COUNT];
 
-    TitleMainMenu* m_mainMenu;
-    TitleSettingsPage* m_settingsPage;
-} TitleUIManager;
+    MainMenu* m_mainMenu;
+    SettingsPage* m_settingsPage;
+} UIManager;
 
-TitleUIManager* TitleUIManager_create(GameContext* context);
-void TitleUIManager_destroy(TitleUIManager* self);
-void TitleUIManager_update(TitleUIManager* self);
+UIManager* UIManager_create(GameContext* context);
+void UIManager_destroy(UIManager* self);
+void UIManager_update(UIManager* self);
 
-INLINE void TitleUIManager_openPage(TitleUIManager* self, TitleUIPageId pageId)
+INLINE void UIManager_openPage(UIManager* self, TitleUIPageId pageId)
 {
     assert(self && "self must not be NULL");
     if (pageId < 0 || pageId >= TITLE_UI_PAGE_COUNT)
@@ -44,7 +44,7 @@ INLINE void TitleUIManager_openPage(TitleUIManager* self, TitleUIPageId pageId)
     self->m_activePages[pageId] = true;
 }
 
-INLINE void TitleUIManager_closePage(TitleUIManager* self, TitleUIPageId pageId)
+INLINE void UIManager_closePage(UIManager* self, TitleUIPageId pageId)
 {
     assert(self && "self must not be NULL");
     if (pageId < 0 || pageId >= TITLE_UI_PAGE_COUNT)
@@ -55,7 +55,7 @@ INLINE void TitleUIManager_closePage(TitleUIManager* self, TitleUIPageId pageId)
     self->m_activePages[pageId] = false;
 }
 
-INLINE void TitleUIManager_closePages(TitleUIManager* self)
+INLINE void UIManager_closePages(UIManager* self)
 {
     assert(self && "self must not be NULL");
     for (int i = 0; i < TITLE_UI_PAGE_COUNT; ++i)

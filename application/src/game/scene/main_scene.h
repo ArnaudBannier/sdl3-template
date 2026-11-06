@@ -10,12 +10,15 @@
 #include "common/common.h"
 #include "game/core/scene_manager.h"
 #include "game/core/game_context.h"
-#include "game/ui/title_ui_manager.h"
+#include "game/ui/ui_manager.h"
 
-typedef struct TitleScene
+#include "game/puzzle/puzzle_graphics.h"
+
+typedef struct MainScene
 {
-    Scene m_base;
-    TitleUIManager* m_uiManager;
-} TitleScene;
+    Scene base;
+    UIManager* uiManager;
+    PuzzleGraphics* puzzleGraphics;
+} MainScene;
 
-TitleScene* TitleScene_create(GameEngine* engine);
+MainScene* MainScene_create(GameEngine* engine);

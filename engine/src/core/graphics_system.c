@@ -14,12 +14,12 @@ typedef enum GraphicsCmdFlags
     GRAPHICS_CMD_SORTING_LAYER = 1 << 1,
     GRAPHICS_CMD_BLEND_MOD = 1 << 2,
     GRAPHICS_CMD_COLOR_MOD = 1 << 3,
-    GRAPHICS_CMD_TEXT = 1 << 5,
-    GRAPHICS_CMD_TEXTURE = 1 << 6,
-    GRAPHICS_CMD_RECT = 1 << 7,
-    GRAPHICS_CMD_ANCHOR = 1 << 8,
-    GRAPHICS_CMD_DIMENSIONS = 1 << 9,
-    GRAPHICS_CMD_FLIP = 1 << 10,
+    GRAPHICS_CMD_TEXT = 1 << 4,
+    GRAPHICS_CMD_TEXTURE = 1 << 5,
+    GRAPHICS_CMD_RECT = 1 << 6,
+    GRAPHICS_CMD_ANCHOR = 1 << 7,
+    GRAPHICS_CMD_DIMENSIONS = 1 << 8,
+    GRAPHICS_CMD_FLIP = 1 << 9,
 } GraphicsCmdFlags;
 
 typedef struct GraphicsCoreCmd

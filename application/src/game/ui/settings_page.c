@@ -4,15 +4,15 @@
     See LICENSE.md in the project root for license information.
 */
 
-#include "game/ui/title_settings_page.h"
-#include "game/ui/title_ui_manager.h"
+#include "game/ui/settings_page.h"
+#include "game/ui/ui_manager.h"
 #include "game/core/game_context.h"
 #include "game/game_config.h"
 #include "common/ui_style.h"
 
-static void TitleSettingsPage_onClick(void* selectable)
+static void SettingsPage_onClick(void* selectable)
 {
-    TitleSettingsPage* self = (TitleSettingsPage*)UISelectable_getUserData(selectable);
+    SettingsPage* self = (SettingsPage*)UISelectable_getUserData(selectable);
     assert(self && "self must not be NULL");
 
     const char* objectName = UIObject_getObjectName(selectable);
@@ -28,22 +28,22 @@ static void TitleSettingsPage_onClick(void* selectable)
         g_gameConfig.sfxGain = self->m_prevSfxGain;
         g_gameConfig.uiGain = self->m_prevUIGain;
 
-        TitleUIManager_closePages(self->m_uiManager);
-        TitleUIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
+        UIManager_closePages(self->m_uiManager);
+        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
     }
     else if (strcmp(objectName, "apply-button") == 0)
     {
         int itemIndex = UIList_getSelectedItem(self->m_fullscreenList);
         SDL_SetWindowFullscreen(g_engine.sdl.window, itemIndex == 1);
 
-        TitleUIManager_closePages(self->m_uiManager);
-        TitleUIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
+        UIManager_closePages(self->m_uiManager);
+        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_MAIN_MENU);
     }
 }
 
-static void TitleSettingsPage_onItemChanged(void* selectable, int currItemIdx, int prevItemIdx, bool increase)
+static void SettingsPage_onItemChanged(void* selectable, int currItemIdx, int prevItemIdx, bool increase)
 {
-    TitleSettingsPage* self = (TitleSettingsPage*)UISelectable_getUserData(selectable);
+    SettingsPage* self = (SettingsPage*)UISelectable_getUserData(selectable);
     assert(self && "self must not be NULL");
 
     GameContext* context = self->m_context;
@@ -67,7 +67,7 @@ static void TitleSettingsPage_onItemChanged(void* selectable, int currItemIdx, i
     }
 }
 
-TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager* manager)
+SettingsPage* SettingsPage_create(GameContext* context, UIManager* manager)
 {
     AssetManager* assets = GameContext_getAssetManager(context);
     UISystem* uiSystem = GameContext_getUISystem(context);
@@ -78,7 +78,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
 
     Input_clearUIInput(GameContext_getInput(context));
 
-    TitleSettingsPage* self = (TitleSettingsPage*)calloc(1, sizeof(TitleSettingsPage));
+    SettingsPage* self = (SettingsPage*)calloc(1, sizeof(SettingsPage));
     ASSERT_NEW(self);
 
     self->m_context = context;
@@ -134,7 +134,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     }
     UIStyle_setDefaultList(fullscreenList, assets);
     UISelectable_setUserData(fullscreenList, self);
-    UIList_setOnItemChangedCallback(fullscreenList, TitleSettingsPage_onItemChanged);
+    UIList_setOnItemChangedCallback(fullscreenList, SettingsPage_onItemChanged);
 
     SDL_WindowFlags windowFlags = SDL_GetWindowFlags(g_engine.sdl.window);
     if (windowFlags & SDL_WINDOW_FULLSCREEN)
@@ -170,7 +170,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     UIList_setSelectedItem(musicGainList, selectedMusicGain);
     UIStyle_setDefaultList(musicGainList, assets);
     UISelectable_setUserData(musicGainList, self);
-    UIList_setOnItemChangedCallback(musicGainList, TitleSettingsPage_onItemChanged);
+    UIList_setOnItemChangedCallback(musicGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, musicGainList, rowIndex++, 0, 1, 1);
     UIFocusManager_addSelectable(self->m_focusManager, musicGainList);
@@ -192,7 +192,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     UIList_setSelectedItem(sfxGainList, selectedSfxGain);
     UIStyle_setDefaultList(sfxGainList, assets);
     UISelectable_setUserData(sfxGainList, self);
-    UIList_setOnItemChangedCallback(sfxGainList, TitleSettingsPage_onItemChanged);
+    UIList_setOnItemChangedCallback(sfxGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, sfxGainList, rowIndex++, 0, 1, 1);
     UIFocusManager_addSelectable(self->m_focusManager, sfxGainList);
@@ -214,7 +214,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     UIList_setSelectedItem(uiGainList, selectedUiGain);
     UIStyle_setDefaultList(uiGainList, assets);
     UISelectable_setUserData(uiGainList, self);
-    UIList_setOnItemChangedCallback(uiGainList, TitleSettingsPage_onItemChanged);
+    UIList_setOnItemChangedCallback(uiGainList, SettingsPage_onItemChanged);
 
     UIGridLayout_addObject(layout, uiGainList, rowIndex++, 0, 1, 1);
     UIFocusManager_addSelectable(self->m_focusManager, uiGainList);
@@ -228,7 +228,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     // Apply button
     UIButton* applyButton = UIButton_create(uiSystem, "apply-button", font);
     UIButton_setLabelString(applyButton, "Apply settings");
-    UIButton_setOnClickCallback(applyButton, TitleSettingsPage_onClick);
+    UIButton_setOnClickCallback(applyButton, SettingsPage_onClick);
     UISelectable_setUserData(applyButton, self);
     UIStyle_setDefaultButton(applyButton, assets);
 
@@ -238,7 +238,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     // Back button
     UIButton* backButton = UIButton_create(uiSystem, "back-button", font);
     UIButton_setLabelString(backButton, "Back");
-    UIButton_setOnClickCallback(backButton, TitleSettingsPage_onClick);
+    UIButton_setOnClickCallback(backButton, SettingsPage_onClick);
     UISelectable_setUserData(backButton, self);
     UIStyle_setDefaultButton(backButton, assets);
 
@@ -250,7 +250,7 @@ TitleSettingsPage* TitleSettingsPage_create(GameContext* context, TitleUIManager
     return self;
 }
 
-void TitleSettingsPage_destroy(TitleSettingsPage* self)
+void SettingsPage_destroy(SettingsPage* self)
 {
     if (!self) return;
 
@@ -260,7 +260,7 @@ void TitleSettingsPage_destroy(TitleSettingsPage* self)
     free(self);
 }
 
-void TitleSettingsPage_update(TitleSettingsPage* self)
+void SettingsPage_update(SettingsPage* self)
 {
     Input* input = GameContext_getInput(self->m_context);
     UIFocusManager_update(self->m_focusManager, &input->uiInput);

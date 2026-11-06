@@ -7,18 +7,18 @@
 #pragma once
 
 #include "settings.h"
-#include "game/ui/title_ui_manager.h"
+#include "game/ui/ui_manager.h"
 
 typedef struct GameContext GameContext;
 
-typedef struct TitleMainMenu
+typedef struct MainMenu
 {
     GameContext* m_context;
-    TitleUIManager* m_uiManager;
+    UIManager* m_uiManager;
     UIFocusManager* m_focusManager;
     UIObject* m_mainPanel;
-} TitleMainMenu;
+} MainMenu;
 
-TitleMainMenu* TitleMainMenu_create(GameContext* context, TitleUIManager* manager);
-void TitleMainMenu_destroy(TitleMainMenu* self);
-void TitleMainMenu_update(TitleMainMenu* self);
+MainMenu* MainMenu_create(GameContext* context, UIManager* manager);
+void MainMenu_destroy(MainMenu* self);
+void MainMenu_update(MainMenu* self);

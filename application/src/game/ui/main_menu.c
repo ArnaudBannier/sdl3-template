@@ -4,16 +4,16 @@
     See LICENSE.md in the project root for license information.
 */
 
-#include "game/ui/title_main_menu.h"
-#include "game/ui/title_ui_manager.h"
+#include "game/ui/main_menu.h"
+#include "game/ui/ui_manager.h"
 #include "game/core/game_context.h"
 #include "common/ui_style.h"
 #include "game/game_config.h"
 #include "game/core/game_engine.h"
 
-static void TitleMainMenu_onClick(void* selectable)
+static void MainMenu_onClick(void* selectable)
 {
-    TitleMainMenu* self = (TitleMainMenu*)UISelectable_getUserData(selectable);
+    MainMenu* self = (MainMenu*)UISelectable_getUserData(selectable);
     assert(self && "self must not be NULL");
 
     const char* objectName = UIObject_getObjectName(selectable);
@@ -23,8 +23,8 @@ static void TitleMainMenu_onClick(void* selectable)
     }
     else if (strcmp(objectName, "settings-button") == 0)
     {
-        TitleUIManager_closePages(self->m_uiManager);
-        TitleUIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_SETTINGS);
+        UIManager_closePages(self->m_uiManager);
+        UIManager_openPage(self->m_uiManager, TITLE_UI_PAGE_SETTINGS);
     }
     else if (strcmp(objectName, "quit-button") == 0)
     {
@@ -32,7 +32,7 @@ static void TitleMainMenu_onClick(void* selectable)
     }
 }
 
-TitleMainMenu* TitleMainMenu_create(GameContext* context, TitleUIManager* manager)
+MainMenu* MainMenu_create(GameContext* context, UIManager* manager)
 {
     AssetManager* assets = GameContext_getAssetManager(context);
     UISystem* uiSystem = GameContext_getUISystem(context);
@@ -42,7 +42,7 @@ TitleMainMenu* TitleMainMenu_create(GameContext* context, TitleUIManager* manage
 
     Input_clearUIInput(GameContext_getInput(context));
 
-    TitleMainMenu* self = (TitleMainMenu*)calloc(1, sizeof(TitleMainMenu));
+    MainMenu* self = (MainMenu*)calloc(1, sizeof(MainMenu));
     ASSERT_NEW(self);
 
     self->m_uiManager = manager;
@@ -74,7 +74,7 @@ TitleMainMenu* TitleMainMenu_create(GameContext* context, TitleUIManager* manage
     {
         UIButton* button = UIButton_create(uiSystem, buttonNames[i], font);
         UIButton_setLabelString(button, buttonLabels[i]);
-        UIButton_setOnClickCallback(button, TitleMainMenu_onClick);
+        UIButton_setOnClickCallback(button, MainMenu_onClick);
         UISelectable_setUserData(button, self);
         UIStyle_setDefaultButton(button, assets);
         UIGridLayout_addObject(layout, button, i + 1, 0, 1, 1);
@@ -88,7 +88,7 @@ TitleMainMenu* TitleMainMenu_create(GameContext* context, TitleUIManager* manage
     return self;
 }
 
-void TitleMainMenu_destroy(TitleMainMenu* self)
+void MainMenu_destroy(MainMenu* self)
 {
     if (!self) return;
 
@@ -98,7 +98,7 @@ void TitleMainMenu_destroy(TitleMainMenu* self)
     free(self);
 }
 
-void TitleMainMenu_update(TitleMainMenu* self)
+void MainMenu_update(MainMenu* self)
 {
     Input* input = GameContext_getInput(self->m_context);
     UIFocusManager_update(self->m_focusManager, &input->uiInput);

@@ -20,6 +20,7 @@ typedef struct Scene
     void (*m_onQuit)(void* selfPtr);
     void (*m_onUpdate)(void* selfPtr, float dt);
     void (*m_onFixedUpdate)(void* selfPtr, float timeStep);
+    void (*m_onRender)(void* selfPtr);
     void (*m_onDestroy)(void* selfPtr);
 } Scene;
 
@@ -40,6 +41,7 @@ SceneManager* SceneManager_create(GameEngine* engine);
 void SceneManager_destroy(SceneManager* self);
 void SceneManager_update(SceneManager* self, float dt);
 void SceneManager_fixedUpdate(SceneManager* self, float timeStep);
+void SceneManager_render(SceneManager* self);
 void SceneManager_addScene(SceneManager* self, void* scenePtr, int sceneId);
 
 void SceneManager_changeScene(SceneManager* self, int sceneId);
