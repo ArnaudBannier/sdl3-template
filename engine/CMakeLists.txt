@@ -3,6 +3,7 @@ add_library(${NAME} STATIC)
 
 target_compile_features(${NAME} PUBLIC c_std_11)
 target_compile_definitions(${NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
+target_compile_definitions(${NAME} PRIVATE ROOT_PATH="${CMAKE_SOURCE_DIR}")
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     target_compile_options(${NAME} PUBLIC -Wall)
