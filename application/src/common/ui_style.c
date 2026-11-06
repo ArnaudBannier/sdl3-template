@@ -10,7 +10,7 @@
 
 void UIStyle_setDefaultButton(UIButton* button, AssetManager* assets)
 {
-    UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL,  g_colors.orange1);
+    UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL, g_colors.orange1);
     UIButton_setLabelColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.orange4);
     UIButton_setLabelColor(button, UI_BUTTON_STATE_PRESSED, g_colors.orange5);
     UIButton_setBackgroundColor(button, UI_BUTTON_STATE_NORMAL, g_colors.orange1);
@@ -34,7 +34,7 @@ void UIStyle_setDefaultButton(UIButton* button, AssetManager* assets)
     UIButton_setSpriteIndex(button, UI_BUTTON_STATE_ACTIVE_PRESSED, 2);
 }
 
-void UIStyle_setDefaultList(UIList* list, AssetManager *assets)
+void UIStyle_setDefaultList(UIList* list, AssetManager* assets)
 {
     SpriteSheet* uiSpriteSheet = AssetManager_getSpriteSheet(assets, SPRITE_UI_BASE);
     SpriteGroup* buttonGroup = SpriteSheet_getGroupByName(uiSpriteSheet, "button");

@@ -8,14 +8,14 @@
 
 #define TRIGGER_MAX_VALUE 32767
 
-void PlayerInput_setTriggerL(PlayerInput *playerInput, Sint16 value)
+void PlayerInput_setTriggerL(PlayerInput* playerInput, Sint16 value)
 {
     float trigger = Float_clamp((float)value / 32767.f, -1.f, 1.f);
     if (trigger < 0.3f) trigger = 0.f;
     playerInput->triggerL = trigger;
 }
 
-void PlayerInput_setTriggerR(PlayerInput *playerInput, Sint16 value)
+void PlayerInput_setTriggerR(PlayerInput* playerInput, Sint16 value)
 {
     float trigger = Float_clamp((float)value / 32767.f, -1.f, 1.f);
     if (trigger < 0.3f) trigger = 0.f;
@@ -194,7 +194,7 @@ void Input_afterEventLoop(Input* self)
     for (int i = 0; i < MAX_PLAYER_COUNT; i++)
     {
         PlayerInput* playerInput = &(self->players[i]);
-        AxisData *axisData = &(playerInput->axisLeftData);
+        AxisData* axisData = &(playerInput->axisLeftData);
 
         playerInput->axis = AxisData_getAxis(axisData);
         playerInput->upPressed = AxisData_isUpPressed(axisData);
@@ -208,7 +208,7 @@ void Input_afterEventLoop(Input* self)
 
 void Input_processControllerButtonDown(Input* self, PlayerInput* playerInput, int button)
 {
-    AxisData *axisLeftData = &(playerInput->axisLeftData);
+    AxisData* axisLeftData = &(playerInput->axisLeftData);
     switch (button)
     {
     case SDL_GAMEPAD_BUTTON_SOUTH:
@@ -244,7 +244,7 @@ void Input_processControllerButtonDown(Input* self, PlayerInput* playerInput, in
 
 void Input_processControllerButtonUp(Input* self, PlayerInput* playerInput, int button)
 {
-    AxisData *axisLeftData = &(playerInput->axisLeftData);
+    AxisData* axisLeftData = &(playerInput->axisLeftData);
     switch (button)
     {
     case SDL_GAMEPAD_BUTTON_SOUTH:
@@ -268,7 +268,7 @@ void Input_processControllerButtonUp(Input* self, PlayerInput* playerInput, int 
 
 void Input_processControllerAxisMotion(Input* self, PlayerInput* playerInput, int axis, Sint16 value)
 {
-    AxisData *axisLeftData = &(playerInput->axisLeftData);
+    AxisData* axisLeftData = &(playerInput->axisLeftData);
     switch (axis)
     {
     case SDL_GAMEPAD_AXIS_LEFTX:
@@ -295,7 +295,7 @@ void Input_processKeyDown(Input* self, PlayerInput* playerInput, bool repeat, in
 {
     if (repeat) return;
 
-    AxisData *axisLeftData = &(playerInput->axisLeftData);
+    AxisData* axisLeftData = &(playerInput->axisLeftData);
     switch (scancode)
     {
     case SDL_SCANCODE_F1:
@@ -357,7 +357,7 @@ void Input_processKeyUp(Input* self, PlayerInput* playerInput, bool repeat, int 
 {
     if (repeat) return;
 
-    AxisData *axisLeftData = &(playerInput->axisLeftData);
+    AxisData* axisLeftData = &(playerInput->axisLeftData);
     switch (scancode)
     {
     case SDL_SCANCODE_UP:

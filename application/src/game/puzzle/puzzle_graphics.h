@@ -14,7 +14,7 @@
 
 typedef struct PuzzleGraphics
 {
-    GameContext *context;
+    GameContext* context;
     AABB puzzleAABB;
     float spacing;
 

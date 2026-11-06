@@ -71,19 +71,19 @@ void UISystem_destroy(UISystem* self)
     {
         for (int i = 0; i < self->uiObjectCount; i++)
         {
-        #if defined(_MSC_VER)
-        #  pragma warning(push)
-        #  pragma warning(disable:6001)
-        #endif
+#if defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable:6001)
+#endif
             UIObject* object = self->uiObjects[i];
             assert(object && "UIObject in uiObjects should not be NULL");
             assert(object->onDestroy && "UIObject in uiObjects should have a valid onDestroy function");
 
             object->onDestroy(object);
             free(object);
-        #if defined(_MSC_VER)
-        #  pragma warning(pop)
-        #endif
+#if defined(_MSC_VER)
+#  pragma warning(pop)
+#endif
         }
         free(self->uiObjects);
     }

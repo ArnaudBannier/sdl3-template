@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
     //--------------------------------------------------------------------------
     // Boucle de jeu
-    
+
     SceneManager_changeScene(sceneManager, SCENE_TYPE_MAIN);
     GameEngine_mainLoop(g_gameEngine);
 

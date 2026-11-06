@@ -80,7 +80,7 @@ static void SceneManager_applySceneChange(SceneManager* self)
 
     if (self->nextSceneId != self->currSceneId)
     {
-        Scene* currScene = NULL;  
+        Scene* currScene = NULL;
         Scene* nextScene = NULL;
         if (self->currSceneId >= 0)
         {
@@ -174,7 +174,7 @@ void SceneManager_addScene(SceneManager* self, void* scenePtr, int sceneId)
         }
         free(prevScene);
     }
-    
+
     Scene* scene = (Scene*)scenePtr;
     self->scenes[sceneId] = scene;
 }

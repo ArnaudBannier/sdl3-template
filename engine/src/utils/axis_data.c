@@ -20,7 +20,7 @@ typedef enum AxisDataFlags
     AXIS_BUTTON_PRESSED = 0xF0
 } AxisDataFlags;
 
-void AxisData_init(AxisData *self, float deadZone)
+void AxisData_init(AxisData* self, float deadZone)
 {
     assert(self && "self must not be NULL");
     self->axis.x = 0.f;
@@ -29,13 +29,13 @@ void AxisData_init(AxisData *self, float deadZone)
     self->deadZoneSquared = deadZone * deadZone;
 }
 
-void AxisData_resetPressed(AxisData *self)
+void AxisData_resetPressed(AxisData* self)
 {
     assert(self && "self must not be NULL");
     self->flags &= ~AXIS_BUTTON_PRESSED;
 }
 
-Vec2 AxisData_getAxis(AxisData *self)
+Vec2 AxisData_getAxis(AxisData* self)
 {
     assert(self && "self must not be NULL");
     float lengthSquared = Vec2_lengthSquared(self->axis);
@@ -51,7 +51,7 @@ Vec2 AxisData_getAxis(AxisData *self)
     return self->axis;
 }
 
-void AxisData_setValueX(AxisData *self, Sint16 value)
+void AxisData_setValueX(AxisData* self, Sint16 value)
 {
     assert(self && "self must not be NULL");
     if (self->flags & AXIS_BUTTON_DOWN)
@@ -68,7 +68,7 @@ void AxisData_setValueX(AxisData *self, Sint16 value)
     self->axis.x = axis;
 }
 
-void AxisData_setValueY(AxisData *self, Sint16 value)
+void AxisData_setValueY(AxisData* self, Sint16 value)
 {
     assert(self && "self must not be NULL");
     if (self->flags & AXIS_BUTTON_DOWN)
@@ -85,7 +85,7 @@ void AxisData_setValueY(AxisData *self, Sint16 value)
     self->axis.y = axis;
 }
 
-void AxisData_setDirectionUp(AxisData *self, bool buttonDown)
+void AxisData_setDirectionUp(AxisData* self, bool buttonDown)
 {
     assert(self && "self must not be NULL");
     if (buttonDown)
@@ -104,7 +104,7 @@ void AxisData_setDirectionUp(AxisData *self, bool buttonDown)
     }
 }
 
-void AxisData_setDirectionDown(AxisData *self, bool buttonDown)
+void AxisData_setDirectionDown(AxisData* self, bool buttonDown)
 {
     assert(self && "self must not be NULL");
     if (buttonDown)
@@ -123,7 +123,7 @@ void AxisData_setDirectionDown(AxisData *self, bool buttonDown)
     }
 }
 
-void AxisData_setDirectionRight(AxisData *self, bool buttonDown)
+void AxisData_setDirectionRight(AxisData* self, bool buttonDown)
 {
     assert(self && "self must not be NULL");
     if (buttonDown)
@@ -142,7 +142,7 @@ void AxisData_setDirectionRight(AxisData *self, bool buttonDown)
     }
 }
 
-void AxisData_setDirectionLeft(AxisData *self, bool buttonDown)
+void AxisData_setDirectionLeft(AxisData* self, bool buttonDown)
 {
     assert(self && "self must not be NULL");
     if (buttonDown)
@@ -161,25 +161,25 @@ void AxisData_setDirectionLeft(AxisData *self, bool buttonDown)
     }
 }
 
-bool AxisData_isUpPressed(AxisData *self)
+bool AxisData_isUpPressed(AxisData* self)
 {
     assert(self && "self must not be NULL");
     return (self->flags & AXIS_UP_PRESSED) == AXIS_UP_PRESSED;
 }
 
-bool AxisData_isDownPressed(AxisData *self)
+bool AxisData_isDownPressed(AxisData* self)
 {
     assert(self && "self must not be NULL");
     return (self->flags & AXIS_DOWN_PRESSED) == AXIS_DOWN_PRESSED;
 }
 
-bool AxisData_isLeftPressed(AxisData *self)
+bool AxisData_isLeftPressed(AxisData* self)
 {
     assert(self && "self must not be NULL");
     return (self->flags & AXIS_LEFT_PRESSED) == AXIS_LEFT_PRESSED;
 }
 
-bool AxisData_isRightPressed(AxisData *self)
+bool AxisData_isRightPressed(AxisData* self)
 {
     assert(self && "self must not be NULL");
     return (self->flags & AXIS_RIGHT_PRESSED) == AXIS_RIGHT_PRESSED;
