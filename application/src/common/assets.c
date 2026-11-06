@@ -44,6 +44,7 @@ void Game_addAssets(AssetManager* assets, SpriteAnimManager* animManager)
 
     static const SheetLoadInfo sheetsToLoad[] = {
         { SPRITE_UI_BASE, "atlas/ui_base", "atlas/ui_base_desc" },
+        { SPRITE_PUZZLE, "atlas/jump_in", "atlas/jump_in_desc" },
     };
     static const int sheetCount = sizeof(sheetsToLoad) / sizeof(SheetLoadInfo);
 

@@ -10,12 +10,12 @@
 
 void UIStyle_setDefaultButton(UIButton* button, AssetManager* assets)
 {
-    UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL, g_colors.orange1);
-    UIButton_setLabelColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.orange4);
-    UIButton_setLabelColor(button, UI_BUTTON_STATE_PRESSED, g_colors.orange5);
-    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_NORMAL, g_colors.orange1);
-    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.orange4);
-    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_PRESSED, g_colors.orange5);
+    UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL, g_colors.indigo1);
+    UIButton_setLabelColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.indigo4);
+    UIButton_setLabelColor(button, UI_BUTTON_STATE_PRESSED, g_colors.indigo5);
+    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_NORMAL, g_colors.indigo1);
+    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.indigo4);
+    UIButton_setBackgroundColor(button, UI_BUTTON_STATE_PRESSED, g_colors.indigo5);
 
     UISelectable_setAudioOnFocused(button, AUDIO_UI_SELECT);
     UISelectable_setAudioOnClick(button, AUDIO_UI_VALIDATE);
@@ -50,16 +50,16 @@ void UIStyle_setDefaultList(UIList* list, AssetManager* assets)
     labelRect.offsetMax = Vec2_set(0.f, 0.f);
     UIList_setLabelRect(list, labelRect);
 
-    UIList_setBackgroundColor(list, UI_LIST_STATE_NORMAL, g_colors.orange1);
-    UIList_setBackgroundColor(list, UI_LIST_STATE_FOCUSED, g_colors.orange4);
-    UIList_setBackgroundColor(list, UI_LIST_STATE_ACTIVE, g_colors.orange5);
+    UIList_setBackgroundColor(list, UI_LIST_STATE_NORMAL, g_colors.indigo1);
+    UIList_setBackgroundColor(list, UI_LIST_STATE_FOCUSED, g_colors.indigo4);
+    UIList_setBackgroundColor(list, UI_LIST_STATE_ACTIVE, g_colors.indigo5);
     UIList_setUseColorMod(list, true);
 
-    UIList_setLabelColor(list, UI_LIST_STATE_NORMAL, g_colors.orange1);
-    UIList_setLabelColor(list, UI_LIST_STATE_FOCUSED, g_colors.orange4);
-    UIList_setLabelColor(list, UI_LIST_STATE_ACTIVE, g_colors.orange5);
+    UIList_setLabelColor(list, UI_LIST_STATE_NORMAL, g_colors.indigo1);
+    UIList_setLabelColor(list, UI_LIST_STATE_FOCUSED, g_colors.indigo4);
+    UIList_setLabelColor(list, UI_LIST_STATE_ACTIVE, g_colors.indigo5);
 
-    UIList_setItemColor(list, UI_LIST_STATE_NORMAL, g_colors.orange1);
+    UIList_setItemColor(list, UI_LIST_STATE_NORMAL, g_colors.indigo1);
     UIList_setItemColor(list, UI_LIST_STATE_FOCUSED, g_colors.white);
     UIList_setItemColor(list, UI_LIST_STATE_ACTIVE, g_colors.white);
 
@@ -79,10 +79,10 @@ void UIStyle_setDefaultList(UIList* list, AssetManager* assets)
         UIButton_setFont(button, font);
         UIButton_setUseColorMod(button, true);
         UIButton_setBackgroundColor(button, UI_BUTTON_STATE_NORMAL, g_colors.transparent);
-        UIButton_setBackgroundColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.orange4);
-        UIButton_setBackgroundColor(button, UI_BUTTON_STATE_PRESSED, g_colors.orange5);
-        UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL, g_colors.orange5);
+        UIButton_setBackgroundColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.indigo4);
+        UIButton_setBackgroundColor(button, UI_BUTTON_STATE_PRESSED, g_colors.indigo5);
+        UIButton_setLabelColor(button, UI_BUTTON_STATE_NORMAL, g_colors.indigo5);
         UIButton_setLabelColor(button, UI_BUTTON_STATE_FOCUSED, g_colors.white);
-        UIButton_setLabelColor(button, UI_BUTTON_STATE_PRESSED, g_colors.orange6);
+        UIButton_setLabelColor(button, UI_BUTTON_STATE_PRESSED, g_colors.indigo6);
     }
 }

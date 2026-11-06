@@ -24,6 +24,12 @@ PuzzleGraphics* PuzzleGraphics_create(GameContext* context)
     self->puzzleAABB.lower = Vec2_add(center, Vec2_scale(puzzleDim, -0.5f));
     self->puzzleAABB.upper = Vec2_add(center, Vec2_scale(puzzleDim, +0.5f));
 
+    AssetManager* assets = GameContext_getAssetManager(context);
+    SpriteSheet* puzzleSpriteSheet = AssetManager_getSpriteSheet(assets, SPRITE_PUZZLE);
+    ASSERT_NEW(puzzleSpriteSheet);
+    self->spriteRabbit = SpriteSheet_getGroupByName(puzzleSpriteSheet, "rabbit");
+    ASSERT_NEW(self->spriteRabbit);
+
     return self;
 }
 
@@ -103,6 +109,7 @@ void PuzzleGraphics_render(PuzzleGraphics* self)
     RenderAnchor anchor = { .value = Vec2_anchor_south_west };
     RenderSortingLayer sortingLayer = { 0 };
     RenderDim dimensions = { 0 };
+    RenderTexture renderTexture = { 0 };
 
     transform.space = TRANSFORM_SPACE_UI;
     dimensions.space = RENDER_DIM_SPACE_UI;
@@ -119,21 +126,24 @@ void PuzzleGraphics_render(PuzzleGraphics* self)
             dimensions.height = cellAABB.upper.y - cellAABB.lower.y;
             transform.position = cellAABB.lower;
 
-            if (i == self->selectedRow && j == self->selectedCol)
-            {
-                rect.color = g_colors.yellow5;
-            }
-            else
-            {
-                rect.color = g_colors.blue5;
-            }
-
             GraphicsCmd cmd = { 0 };
             cmd.transform = &transform;
             cmd.anchor = &anchor;
             cmd.dimensions = &dimensions;
             cmd.rect = &rect;
             cmd.sortingLayer = &sortingLayer;
+
+            if (i == self->selectedRow && j == self->selectedCol)
+            {
+                rect.color = g_colors.indigo9;
+                RenderTexture_setFromGroup(&renderTexture, self->spriteRabbit, 0);
+                cmd.texture = &renderTexture;
+            }
+            else
+            {
+                rect.color = g_colors.indigo5;
+            }
+
             GraphicsSystem_addCommand(graphicsSystem, &cmd);
         }
     }

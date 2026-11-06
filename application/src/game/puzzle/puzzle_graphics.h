@@ -22,6 +22,8 @@ typedef struct PuzzleGraphics
 
     int selectedRow;
     int selectedCol;
+
+    SpriteGroup* spriteRabbit;
 } PuzzleGraphics;
 
 PuzzleGraphics* PuzzleGraphics_create(GameContext* context);
